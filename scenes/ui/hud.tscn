@@ -1,6 +1,6 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://c2vkdvmmj8wf0"]
 
-[node name="HUD" type="Control"]
+[node name="HUD" type="Control" unique_id=1137078049]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -9,7 +9,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Crosshair" type="Label" parent="."]
+[node name="Crosshair" type="Label" parent="." unique_id=1346297205]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -26,9 +26,8 @@ theme_override_font_sizes/font_size = 22
 text = "+"
 horizontal_alignment = 1
 vertical_alignment = 1
-mouse_filter = 2
 
-[node name="Hint" type="Label" parent="."]
+[node name="Hint" type="Label" parent="." unique_id=253708447]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -46,9 +45,9 @@ theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 22
 horizontal_alignment = 1
 autowrap_mode = 3
-mouse_filter = 2
 
-[node name="Controls" type="Label" parent="."]
+[node name="Controls" type="Label" parent="." unique_id=634108610]
+visible = false
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -67,4 +66,3 @@ theme_override_font_sizes/font_size = 16
 text = "WASD — ходить   ·   Shift — бег   ·   E — сесть за ПК   ·   Esc — освободить мышь"
 horizontal_alignment = 1
 autowrap_mode = 3
-mouse_filter = 2
