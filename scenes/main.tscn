@@ -1,39 +1,30 @@
-[gd_scene format=3]
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/apartment/apartment.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/terminal/terminal.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/ui/terminal_ui.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="6"]
 
 [node name="Main" type="Node3D"]
+script = ExtResource("1")
 
-[node name="Bootstrap" type="CanvasLayer" parent="."]
+[node name="Apartment" parent="." instance=ExtResource("2")]
 
-[node name="Screen" type="Control" parent="Bootstrap"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Terminal" parent="." instance=ExtResource("4")]
+position = Vector3(0, 0, -2.35)
 
-[node name="Margin" type="MarginContainer" parent="Bootstrap/Screen"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
+[node name="Player" parent="." instance=ExtResource("3")]
+position = Vector3(0, 0.05, 0.7)
 
-[node name="Status" type="Label" parent="Bootstrap/Screen/Margin"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.77, 0.65, 1)
-theme_override_font_sizes/font_size = 24
-text = "FOOD CHAIN — project foundation
+[node name="TransitionCamera" type="Camera3D" parent="."]
+near = 0.03
+fov = 75.0
 
-Godot 4.6 / Compatibility
-Next: apartment, walking, full-screen computer.
+[node name="UI" type="CanvasLayer" parent="."]
 
-This is a launch check, not a playable prototype."
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 3
+[node name="HUD" parent="UI" instance=ExtResource("6")]
+
+[node name="TerminalUI" parent="UI" instance=ExtResource("5")]
+visible = false

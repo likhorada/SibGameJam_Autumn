@@ -1,0 +1,44 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="StyleBoxFlat" id="DesktopStyle"]
+bg_color = Color(0.035, 0.09, 0.075, 1)
+
+[node name="TerminalUI" type="PanelContainer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("DesktopStyle")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 24
+
+[node name="Layout" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Header" type="Label" parent="Margin/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.85, 0.65, 1)
+theme_override_font_sizes/font_size = 30
+text = "FOOD CHAIN / LOCAL TERMINAL"
+autowrap_mode = 3
+
+[node name="Content" type="Label" parent="Margin/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 22
+text = "Рабочий стол\n\nСвязь с камерами ещё не подключена.\n\nЭто заглушка интерфейса ПК.\nМожно встать и обследовать квартиру."
+autowrap_mode = 3
+
+[node name="ExitButton" type="Button" parent="Margin/Layout"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Встать [Esc]"
