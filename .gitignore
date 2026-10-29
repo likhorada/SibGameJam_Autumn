@@ -2,6 +2,20 @@
 .godot/
 /android/
 
+# Exported builds and local export credentials
+/build/*
+!/build/.gdignore
+.godot/export_credentials.cfg
+.env
+.env.*
+
+# Local editor / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.tmp
+
 # Local-only icon
 icon.svg
 icon.svg.import
