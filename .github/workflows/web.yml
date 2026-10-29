@@ -1,0 +1,118 @@
+name: Web build and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-${{ github.workflow }}-${{ github.ref }}
+  # Never interrupt an in-progress production deployment.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  GODOT_VERSION: 4.6.2
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    name: Check and export Web
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Cache Godot and Web templates
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/godot/export_templates
+            ~/.local/share/godot-ci
+          key: godot-web-${{ runner.os }}-${{ runner.arch }}-${{ env.GODOT_VERSION }}-v1
+
+      - name: Install Godot and matching Web templates
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          base_url="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          editor="Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          templates="Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          cd "$RUNNER_TEMP"
+          curl --fail --location --retry 3 "$base_url/$editor" -o "$editor"
+          curl --fail --location --retry 3 "$base_url/$templates" -o "$templates"
+          # Digests of the official 4.6.2 release assets. Update with GODOT_VERSION.
+          echo "30e6b6d141f0cd5bebd629ad1d0ef1324e60091bb20662d026b402ba58c59937  $editor" | sha256sum --check
+          echo "942366dc4e27e7686a99da4d3cfb1b8ae8d3eb9444f6d8217eef16245b599ef2  $templates" | sha256sum --check
+          mkdir -p "$HOME/.local/share/godot-ci"
+          unzip -q "$editor" -d "$HOME/.local/share/godot-ci"
+          mv "$HOME/.local/share/godot-ci/Godot_v${GODOT_VERSION}-stable_linux.x86_64" "$HOME/.local/share/godot-ci/godot"
+          chmod +x "$HOME/.local/share/godot-ci/godot"
+          unzip -q "$templates" 'templates/web*.zip' 'templates/version.txt' -d godot-templates
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          cp godot-templates/templates/* "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+
+      - name: Add Godot to PATH
+        run: echo "$HOME/.local/share/godot-ci" >> "$GITHUB_PATH"
+
+      - name: Import, check startup and export
+        run: |
+          godot --version
+          # Godot can report script errors without a nonzero exit code.
+          # pipefail catches process failures; log checks catch those errors too.
+          godot --headless --editor --path . --import 2>&1 | tee "$RUNNER_TEMP/import.log"
+          if grep -F 'ERROR:' "$RUNNER_TEMP/import.log"; then exit 1; fi
+          godot --headless --path . --quit-after 10 2>&1 | tee "$RUNNER_TEMP/startup.log"
+          if grep -F 'ERROR:' "$RUNNER_TEMP/startup.log"; then exit 1; fi
+          mkdir -p build/web
+          godot --headless --path . --export-release "Web" build/web/index.html 2>&1 | tee "$RUNNER_TEMP/export.log"
+          if grep -F 'ERROR:' "$RUNNER_TEMP/export.log"; then exit 1; fi
+          for file in index.html index.js index.wasm index.pck; do
+            test -s "build/web/$file"
+          done
+
+      - name: Save downloadable Web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-${{ github.sha }}
+          path: build/web/
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Prepare Pages artifact
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web/
+
+  deploy:
+    name: Publish to GitHub Pages
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check Pages configuration
+        uses: actions/configure-pages@v5
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

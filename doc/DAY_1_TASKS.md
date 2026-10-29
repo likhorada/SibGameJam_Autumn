@@ -2,6 +2,20 @@
 
 **Milestone:** by the end of Day 1, someone who has never opened the project can launch it, play one 2–3 minute scripted shift, answer 3 questions, see a result and restart. Browser proof preferred over polish.
 
+## Current status — 2026-10-29
+
+| Task | Status | Evidence / remaining work |
+| --- | --- | --- |
+| D1-01 | Prototype ready | Godot 4.6.2 Compatibility, editable apartment blockout, walking/sprint, desktop and clean-copy smoke tests pass. |
+| D1-02 | Core interaction ready | Smooth full-screen PC enter/exit, 10 desktop cycles, Chrome input/resize checks pass. Browser focus-loss and later audio startup still need acceptance. |
+| D1-03 | Not started | PC UI is a placeholder; no CCTV or timeline. |
+| D1-04 | Not started | No notes, quiz or scoring. |
+| D1-05 | Not started | Fusebox is decorative, not an implemented threat. |
+| D1-06 | Partial | Web and Windows exports work; Chrome prototype tested. CI workflow added; Pages requires owner setup. Full game-loop acceptance depends on D1-03..05. |
+
+See `doc/PROTOTYPE_TESTS.md` for actual checks and limitations. The user approved the
+local blockout for publication; this does **not** mean the Day 1 milestone is complete.
+
 ## P0 — Must be done in order
 
 ### D1-01 — Create Godot repository + launchable scene
