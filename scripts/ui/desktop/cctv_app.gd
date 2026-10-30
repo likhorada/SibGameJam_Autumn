@@ -49,7 +49,7 @@ func _ready() -> void:
 	panel.add_child(image)
 	image.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	connection = Label.new()
-	connection.text = "НЕТ КАМЕР"
+	connection.text = tr("НЕТ КАМЕР")
 	connection.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	connection.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	connection.add_theme_color_override("font_color", Color("aebeb6"))
@@ -61,10 +61,10 @@ func _ready() -> void:
 	add_child(telemetry)
 	var controls := HBoxContainer.new()
 	add_child(controls)
-	_control(controls, &"left", "<", "Повернуть влево · удерживать", 1.0, 0.0)
-	_control(controls, &"right", ">", "Повернуть вправо · удерживать", -1.0, 0.0)
-	_control(controls, &"out", "ZOOM -", "Отдалить · удерживать", 0.0, -1.0)
-	_control(controls, &"in", "ZOOM +", "Приблизить · удерживать", 0.0, 1.0)
+	_control(controls, &"left", "<", tr("Повернуть влево · удерживать"), 1.0, 0.0)
+	_control(controls, &"right", ">", tr("Повернуть вправо · удерживать"), -1.0, 0.0)
+	_control(controls, &"out", "ZOOM -", tr("Отдалить · удерживать"), 0.0, -1.0)
+	_control(controls, &"in", "ZOOM +", tr("Приблизить · удерживать"), 0.0, 1.0)
 	status = Label.new()
 	status.text = "LOCAL CCTV / OFFLINE NETWORK"
 	status.add_theme_font_size_override("font_size", 12)
@@ -103,19 +103,19 @@ func _refresh_directory() -> void:
 		return
 	directory.clear()
 	if not is_instance_valid(system) or system.cameras.is_empty():
-		directory.add_item("Нет подключённых камер")
+		directory.add_item(tr("Нет подключённых камер"))
 		directory.disabled = true
 		properties.text = "MIC -- / VIDEO --"
 		image.texture = null
 		image.hide()
-		connection.text = "НЕТ КАМЕР"
+		connection.text = tr("НЕТ КАМЕР")
 		connection.show()
 		for button: Button in buttons.values():
 			button.disabled = true
 		return
 	directory.disabled = false
 	for camera: CCTVCamera in system.cameras:
-		directory.add_item("%s / %s" % [camera.location_label, camera.display_name])
+		directory.add_item("%s / %s" % [tr(camera.location_label), tr(camera.display_name)])
 	image.texture = system.viewport.get_texture()
 	_select(0)
 
@@ -126,13 +126,13 @@ func _select(index: int) -> void:
 	release_controls()
 	system.select_camera(index)
 	var camera := system.selected
-	properties.text = "%s    /    %s" % ["VIDEO B/W" if camera.monochrome else "VIDEO COLOR", "MIC +" if camera.has_microphone else "MIC -"]
-	properties.tooltip_text = "Микрофон: только свойство прототипа. Звук пока не подключён."
+	properties.text = "%s    /    %s" % [tr("VIDEO B/W") if camera.monochrome else tr("VIDEO COLOR"), "MIC +" if camera.has_microphone else "MIC -"]
+	properties.tooltip_text = tr("Микрофон: только свойство прототипа. Звук пока не подключён.")
 	_material.set_shader_parameter("monochrome", camera.monochrome)
 	# Never present the previous camera's last frame under the new camera label.
 	image.hide()
 	connection.show()
-	connection.text = "ПОДКЛЮЧЕНИЕ..."
+	connection.text = tr("ПОДКЛЮЧЕНИЕ...")
 
 
 func set_input_enabled(value: bool) -> void:
@@ -188,9 +188,9 @@ func _process(_delta: float) -> void:
 		button.disabled = not connected
 	var camera := system.selected
 	_material.set_shader_parameter("interference", 1.0 if camera.interference_left > 0.0 else 0.0)
-	var limit := " / LIMIT" if absf(camera.pan_degrees) >= camera.pan_limit_degrees - 0.1 else ""
-	telemetry.text = "PAN %+.0f°%s   /   ZOOM %.1fx" % [camera.pan_degrees, limit, camera.zoom]
-	status.text = "CONNECTING..." if not connected else ("SIGNAL UNSTABLE / MOTOR" if camera.interference_left > 0.0 else "LOCAL CCTV / %s / %02d FPS" % [camera.camera_id, int(system.feed_fps)])
+	var limit := tr(" / LIMIT") if absf(camera.pan_degrees) >= camera.pan_limit_degrees - 0.1 else ""
+	telemetry.text = tr("PAN %+.0f°%s   /   ZOOM %.1fx") % [camera.pan_degrees, limit, camera.zoom]
+	status.text = tr("CONNECTING...") if not connected else (tr("SIGNAL UNSTABLE / MOTOR") if camera.interference_left > 0.0 else tr("LOCAL CCTV / %s / %02d FPS") % [camera.camera_id, int(system.feed_fps)])
 
 
 func _sync_watching() -> void:
@@ -199,7 +199,7 @@ func _sync_watching() -> void:
 		if is_instance_valid(image) and not system.can_show_feed():
 			image.hide()
 			connection.show()
-			connection.text = "ПОДКЛЮЧЕНИЕ..." if not system.cameras.is_empty() else "НЕТ КАМЕР"
+			connection.text = tr("ПОДКЛЮЧЕНИЕ...") if not system.cameras.is_empty() else tr("НЕТ КАМЕР")
 
 
 func _visibility_changed() -> void:

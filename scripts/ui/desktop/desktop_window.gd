@@ -54,14 +54,14 @@ func _ready() -> void:
 	header.offset_right = -2
 	header.offset_bottom = -2
 	title_label = Label.new()
-	title_label.text = window_title
+	title_label.text = tr(window_title)
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	header.add_child(title_label)
-	_header_button(header, "_", "Свернуть", minimize)
-	maximize_button = _header_button(header, "", "Развернуть / восстановить", toggle_maximized)
+	_header_button(header, "_", tr("Свернуть"), minimize)
+	maximize_button = _header_button(header, "", tr("Развернуть / восстановить"), toggle_maximized)
 	maximize_button.icon = MAXIMIZE_ICON
-	_header_button(header, "×", "Закрыть", close_window)
+	_header_button(header, "×", tr("Закрыть"), close_window)
 	content = MarginContainer.new()
 	content.name = "Content"
 	content.size_flags_vertical = Control.SIZE_EXPAND_FILL

@@ -8,6 +8,8 @@ signal leave_requested
 
 
 func _ready() -> void:
+	editor.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	editor.placeholder_text = tr("Заметки…")
 	editor.text_changed.connect(_update_status)
 	editor.get_menu().window_input.connect(_context_input)
 
@@ -17,7 +19,7 @@ func focus_editor() -> void:
 
 
 func _update_status() -> void:
-	status.text = "Только текущая попытка · %d символов" % editor.text.length()
+	status.text = tr("%d символов") % editor.text.length()
 
 
 func _context_input(event: InputEvent) -> void:

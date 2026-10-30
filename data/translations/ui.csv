@@ -1,0 +1,71 @@
+keys,en,ru
+PLAY,Play,Играть
+SETTINGS,Settings,Настройки
+CREDITS,Credits,Титры
+EXIT,Exit,Выход
+BACK,Back,Назад
+VOLUME,Volume,Громкость
+SENSITIVITY,Mouse sensitivity,Чувствительность мыши
+FULLSCREEN,Fullscreen,Полный экран
+LANGUAGE,Language,Язык
+NO_SILENCE,Silence is not included in your observation agreement.,Тишина не предусмотрена условиями наблюдения.
+LOADING,Connecting…,Подключение…
+LOAD_FAILED,Connection failed. Try again.,Ошибка подключения. Попробуйте снова.
+Блокнот,Notepad,Блокнот
+Калькулятор,Calculator,Калькулятор
+Приложение,Application,Приложение
+Пуск,Start,Пуск
+ЛОКАЛЬНЫЙ СЕАНС,LOCAL SESSION,ЛОКАЛЬНЫЙ СЕАНС
+Встать [Esc],Leave [Esc],Встать [Esc]
+Внутриигровое время сеанса,In-game session time,Внутриигровое время сеанса
+Свернуть,Minimize,Свернуть
+Развернуть / восстановить,Maximize / restore,Развернуть / восстановить
+Закрыть,Close,Закрыть
+Удалить последнюю цифру [Backspace],Delete last digit [Backspace],Удалить последнюю цифру [Backspace]
+Деление на ноль,Division by zero,Деление на ноль
+Число слишком велико,Number too large,Число слишком велико
+Ошибка,Error,Ошибка
+%d символов,%d characters,%d символов
+Заметки…,Notes…,Заметки…
+Только текущая попытка · 0 символов,Current session only · 0 characters,Только текущая попытка · 0 символов
+НЕТ КАМЕР,NO CAMERAS,НЕТ КАМЕР
+Нет подключённых камер,No connected cameras,Нет подключённых камер
+ПОДКЛЮЧЕНИЕ...,CONNECTING...,ПОДКЛЮЧЕНИЕ...
+Повернуть влево · удерживать,Pan left · hold,Повернуть влево · удерживать
+Повернуть вправо · удерживать,Pan right · hold,Повернуть вправо · удерживать
+Отдалить · удерживать,Zoom out · hold,Отдалить · удерживать
+Приблизить · удерживать,Zoom in · hold,Приблизить · удерживать
+Микрофон: только свойство прототипа. Звук пока не подключён.,Microphone: prototype property only. Audio is not connected yet.,Микрофон: только свойство прототипа. Звук пока не подключён.
+"Браузер освободил мышь. Подожди секунду, затем нажми ЛКМ",Browser released the mouse. Wait a moment and click.,"Браузер освободил мышь. Подожди секунду, затем нажми ЛКМ"
+"Нажми ЛКМ, чтобы осмотреться",Click to look around,"Нажми ЛКМ, чтобы осмотреться"
+E — сесть за компьютер,E — use computer,E — сесть за компьютер
+WASD — ходить   ·   Shift — бег   ·   E — сесть за ПК   ·   Esc — освободить мышь,WASD — walk   ·   Shift — sprint   ·   E — computer   ·   Esc — release mouse,WASD — ходить   ·   Shift — бег   ·   E — сесть за ПК   ·   Esc — освободить мышь
+CAM-01 / ЗАЛ,CAM-01 / FLOOR,CAM-01 / ЗАЛ
+CAM-02 / КАССА,CAM-02 / CHECKOUT,CAM-02 / КАССА
+CAM-03 / ДВОР,CAM-03 / YARD,CAM-03 / ДВОР
+CAM-04 / ВХОД,CAM-04 / ENTRANCE,CAM-04 / ВХОД
+01 / МАГАЗИН,01 / SHOP,01 / МАГАЗИН
+02 / ДВОР,02 / YARD,02 / ДВОР
+САНУЗЕЛ,BATHROOM,САНУЗЕЛ
+СПАЛЬНЯ,BEDROOM,СПАЛЬНЯ
+"ЩИТОК
+(пока без механики)","FUSEBOX
+(not functional yet)","ЩИТОК
+(пока без механики)"
+CONNECTING...,CONNECTING...,ПОДКЛЮЧЕНИЕ...
+SIGNAL UNSTABLE / MOTOR,SIGNAL UNSTABLE / MOTOR,НЕСТАБИЛЬНЫЙ СИГНАЛ / МОТОР
+LOCAL CCTV / OFFLINE NETWORK,LOCAL CCTV / OFFLINE NETWORK,ЛОКАЛЬНОЕ CCTV / АВТОНОМНАЯ СЕТЬ
+LOCAL CCTV / %s / %02d FPS,LOCAL CCTV / %s / %02d FPS,ЛОКАЛЬНОЕ CCTV / %s / %02d FPS
+PAN %+.0f°%s   /   ZOOM %.1fx,PAN %+.0f°%s   /   ZOOM %.1fx,ПОВОРОТ %+.0f°%s   /   ЗУМ %.1fx
+ / LIMIT, / LIMIT, / ПРЕДЕЛ
+VIDEO B/W,VIDEO B/W,ВИДЕО Ч/Б
+VIDEO COLOR,VIDEO COLOR,ВИДЕО ЦВЕТ
+NIGHT SHOP / 24,NIGHT SHOP / 24,НОЧНОЙ МАГАЗИН / 24
+RICE 42 / TEA 17,RICE 42 / TEA 17,РИС 42 / ЧАЙ 17
+SERVICE / 04,SERVICE / 04,СЛУЖЕБНЫЙ ВХОД / 04
+"E — сесть за компьютер",E — use computer,E — сесть за компьютер
+"WASD — ходить   ·   Shift — бег   ·   E — сесть за ПК   ·   Esc — освободить мышь",WASD — walk   ·   Shift — sprint   ·   E — use computer   ·   Esc — release mouse,"WASD — ходить   ·   Shift — бег   ·   E — сесть за ПК   ·   Esc — освободить мышь"
+"MIC -- / VIDEO --",MIC -- / VIDEO --,МИКРОФОН -- / ВИДЕО --
+"Деление на ноль",Division by zero,Деление на ноль
+"Число слишком велико",Number too large,Число слишком велико
+"Ошибка",Error,Ошибка

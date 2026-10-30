@@ -20,7 +20,7 @@ func _ready() -> void:
 	add_child(status)
 	var clear_row := HBoxContainer.new()
 	add_child(clear_row)
-	_button(clear_row, "BS", "BACK").tooltip_text = "Удалить последнюю цифру [Backspace]"
+	_button(clear_row, "BS", "BACK").tooltip_text = tr("Удалить последнюю цифру [Backspace]")
 	_button(clear_row, "CE", "CE")
 	_button(clear_row, "C", "C")
 	var grid := GridContainer.new()
@@ -58,8 +58,8 @@ func press(token: String) -> void:
 
 
 func _refresh() -> void:
-	display.text = model.entry.replace(".", ",")
-	status.text = model.error_message
+	display.text = tr(model.entry) if model.entry == "Ошибка" else model.entry.replace(".", ",")
+	status.text = tr(model.error_message) if not model.error_message.is_empty() else ""
 
 
 func handle_key(event: InputEventKey) -> bool:

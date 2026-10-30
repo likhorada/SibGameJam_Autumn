@@ -24,6 +24,10 @@ var _motion_acceleration := Vector3.ZERO
 @onready var stamina: PlayerStamina = $Stamina
 
 
+func _ready() -> void:
+	mouse_sensitivity = get_node("/root/Preferences").sensitivity
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not controls_enabled or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		return

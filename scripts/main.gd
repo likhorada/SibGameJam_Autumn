@@ -40,11 +40,11 @@ func _physics_process(_delta: float) -> void:
 		return
 	crosshair.visible = captured
 	if not captured and Time.get_ticks_msec() < pointer_retry_after_msec:
-		hint.text = "Браузер освободил мышь. Подожди секунду, затем нажми ЛКМ"
+		hint.text = tr("Браузер освободил мышь. Подожди секунду, затем нажми ЛКМ")
 	elif not captured:
-		hint.text = "Нажми ЛКМ, чтобы осмотреться"
+		hint.text = tr("Нажми ЛКМ, чтобы осмотреться")
 	elif player.interaction_id == &"computer":
-		hint.text = "E — сесть за компьютер"
+		hint.text = tr("E — сесть за компьютер")
 	else:
 		hint.text = ""
 

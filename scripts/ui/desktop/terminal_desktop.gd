@@ -110,7 +110,7 @@ func _build_taskbar() -> void:
 	panel.add_child(row)
 	start_button = Button.new()
 	start_button.name = "StartButton"
-	start_button.text = "Пуск"
+	start_button.text = tr("Пуск")
 	start_button.toggle_mode = true
 	start_button.focus_mode = Control.FOCUS_NONE
 	start_button.custom_minimum_size.x = 96
@@ -136,7 +136,7 @@ func _build_taskbar() -> void:
 	clock = Label.new()
 	clock.custom_minimum_size.x = 72
 	clock.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	clock.tooltip_text = "Внутриигровое время сеанса"
+	clock.tooltip_text = tr("Внутриигровое время сеанса")
 	row.add_child(clock)
 
 
@@ -149,7 +149,7 @@ func _build_start_menu() -> void:
 	column.add_theme_constant_override("separation", 6)
 	start_menu.add_child(column)
 	var heading := Label.new()
-	heading.text = "ЛОКАЛЬНЫЙ СЕАНС"
+	heading.text = tr("ЛОКАЛЬНЫЙ СЕАНС")
 	heading.add_theme_font_size_override("font_size", 13)
 	column.add_child(heading)
 	for app: StringName in TITLES:
@@ -166,7 +166,7 @@ func _build_start_menu() -> void:
 	column.add_child(HSeparator.new())
 	exit_button = Button.new()
 	exit_button.name = "ExitButton"
-	exit_button.text = "Встать [Esc]"
+	exit_button.text = tr("Встать [Esc]")
 	exit_button.focus_mode = Control.FOCUS_NONE
 	exit_button.custom_minimum_size.y = 38
 	exit_button.pressed.connect(_close_start)

@@ -101,6 +101,9 @@ try {
   if (!loaded) throw new Error('Game did not finish loading');
   await sleep(2000);
   await call('Page.bringToFront');
+  await sleep(1500); // Allow the introductory placeholder to finish.
+  await click(110,480); // Main menu: Play.
+  await sleep(2500);
   await click(640,360);
   if (!await evaluate('!!document.pointerLockElement')) throw new Error('Initial pointer capture failed');
   await move(640,440);
