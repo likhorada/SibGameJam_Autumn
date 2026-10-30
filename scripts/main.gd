@@ -70,21 +70,23 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		_release_pointer()
 		if is_instance_valid(player):
-			player.velocity = Vector3.ZERO
+			player.stop_motion()
 
 
 func enter_computer() -> void:
 	if mode != Mode.WALKING:
 		return
 	mode = Mode.ENTERING
-	player.controls_enabled = false
-	player.velocity = Vector3.ZERO
+	# Copy before disabling motion: preserve the exact rendered bob/roll/FOV.
+	transition_camera.global_transform = player.camera.global_transform
+	transition_camera.fov = player.camera.fov
+	player.set_controls_enabled(false)
 	player.interaction_id = &""
 	hud.hide()
-	transition_camera.global_transform = player.camera.global_transform
 	transition_camera.make_current()
 	transition = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	transition.tween_property(transition_camera, "global_transform", terminal.get_node("SeatView").global_transform, transition_seconds * 0.45)
+	transition.parallel().tween_property(transition_camera, "fov", player.camera_motion.base_fov, transition_seconds * 0.45)
 	transition.tween_property(transition_camera, "global_transform", terminal.get_node("MonitorView").global_transform, transition_seconds * 0.55)
 	transition.tween_callback(_show_desktop)
 
@@ -113,7 +115,7 @@ func leave_computer() -> void:
 func _resume_walking() -> void:
 	mode = Mode.WALKING
 	player.camera.make_current()
-	player.controls_enabled = true
+	player.set_controls_enabled(true)
 	hud.show()
 
 
@@ -127,6 +129,8 @@ func _release_pointer() -> void:
 		_record_pointer_release()
 	pointer_was_captured = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if is_instance_valid(player):
+		player.stop_motion()
 
 
 func _record_pointer_release() -> void:

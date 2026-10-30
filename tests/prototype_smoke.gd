@@ -71,6 +71,7 @@ func _run() -> void:
 		player.position = Vector3(0, 0.02, -0.55)
 		player.rotation = Vector3.ZERO
 		player.head.rotation = Vector3(-0.18, 0, 0)
+		player.stop_motion(true)
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		await _frames(3)
 		_expect(player.interaction_id == &"computer", "Computer ray available, cycle %d" % cycle)
@@ -129,7 +130,7 @@ func _run() -> void:
 func _walk(start: Vector3, yaw: float, action: StringName, frames: int) -> void:
 	player.position = start
 	player.rotation = Vector3(0, yaw, 0)
-	player.velocity = Vector3.ZERO
+	player.stop_motion(true)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	Input.action_press(action)
 	await _frames(frames)

@@ -3,44 +3,90 @@ extends CharacterBody3D
 
 @export var walk_speed: float = 2.5
 @export var sprint_speed: float = 4.3
+@export_range(1.0, 60.0) var acceleration: float = 18.0
+@export_range(1.0, 60.0) var braking: float = 22.0
 @export var mouse_sensitivity: float = 0.0022
 @export var interaction_distance: float = 2.2
+## Exponential response in 1/seconds; zero gives instant mouse look.
+@export_range(0.0, 40.0) var look_response: float = 18.0
+@export_range(0.0, 15.0) var max_look_lag_degrees: float = 6.0
 
 var controls_enabled: bool = true
 var interaction_id: StringName = &""
+var _pending_look := Vector2.ZERO
+var _motion_velocity := Vector3.ZERO
+var _motion_acceleration := Vector3.ZERO
 
 @onready var head: Node3D = $Head
-@onready var camera: Camera3D = $Head/Camera3D
+@onready var camera_motion: PlayerCameraMotion = $Head/CameraMotion
+@onready var camera: Camera3D = $Head/CameraMotion/Camera3D
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not controls_enabled or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		return
 	if event is InputEventMouseMotion:
-		rotate_y(-event.screen_relative.x * mouse_sensitivity)
-		head.rotation.x = clampf(
-			head.rotation.x - event.screen_relative.y * mouse_sensitivity,
-			deg_to_rad(-80.0), deg_to_rad(80.0)
-		)
+		_pending_look += event.screen_relative * mouse_sensitivity
+		# Preserve total input while bounding the lag of a fast mouse flick.
+		var limit := deg_to_rad(max_look_lag_degrees)
+		var retained := _pending_look.clamp(Vector2(-limit, -limit), Vector2(limit, limit))
+		_apply_look(_pending_look - retained)
+		_pending_look = retained
+
+
+func _process(delta: float) -> void:
+	if not controls_enabled:
+		return
+	var active := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+	var applied_look := Vector2.ZERO
+	if active:
+		var weight := 1.0 if look_response <= 0.0 else 1.0 - exp(-look_response * delta)
+		applied_look = _pending_look * weight
+		_pending_look -= applied_look
+		_apply_look(applied_look)
+	else:
+		_pending_look = Vector2.ZERO
+	var local_velocity := global_basis.inverse() * _motion_velocity
+	var local_acceleration := global_basis.inverse() * _motion_acceleration
+	camera_motion.update_feedback(
+		delta, local_velocity, local_acceleration, applied_look / maxf(delta, 0.0001),
+		is_on_floor(), Input.is_action_pressed("sprint"), active, walk_speed, sprint_speed
+	)
+
+
+func _apply_look(amount: Vector2) -> void:
+	rotate_y(-amount.x)
+	head.rotation.x = clampf(head.rotation.x - amount.y, deg_to_rad(-80.0), deg_to_rad(80.0))
 
 
 func _physics_process(delta: float) -> void:
 	interaction_id = &""
 	if not controls_enabled:
-		velocity = Vector3.ZERO
+		stop_motion()
 		return
 	var direction := Vector3.ZERO
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		var axis := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 		direction = global_basis * Vector3(axis.x, 0.0, axis.y)
 	var speed := sprint_speed if Input.is_action_pressed("sprint") else walk_speed
-	velocity.x = direction.x * speed
-	velocity.z = direction.z * speed
+	var horizontal := Vector3(velocity.x, 0.0, velocity.z)
+	var target := direction * speed
+	var rate := acceleration if target.length_squared() > horizontal.length_squared() else braking
+	horizontal = horizontal.move_toward(target, rate * delta)
+	# Focus loss/Esc must stop immediately, not continue the normal braking glide.
+	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		horizontal = Vector3.ZERO
+	velocity.x = horizontal.x
+	velocity.z = horizontal.z
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 	else:
 		velocity.y = 0.0
 	move_and_slide()
+	var actual_velocity := get_real_velocity()
+	actual_velocity.y = 0.0
+	_motion_acceleration = ((actual_velocity - _motion_velocity) / maxf(delta, 0.0001)).limit_length(30.0)
+	_motion_velocity = actual_velocity
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		interaction_id = find_interaction()
 
@@ -58,5 +104,20 @@ func find_interaction() -> StringName:
 func place_at(marker: Node3D) -> void:
 	global_transform = marker.global_transform
 	head.rotation = Vector3.ZERO
-	velocity = Vector3.ZERO
+	stop_motion(true)
 	interaction_id = &""
+
+
+func set_controls_enabled(enabled: bool) -> void:
+	controls_enabled = enabled
+	if not enabled:
+		stop_motion(true)
+
+
+func stop_motion(reset_camera: bool = false) -> void:
+	velocity = Vector3.ZERO
+	_motion_velocity = Vector3.ZERO
+	_motion_acceleration = Vector3.ZERO
+	_pending_look = Vector2.ZERO
+	if reset_camera:
+		camera_motion.reset_motion()

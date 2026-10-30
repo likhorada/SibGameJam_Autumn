@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/player.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/player/camera_motion.gd" id="2"]
 
 [sub_resource type="CapsuleShape3D" id="Capsule"]
 radius = 0.25
@@ -17,7 +18,10 @@ shape = SubResource("Capsule")
 [node name="Head" type="Node3D" parent="."]
 position = Vector3(0, 1.6, 0)
 
-[node name="Camera3D" type="Camera3D" parent="Head"]
+[node name="CameraMotion" type="Node3D" parent="Head"]
+script = ExtResource("2")
+
+[node name="Camera3D" type="Camera3D" parent="Head/CameraMotion"]
 current = true
 near = 0.05
 fov = 75.0
