@@ -1,0 +1,97 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/cctv/cctv_camera.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/cctv/locations/test_mannequin.tscn" id="2"]
+
+[sub_resource type="StandardMaterial3D" id="FloorMat"]
+albedo_color = Color(0.33, 0.35, 0.3, 1)
+[sub_resource type="StandardMaterial3D" id="WallMat"]
+albedo_color = Color(0.62, 0.6, 0.43, 1)
+[sub_resource type="StandardMaterial3D" id="CounterMat"]
+albedo_color = Color(0.27, 0.34, 0.33, 1)
+[sub_resource type="StandardMaterial3D" id="Red"]
+albedo_color = Color(0.8, 0.1, 0.06, 1)
+[sub_resource type="StandardMaterial3D" id="Blue"]
+albedo_color = Color(0.06, 0.2, 0.7, 1)
+[sub_resource type="BoxMesh" id="Floor"]
+size = Vector3(12, 0.15, 10)
+material = SubResource("FloorMat")
+[sub_resource type="BoxMesh" id="BackWall"]
+size = Vector3(12, 4, 0.2)
+material = SubResource("WallMat")
+[sub_resource type="BoxMesh" id="Shelf"]
+size = Vector3(3, 1.8, 0.7)
+material = SubResource("CounterMat")
+[sub_resource type="BoxMesh" id="Counter"]
+size = Vector3(3, 1, 1)
+material = SubResource("CounterMat")
+[sub_resource type="BoxMesh" id="RedBox"]
+size = Vector3(0.35, 0.45, 0.3)
+material = SubResource("Red")
+[sub_resource type="BoxMesh" id="BlueBox"]
+size = Vector3(0.3, 0.3, 0.3)
+material = SubResource("Blue")
+
+[node name="Shop" type="Node3D"]
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+mesh = SubResource("Floor")
+[node name="BackWall" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2, -5)
+mesh = SubResource("BackWall")
+[node name="ShelfLeft" type="MeshInstance3D" parent="."]
+position = Vector3(-3.5, 0.95, -3.7)
+mesh = SubResource("Shelf")
+[node name="ShelfRight" type="MeshInstance3D" parent="."]
+position = Vector3(3.5, 0.95, -3.7)
+mesh = SubResource("Shelf")
+[node name="Counter" type="MeshInstance3D" parent="."]
+position = Vector3(2, 0.55, -0.8)
+mesh = SubResource("Counter")
+[node name="RedPackage" type="MeshInstance3D" parent="."]
+position = Vector3(1.5, 1.28, -0.8)
+mesh = SubResource("RedBox")
+[node name="BluePackage" type="MeshInstance3D" parent="."]
+position = Vector3(2.3, 1.2, -0.8)
+mesh = SubResource("BlueBox")
+[node name="RedShelfPackage" type="MeshInstance3D" parent="."]
+position = Vector3(-4, 2.08, -3.7)
+mesh = SubResource("RedBox")
+[node name="BlueShelfPackage" type="MeshInstance3D" parent="."]
+position = Vector3(3.6, 2, -3.7)
+mesh = SubResource("BlueBox")
+[node name="Sign" type="Label3D" parent="."]
+position = Vector3(0, 2.8, -4.85)
+text = "NIGHT SHOP / 24"
+font_size = 64
+pixel_size = 0.012
+modulate = Color(0.85, 0.2, 0.08, 1)
+[node name="Price" type="Label3D" parent="."]
+position = Vector3(2, 0.85, -0.285)
+text = "RICE 42 / TEA 17"
+font_size = 32
+pixel_size = 0.005
+[node name="Light" type="OmniLight3D" parent="."]
+position = Vector3(0, 3.8, 0)
+light_color = Color(0.95, 0.91, 0.75, 1)
+light_energy = 2.0
+omni_range = 12.0
+[node name="Visitor" parent="." instance=ExtResource("2")]
+position = Vector3(-3, 0.08, -1.8)
+travel = Vector3(4, 0, 0)
+[node name="ShopWide" parent="." instance=ExtResource("1")]
+position = Vector3(-4.8, 3.2, 4.3)
+rotation_degrees = Vector3(-17, -31, 0)
+camera_id = &"shop_wide"
+display_name = "CAM-01 / ЗАЛ"
+location_label = "01 / МАГАЗИН"
+list_order = 0
+[node name="Checkout" parent="." instance=ExtResource("1")]
+position = Vector3(4.8, 2.8, 3.2)
+rotation_degrees = Vector3(-20, 33, 0)
+camera_id = &"shop_checkout"
+display_name = "CAM-02 / КАССА"
+location_label = "01 / МАГАЗИН"
+list_order = 1
+monochrome = true
+has_microphone = true

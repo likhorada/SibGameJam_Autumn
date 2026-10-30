@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/apartment/apartment.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/terminal/terminal.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/terminal_ui.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/cctv/cctv_system.tscn" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="6"]
 
 [node name="Main" type="Node3D"]
@@ -28,3 +29,5 @@ fov = 75.0
 
 [node name="TerminalUI" parent="UI" instance=ExtResource("5")]
 visible = false
+
+[node name="CCTVSystem" parent="." instance=ExtResource("7")]

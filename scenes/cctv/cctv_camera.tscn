@@ -1,0 +1,57 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/cctv/cctv_camera.gd" id="1"]
+
+[sub_resource type="StandardMaterial3D" id="Metal"]
+albedo_color = Color(0.32, 0.36, 0.35, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Glass"]
+albedo_color = Color(0.025, 0.045, 0.05, 1)
+
+[sub_resource type="BoxMesh" id="Mount"]
+material = SubResource("Metal")
+size = Vector3(0.12, 0.12, 0.35)
+
+[sub_resource type="BoxMesh" id="Housing"]
+material = SubResource("Metal")
+size = Vector3(0.25, 0.22, 0.4)
+
+[sub_resource type="CylinderMesh" id="Lens"]
+material = SubResource("Glass")
+top_radius = 0.07
+bottom_radius = 0.07
+height = 0.04
+radial_segments = 8
+
+[sub_resource type="BoxMesh" id="Plate"]
+material = SubResource("Metal")
+size = Vector3(0.25, 0.3, 0.04)
+
+[node name="CCTVCamera" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Mount" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.15, 0.18)
+mesh = SubResource("Mount")
+
+[node name="Plate" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.15, 0.36)
+mesh = SubResource("Plate")
+
+[node name="Head" type="Node3D" parent="."]
+
+[node name="Housing" type="MeshInstance3D" parent="Head"]
+mesh = SubResource("Housing")
+
+[node name="Lens" type="MeshInstance3D" parent="Head"]
+position = Vector3(0, 0, -0.22)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("Lens")
+
+[node name="Camera3D" type="Camera3D" parent="Head"]
+position = Vector3(0, 0, -0.26)
+near = 0.04
+far = 65.0
+fov = 65.0
+current = false

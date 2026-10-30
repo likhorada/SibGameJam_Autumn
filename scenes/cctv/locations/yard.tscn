@@ -1,0 +1,82 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/cctv/cctv_camera.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/cctv/locations/test_mannequin.tscn" id="2"]
+
+[sub_resource type="StandardMaterial3D" id="GroundMat"]
+albedo_color = Color(0.23, 0.25, 0.24, 1)
+[sub_resource type="StandardMaterial3D" id="Brick"]
+albedo_color = Color(0.35, 0.21, 0.16, 1)
+[sub_resource type="StandardMaterial3D" id="DoorMat"]
+albedo_color = Color(0.08, 0.23, 0.16, 1)
+[sub_resource type="StandardMaterial3D" id="BinMat"]
+albedo_color = Color(0.12, 0.3, 0.65, 1)
+[sub_resource type="BoxMesh" id="Ground"]
+size = Vector3(16, 0.15, 14)
+material = SubResource("GroundMat")
+[sub_resource type="BoxMesh" id="Wall"]
+size = Vector3(16, 5, 0.3)
+material = SubResource("Brick")
+[sub_resource type="BoxMesh" id="Door"]
+size = Vector3(1.4, 2.4, 0.15)
+material = SubResource("DoorMat")
+[sub_resource type="BoxMesh" id="Bin"]
+size = Vector3(1.2, 1.3, 1)
+material = SubResource("BinMat")
+[sub_resource type="BoxMesh" id="Step"]
+size = Vector3(2.2, 0.25, 1.2)
+material = SubResource("GroundMat")
+
+[node name="Yard" type="Node3D"]
+[node name="Ground" type="MeshInstance3D" parent="."]
+mesh = SubResource("Ground")
+[node name="Wall" type="MeshInstance3D" parent="."]
+position = Vector3(0, 2.5, -5)
+mesh = SubResource("Wall")
+[node name="Door" type="MeshInstance3D" parent="."]
+position = Vector3(2, 1.3, -4.75)
+mesh = SubResource("Door")
+[node name="Step" type="MeshInstance3D" parent="."]
+position = Vector3(2, 0.2, -4.1)
+mesh = SubResource("Step")
+[node name="BinLeft" type="MeshInstance3D" parent="."]
+position = Vector3(-4.5, 0.75, -2.4)
+mesh = SubResource("Bin")
+[node name="BinRight" type="MeshInstance3D" parent="."]
+position = Vector3(5, 0.75, -2.4)
+mesh = SubResource("Bin")
+[node name="Sign" type="Label3D" parent="."]
+position = Vector3(2, 3.1, -4.75)
+text = "SERVICE / 04"
+font_size = 48
+pixel_size = 0.008
+[node name="DoorNumber" type="Label3D" parent="."]
+position = Vector3(2, 1.8, -4.65)
+text = "04"
+font_size = 32
+pixel_size = 0.006
+[node name="Light" type="OmniLight3D" parent="."]
+position = Vector3(2, 4, -2)
+light_color = Color(0.8, 0.9, 1, 1)
+light_energy = 2.2
+omni_range = 16.0
+[node name="Visitor" parent="." instance=ExtResource("2")]
+position = Vector3(-3.5, 0.08, -2.7)
+travel = Vector3(6, 0, 0)
+period = 16.0
+[node name="YardWide" parent="." instance=ExtResource("1")]
+position = Vector3(-6, 3.8, 5)
+rotation_degrees = Vector3(-18, -32, 0)
+camera_id = &"yard_wide"
+display_name = "CAM-03 / ДВОР"
+location_label = "02 / ДВОР"
+list_order = 0
+monochrome = true
+[node name="Entrance" parent="." instance=ExtResource("1")]
+position = Vector3(5, 3.1, 1.5)
+rotation_degrees = Vector3(-16, 28, 0)
+camera_id = &"yard_entrance"
+display_name = "CAM-04 / ВХОД"
+location_label = "02 / ДВОР"
+list_order = 1
+has_microphone = true

@@ -17,9 +17,11 @@ var pointer_retry_after_msec: int = 0
 @onready var hud: Control = $UI/HUD
 @onready var hint: Label = $UI/HUD/Hint
 @onready var crosshair: Label = $UI/HUD/Crosshair
+@onready var cctv_system: CCTVSystem = $CCTVSystem
 
 
 func _ready() -> void:
+	terminal_ui.cctv.bind_system(cctv_system)
 	exit_button.pressed.connect(leave_computer)
 	terminal_ui.leave_requested.connect(_leave_from_ui_escape)
 	# A click is required for browser pointer lock; desktop uses the same flow.

@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | D1-01 | Prototype ready | Godot 4.6.2 Compatibility, editable apartment blockout, walking/sprint, desktop and clean-copy smoke tests pass. |
 | D1-02 | Core interaction ready | Smooth full-screen PC enter/exit, 10 desktop cycles, Chrome input/resize checks pass. Browser focus-loss and later audio startup still need acceptance. |
-| D1-03 | Not started | Windowed PC desktop exists; no CCTV or timeline. |
+| D1-03 | Partial | CCTV app: four cameras in two editable test locations, color/BW, microphone flags, delayed pan/zoom, one active render target. No clue timeline or real feed audio yet. See `doc/CCTV.md`. |
 | D1-04 | Partial | Freeform Notepad preserves notes within the run; no quiz, scoring or full session restart yet. See `doc/DESKTOP_UI.md`. |
 | D1-05 | Not started | Fusebox is decorative, not an implemented threat. |
 | D1-06 | Partial | Web and Windows exports work; Chrome prototype tested. CI workflow added; Pages requires owner setup. Full game-loop acceptance depends on D1-03..05. |

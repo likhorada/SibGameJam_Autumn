@@ -7,11 +7,13 @@ signal leave_requested
 const WINDOW_SCENE := preload("res://scenes/ui/desktop/desktop_window.tscn")
 const NOTEPAD_SCENE := preload("res://scenes/ui/desktop/notepad.tscn")
 const CALCULATOR_SCENE := preload("res://scenes/ui/desktop/calculator.tscn")
+const CCTV_SCENE := preload("res://scenes/ui/desktop/cctv_app.tscn")
 const ICONS := {
 	&"notepad": preload("res://assets/ui/notepad.svg"),
 	&"calculator": preload("res://assets/ui/calculator.svg"),
+	&"cctv": preload("res://assets/ui/cctv.svg"),
 }
-const TITLES := {&"notepad": "Блокнот", &"calculator": "Калькулятор"}
+const TITLES := {&"notepad": "Блокнот", &"calculator": "Калькулятор", &"cctv": "CCTV"}
 const TASKBAR_HEIGHT := 44.0
 
 var windows: Dictionary = {}
@@ -20,6 +22,7 @@ var desktop_icons: Dictionary = {}
 var active_app: StringName = &""
 var notepad: NotepadApp
 var calculator: CalculatorApp
+var cctv: CCTVApp
 var exit_button: Button
 var start_button: Button
 var start_menu: PanelContainer
@@ -49,6 +52,10 @@ func _ready() -> void:
 	notepad.leave_requested.connect(leave_requested.emit)
 	calculator = CALCULATOR_SCENE.instantiate()
 	windows[&"calculator"].content.add_child(calculator)
+	_create_app(&"cctv", Vector2(350, 35), Vector2(760, 540), Vector2(390, 295))
+	cctv = CCTV_SCENE.instantiate()
+	windows[&"cctv"].content.add_child(cctv)
+	cctv.leave_requested.connect(leave_requested.emit)
 	resized.connect(_fit_workspace)
 	visibility_changed.connect(_on_visibility_changed)
 	_fit_workspace.call_deferred()
@@ -118,7 +125,9 @@ func _build_taskbar() -> void:
 		button.icon = ICONS[app]
 		button.expand_icon = true
 		button.add_theme_constant_override("icon_max_width", 20)
-		button.custom_minimum_size.x = 170
+		button.custom_minimum_size.x = 110
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.clip_text = true
 		button.toggle_mode = true
 		button.focus_mode = Control.FOCUS_NONE
 		button.pressed.connect(_task_pressed.bind(app))
@@ -209,6 +218,7 @@ func activate_window(app: StringName) -> void:
 		windows[id].set_active(id == active_app)
 	_update_task_buttons()
 	_focus_content(app)
+	_sync_cctv_controls()
 
 
 func _focus_content(app: StringName) -> void:
@@ -238,6 +248,7 @@ func _window_changed(app: StringName) -> void:
 						_focus_content(id)
 				break
 	_update_task_buttons()
+	_sync_cctv_controls()
 
 
 func _update_task_buttons() -> void:
@@ -256,6 +267,7 @@ func _clear_active() -> void:
 	for app: StringName in windows:
 		windows[app].set_active(false)
 	_update_task_buttons()
+	_sync_cctv_controls()
 
 
 func _input(event: InputEvent) -> void:
@@ -315,6 +327,7 @@ func _toggle_start() -> void:
 		focus.release_focus()
 	start_menu.move_to_front()
 	_fit_workspace()
+	_sync_cctv_controls()
 
 
 func _close_start() -> void:
@@ -323,6 +336,7 @@ func _close_start() -> void:
 	start_button.set_pressed_no_signal(false)
 	if was_open and not active_app.is_empty():
 		_focus_content(active_app)
+	_sync_cctv_controls()
 
 
 func _fit_workspace() -> void:
@@ -334,12 +348,14 @@ func _fit_workspace() -> void:
 
 func resume_desktop() -> void:
 	_fit_workspace()
+	_sync_cctv_controls()
 	if not active_app.is_empty():
 		_focus_content(active_app)
 
 
 func suspend_desktop() -> void:
 	_close_start()
+	cctv.cancel_controls()
 	notepad.editor.get_menu().hide()
 	for window: DesktopAppWindow in windows.values():
 		window.cancel_gesture()
@@ -356,3 +372,8 @@ func _on_visibility_changed() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_instance_valid(start_menu):
 		_close_start()
+
+
+func _sync_cctv_controls() -> void:
+	if is_instance_valid(cctv):
+		cctv.set_input_enabled(active_app == &"cctv" and not start_menu.visible and is_visible_in_tree())
