@@ -22,6 +22,9 @@ var view_camera: Camera3D
 
 
 func _ready() -> void:
+	if raise_sound == null:
+		# Electric buzz while a handle is held upward; released handles stay silent.
+		raise_sound = preload("res://assets/audio/elecric_fixing.wav")
 	_update_handles()
 
 

@@ -22,6 +22,7 @@ var _focus_active: bool = true
 @onready var cctv_system: CCTVSystem = $CCTVSystem
 @onready var power: ApartmentPower = $PowerSystem
 @onready var dev_menu = $DevMenu
+var ambient: AmbientDirector
 
 
 func _ready() -> void:
@@ -34,6 +35,9 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	power.bind(self)
 	power.power_changed.connect(_on_power_changed)
+	ambient = AmbientDirector.new()
+	add_child(ambient)
+	ambient.bind(self)
 	dev_menu.bind(self)
 	dev_menu.opened.connect(_on_dev_opened)
 	dev_menu.closed.connect(_on_dev_closed)
@@ -312,6 +316,8 @@ func _on_dev_closed() -> void:
 func _finish_report(won: bool, score: int) -> void:
 	terminal_ui.suspend_desktop()
 	cctv_system.set_watching(false)
+	if ambient != null:
+		ambient.stop_all()
 	_release_pointer()
 	_kill_transition()
 	# Freeze this run, but keep only the result overlay processing input.
