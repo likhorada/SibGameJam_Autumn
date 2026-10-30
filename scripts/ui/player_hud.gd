@@ -33,6 +33,10 @@ var _history_valid: bool = false
 
 
 func _ready() -> void:
+	var hud_theme := Theme.new()
+	# Same artist font as the menu; the PC desktop keeps its own theme.
+	hud_theme.default_font = preload("res://assets/fonts/static/Handjet-SemiBold.ttf")
+	theme = hud_theme
 	fatigue.material = fatigue.material.duplicate()
 	_material = fatigue.material
 	bar.modulate.a = 0.0

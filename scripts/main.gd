@@ -40,7 +40,8 @@ func _ready() -> void:
 	fusebox_hint = Label.new()
 	fusebox_hint.text = "FUSEBOX_HELP"
 	fusebox_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	fusebox_hint.add_theme_font_size_override("font_size", 18)
+	fusebox_hint.add_theme_font_override("font", preload("res://assets/fonts/static/Handjet-SemiBold.ttf"))
+	fusebox_hint.add_theme_font_size_override("font_size", 20)
 	fusebox_hint.add_theme_color_override("font_shadow_color", Color.BLACK)
 	fusebox_hint.add_theme_constant_override("shadow_offset_x", 2)
 	fusebox_hint.add_theme_constant_override("shadow_offset_y", 2)

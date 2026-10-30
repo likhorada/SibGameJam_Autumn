@@ -22,6 +22,10 @@ func bind(value: Node3D) -> void:
 	_overlay.color = Color(0, 0, 0, 0.85)
 	add_child(_overlay)
 	_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var menu_theme := Theme.new()
+	# Same artist font as the menu; the desktop apps keep their own fonts.
+	menu_theme.default_font = preload("res://assets/fonts/static/Handjet-SemiBold.ttf")
+	_overlay.theme = menu_theme
 	var center := CenterContainer.new()
 	_overlay.add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

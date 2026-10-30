@@ -76,6 +76,8 @@ func _fit_panel() -> void:
 
 func _build_theme() -> void:
 	theme = Theme.new()
+	# Artist-supplied pixel font for the game UI outside the PC desktop.
+	theme.default_font = preload("res://assets/fonts/static/Handjet-SemiBold.ttf")
 	theme.default_font_size = 22
 	var empty := StyleBoxFlat.new()
 	empty.bg_color = Color(0, 0, 0, 0)
