@@ -69,6 +69,45 @@ SERVICE / 04,SERVICE / 04,СЛУЖЕБНЫЙ ВХОД / 04
 "Деление на ноль",Division by zero,Деление на ноль
 "Число слишком велико",Number too large,Число слишком велико
 "Ошибка",Error,Ошибка
+DEV_CHAT_REPORT,Start test report (power required),Начать тестовый отчёт (нужно питание)
+CHAT_INTRO_1,"Your target is Viktor. An office clerk. Looks like he's starting to suspect something. Don't let him linger at the office. Keep an eye on him.","Твоя цель — Виктор, офисный клерк. Кажется, он начинает что-то подозревать. Не дай ему задержаться в офисе. Проследи за ним."
+CHAT_INTRO_2,"Find out who he sees, who he sleeps with, where he eats. Hell, even what he drinks after work.","Тебе нужно узнать, с кем он бывает, с кем спит, где ест. Да хоть что он пьёт после работы."
+CHAT_REPLY_1,Understood. Where do I start?,Понял. С чего начать?
+CHAT_REPLY_2,And how am I supposed to do that?,И как я должен это сделать?
+CHAT_TUTORIAL_1,Open CCTV on this desktop. Switch cameras and follow the target. Some cameras have audio; others don't.,Открой CCTV на этом рабочем столе. Переключай камеры и следи за целью. У одних камер есть звук — у других нет.
+CHAT_TUTORIAL_2,"Write details in Notepad. At the end I'll ask questions. Guessing isn't a plan.","Записывай детали в Блокнот. В конце я задам вопросы. Угадывать — плохой план."
+CHAT_TUTORIAL_3,"Esc gets you out of the PC. Check your apartment. If power goes out: find the fusebox, press E, hold LMB and follow each handle upward. Four ON switches bring power back.","Esc — встать из-за ПК. Проверяй квартиру. Если погаснет свет: найди щиток, нажми E, удерживай ЛКМ и веди курсор за ручкой вверх. Четыре ON вернут питание."
+CHAT_REPLY_3,Cameras. Notes. Keep an eye on my own door. Got it.,Камеры. Заметки. Не забывать про собственную дверь. Понял.
+CHAT_THREAT_1,You think we don't have a plan B?,Думаешь у нас нет плана Б?
+CHAT_THREAT_2,You'd better get this job done.,Лучше тебе справиться с этой работой...
+CHAT_TEST_FACTS,"[TEST DATA — NOT CCTV EVIDENCE] Target: Viktor. After work: coffee. Contact: Anna. These are placeholder facts for testing the report.","[ТЕСТ — НЕ УЛИКИ С КАМЕР] Цель: Виктор. После работы: кофе. Контакт: Анна. Это временные факты для проверки отчёта."
+CHAT_REPLY_4,I'll get it done.,Я справлюсь.
+CHAT_REPLY_5,I don't want to know what plan B is.,Не хочу знать что такое план Б.
+CHAT_WAIT,Stay on the cameras. [Prototype: the final report starts from F7 dev menu.],Следи за камерами. [Прототип: финальный отчёт запускается из dev-меню F7.]
+CHAT_REPORT,Time to report. Three questions. No second chances.,Время отчёта. Три вопроса. Второй попытки не будет.
+CHAT_Q1,What is the target's name?,Как зовут цель?
+CHAT_Q2,What does he drink after work (test data)?,Что он пьёт после работы (тестовые данные)?
+CHAT_Q3,Who is his contact (test data)?,Кто его контакт (тестовые данные)?
+CHAT_A_VIKTOR,Viktor.,Виктор.
+CHAT_A_ANTON,Anton.,Антон.
+CHAT_A_PAVEL,Pavel.,Павел.
+CHAT_A_TEA,Tea.,Чай.
+CHAT_A_COFFEE,Coffee.,Кофе.
+CHAT_A_WATER,Water.,Вода.
+CHAT_A_IGOR,Igor.,Игорь.
+CHAT_A_OLGA,Olga.,Ольга.
+CHAT_A_ANNA,Anna.,Анна.
+CHAT_SUCCESS,Good. You're useful after all. Stay available.,Хорошо. От тебя всё-таки есть польза. Будь на связи.
+CHAT_FAILURE,You had one job. We're going with plan B.,У тебя была одна задача. Переходим к плану Б.
+CHAT_RECEIVING,handler is typing...,заказчик печатает...
+CHAT_TYPE_HELP,Type any letters to compose the selected reply. Enter sends when complete.,Нажимай любые буквы чтобы набрать выбранный ответ. Когда допечатаешь — Enter.
+CHAT_CHOOSE,Select a reply below.,Выбери ответ ниже.
+CHAT_IDLE,Awaiting messages.,Ожидание сообщений.
+CHAT_WIN,REPORT ACCEPTED,ОТЧЁТ ПРИНЯТ
+CHAT_LOSE,PLAN B,ПЛАН Б
+CHAT_RESULT,Correct answers: %d / %d,Правильных ответов: %d / %d
+CHAT_RESTART,New run,Новый забег
+CHAT_MENU,Main menu,Главное меню
 FUSEBOX,FUSEBOX,ЭЛЕКТРОЩИТОК
 NO_POWER,No power. Find the fusebox.,Нет питания. Найди электрощиток.
 POWER_OK,Power is on,Питание включено

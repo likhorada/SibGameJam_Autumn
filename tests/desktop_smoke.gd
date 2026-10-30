@@ -17,7 +17,7 @@ func _run() -> void:
 	desktop = load("res://scenes/ui/terminal_ui.tscn").instantiate()
 	root.add_child(desktop)
 	await _frames(4)
-	_expect(desktop.windows.size() == 3, "Exactly three applications")
+	_expect(desktop.windows.size() == 4, "Four applications including RELAY")
 	_expect(desktop.active_app.is_empty(), "No app starts open")
 	_expect(desktop.clock.text == "09:00", "Clock starts at fictional 09:00")
 	var note: DesktopAppWindow = desktop.windows[&"notepad"]
@@ -168,13 +168,18 @@ func _test_game_integration() -> void:
 	game.transition_seconds = 0.02
 	game.enter_computer()
 	await create_timer(0.12).timeout
+	# Initial audio/font loading can consume the timer's first frame before the tween advances.
+	for frame: int in 20:
+		if game.mode == game.Mode.COMPUTER:
+			break
+		await _frames(1)
 	var ui: TerminalDesktop = game.terminal_ui
 	ui.launch_app(&"notepad")
 	_text("Keep")
 	_key(KEY_W, 119)
 	_key(KEY_E, 101)
 	await _frames(3)
-	_expect(ui.notepad.editor.text == "Keepwe", "W/E type in Notepad instead of moving or interacting")
+	_expect(ui.notepad.editor.text == "Keepwe", "W/E type in Notepad instead of moving or interacting: " + ui.notepad.editor.text)
 	_expect(game.mode == game.Mode.COMPUTER and game.player.velocity == Vector3.ZERO, "Typing leaves player disabled")
 	_click(ui.start_button.get_global_rect().get_center())
 	_expect(ui.start_menu.visible, "Start opened while using PC")

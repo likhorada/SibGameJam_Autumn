@@ -3,17 +3,21 @@ extends Control
 ## In-game controls only: no native OS windows, files or external services.
 
 signal leave_requested
+signal report_finished(won: bool, score: int)
 
 const WINDOW_SCENE := preload("res://scenes/ui/desktop/desktop_window.tscn")
 const NOTEPAD_SCENE := preload("res://scenes/ui/desktop/notepad.tscn")
 const CALCULATOR_SCENE := preload("res://scenes/ui/desktop/calculator.tscn")
 const CCTV_SCENE := preload("res://scenes/ui/desktop/cctv_app.tscn")
+const CHAT_SCENE := preload("res://scenes/ui/desktop/chat.tscn")
+const INPUT_AUDIO := preload("res://scripts/ui/desktop/desktop_input_audio.gd")
 const ICONS := {
+	&"chat": preload("res://assets/ui/chat.svg"),
 	&"notepad": preload("res://assets/ui/notepad.svg"),
 	&"calculator": preload("res://assets/ui/calculator.svg"),
 	&"cctv": preload("res://assets/ui/cctv.svg"),
 }
-const TITLES := {&"notepad": "Блокнот", &"calculator": "Калькулятор", &"cctv": "CCTV"}
+const TITLES := {&"notepad": "Блокнот", &"calculator": "Калькулятор", &"cctv": "CCTV", &"chat": "RELAY"}
 const TASKBAR_HEIGHT := 44.0
 
 var windows: Dictionary = {}
@@ -23,6 +27,9 @@ var active_app: StringName = &""
 var notepad: NotepadApp
 var calculator: CalculatorApp
 var cctv: CCTVApp
+var chat: ChatApp
+var input_audio: Node
+var _first_login: bool = true
 var exit_button: Button
 var start_button: Button
 var start_menu: PanelContainer
@@ -56,6 +63,12 @@ func _ready() -> void:
 	cctv = CCTV_SCENE.instantiate()
 	windows[&"cctv"].content.add_child(cctv)
 	cctv.leave_requested.connect(leave_requested.emit)
+	_create_app(&"chat", Vector2(180, 40), Vector2(680, 560), Vector2(330, 340))
+	chat = CHAT_SCENE.instantiate()
+	windows[&"chat"].content.add_child(chat)
+	chat.finished.connect(func(won: bool, score: int): report_finished.emit(won, score))
+	input_audio = INPUT_AUDIO.new()
+	add_child(input_audio)
 	resized.connect(_fit_workspace)
 	visibility_changed.connect(_on_visibility_changed)
 	_fit_workspace.call_deferred()
@@ -217,13 +230,15 @@ func activate_window(app: StringName) -> void:
 	for id: StringName in windows:
 		windows[id].set_active(id == active_app)
 	_update_task_buttons()
-	_focus_content(app)
 	_sync_cctv_controls()
+	_focus_content(app)
 
 
 func _focus_content(app: StringName) -> void:
 	if app == &"notepad" and is_visible_in_tree():
 		notepad.focus_editor()
+	elif app == &"chat" and is_visible_in_tree():
+		chat.focus_composer()
 
 
 func _task_pressed(app: StringName) -> void:
@@ -341,6 +356,11 @@ func _close_start() -> void:
 
 func _fit_workspace() -> void:
 	var available := Vector2(size.x, maxf(size.y - TASKBAR_HEIGHT, 1.0))
+	var rows := maxi(1, int((available.y - 24.0) / 116.0))
+	var icon_index := 0
+	for icon: Button in desktop_icons.values():
+		icon.position = Vector2(20 + int(icon_index / rows) * 120, 24 + (icon_index % rows) * 116)
+		icon_index += 1
 	for window: DesktopAppWindow in windows.values():
 		window.fit_to_area(available)
 	start_menu.position = Vector2(6, maxf(size.y - TASKBAR_HEIGHT - start_menu.size.y - 3, 0))
@@ -348,12 +368,21 @@ func _fit_workspace() -> void:
 
 func resume_desktop() -> void:
 	_fit_workspace()
+	input_audio.enabled = true
+	if _first_login:
+		_first_login = false
+		launch_app(&"chat")
+		chat.begin()
 	_sync_cctv_controls()
 	if not active_app.is_empty():
 		_focus_content(active_app)
 
 
 func suspend_desktop() -> void:
+	if is_instance_valid(input_audio):
+		input_audio.stop()
+	if is_instance_valid(chat):
+		chat.set_input_enabled(false)
 	_close_start()
 	cctv.cancel_controls()
 	notepad.editor.get_menu().hide()
@@ -375,5 +404,7 @@ func _notification(what: int) -> void:
 
 
 func _sync_cctv_controls() -> void:
+	if is_instance_valid(chat):
+		chat.set_input_enabled(active_app == &"chat" and not start_menu.visible and is_visible_in_tree())
 	if is_instance_valid(cctv):
 		cctv.set_input_enabled(active_app == &"cctv" and not start_menu.visible and is_visible_in_tree())

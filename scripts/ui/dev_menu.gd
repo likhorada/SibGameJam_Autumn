@@ -48,6 +48,14 @@ func bind(value: Node3D) -> void:
 	_button(column, "DEV_POWER_OFF", func(): game.power.trigger_outage())
 	_button(column, "DEV_POWER_ON", func(): game.power.restore_power())
 	_button(column, "DEV_CLEAR_COOLDOWN", func(): game.power.clear_cooldown())
+	_button(column, "DEV_CHAT_REPORT", func():
+		if not game.power.powered or game.mode not in [game.Mode.WALKING, game.Mode.COMPUTER]:
+			return
+		close_menu()
+		game.terminal_ui.chat.session.start_quiz()
+		game.terminal_ui.launch_app(&"chat")
+		if game.mode == game.Mode.WALKING:
+			game.enter_computer())
 	_close_button = _button(column, "BACK", close_menu)
 	_overlay.hide()
 

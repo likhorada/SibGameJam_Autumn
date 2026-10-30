@@ -1,0 +1,110 @@
+// Dedicated export: main = tests/chat_fixture.tscn, tests/* included. Node 22 + Chrome.
+import http from 'node:http';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {spawn} from 'node:child_process';
+const root=path.resolve(process.env.CHAT_WEB_ROOT || 'build/chat-web');
+const artifacts=path.join(process.env.LOCALAPPDATA,'Temp/opencode');
+const profile=await fs.mkdtemp(path.join(artifacts,'chat-chrome-'));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const errors=[];
+const server=http.createServer(async(req,res)=>{
+  try {
+    const name=new URL(req.url,'http://localhost').pathname;
+    const file=path.resolve(root,'.'+(name==='/'?'/index.html':name));
+    if(!file.startsWith(root+path.sep))throw Error('Invalid path');
+    const bytes=await fs.readFile(file);
+    res.writeHead(200,{'Content-Type':{'.html':'text/html','.js':'application/javascript','.wasm':'application/wasm'}[path.extname(file)]||'application/octet-stream'});res.end(bytes);
+  } catch {res.writeHead(404);res.end();}
+});
+await new Promise(r=>server.listen(0,'127.0.0.1',r));
+const browser=spawn(process.env.CHROME||'C:/Program Files/Google/Chrome/Application/chrome.exe',[
+  '--remote-debugging-port=0','--remote-allow-origins=*','--no-first-run',
+  '--disable-backgrounding-occluded-windows','--disable-renderer-backgrounding','--disable-background-timer-throttling',
+  '--window-size=1280,720','--user-data-dir='+profile,'about:blank'],{stdio:'ignore'});
+let ws;
+try {
+  let port;
+  for(let i=0;i<100;i++) {try {port=(await fs.readFile(path.join(profile,'DevToolsActivePort'),'utf8')).split('\n')[0];break;}catch{await sleep(100);}}
+  const tabs=await(await fetch('http://127.0.0.1:'+port+'/json')).json();
+  ws=new WebSocket(tabs.find(t=>t.type==='page').webSocketDebuggerUrl);
+  await new Promise(r=>ws.addEventListener('open',r,{once:true}));
+  let id=0;const requests=new Map();
+  ws.addEventListener('message',event=>{
+    const d=JSON.parse(event.data);
+    if(d.id) {const p=requests.get(d.id);if(p){clearTimeout(p.timer);requests.delete(d.id);d.error?p.reject(Error(JSON.stringify(d.error))):p.resolve(d.result);}}
+    else if(d.method==='Runtime.exceptionThrown')errors.push(JSON.stringify(d.params));
+    else if(d.method==='Runtime.consoleAPICalled'){
+      const text=d.params.args.map(a=>a.value??a.description??'').join(' ');console.log(text);
+      if(d.params.type==='error')errors.push(text);
+    }
+  });
+  const call=(method,params={})=>new Promise((resolve,reject)=>{
+    const n=++id;const timer=setTimeout(()=>reject(Error('CDP timeout '+method)),20000);
+    requests.set(n,{resolve,reject,timer});ws.send(JSON.stringify({id:n,method,params}));
+  });
+  const evaluate=async expression=>(await call('Runtime.evaluate',{expression,returnByValue:true})).result.value;
+  const state=()=>evaluate('window.chatTelemetry');
+  const expect=(value,message)=>{if(!value)throw Error(message);};
+  const wait=async(predicate,message,seconds=10)=>{
+    for(let i=0;i<seconds*20;i++){const s=await state();if(s&&predicate(s))return s;await sleep(50);}
+    throw Error(message+' '+JSON.stringify(await state()));
+  };
+  const tap=async(code,key,vkey,text)=>{
+    await call('Input.dispatchKeyEvent',{type:'keyDown',code,key,windowsVirtualKeyCode:vkey,...(text?{text,unmodifiedText:text}:{})});
+    await call('Input.dispatchKeyEvent',{type:'keyUp',code,key,windowsVirtualKeyCode:vkey});
+  };
+  const click=async p=>{
+    await call('Input.dispatchMouseEvent',{type:'mouseMoved',x:p[0],y:p[1]});
+    for(const type of ['mousePressed','mouseReleased'])await call('Input.dispatchMouseEvent',{type,x:p[0],y:p[1],button:'left',buttons:type==='mousePressed'?1:0,clickCount:1});
+    await sleep(100);
+  };
+  const capture=async name=>{const d=await call('Page.captureScreenshot',{format:'png'});await fs.writeFile(path.join(artifacts,'chat_web_'+name+'.png'),Buffer.from(d.data,'base64'));};
+  const answer=async index=>{
+    await wait(s=>s.pending===0&&s.options.length>0,'No reply choices');
+    // Containers need a layout frame after the newly delivered question.
+    await sleep(200);
+    const s=await state();
+    await click(s.options[index]);
+    await wait(s=>s.selected.length>0,'Reply not selected');
+    const before=(await state()).presses;
+    await tap('Enter','Enter',13);await sleep(80);
+    expect((await state()).selected.length>0,'Incomplete answer submitted');
+    let typed=await state();
+    const count=Math.ceil(typed.length/2);
+    for(let i=0;i<count;i++)await tap('KeyZ','z',90,'z');
+    typed=await wait(s=>s.typed===s.length,'Text did not type');
+    expect(typed.presses===before+count+1,'Audio must trigger once per press');
+    await tap('Enter','Enter',13);
+    await wait(s=>s.selected==='', 'Reply not sent');
+  };
+  await call('Runtime.enable');await call('Page.enable');
+  await call('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
+  const url='http://127.0.0.1:'+server.address().port+'/';
+  for(const perfect of [true,false]) {
+    await call('Page.navigate',{url:url+'?lang='+(perfect?'ru':'en')});
+    await wait(s=>s.mode===2&&s.active==='chat','First-login chat failed',30);
+    await call('Page.bringToFront');
+    await wait(s=>s.pending===0,'Intro did not arrive');await capture('intro');
+    await answer(0);await answer(0);await answer(0);
+    await wait(s=>s.intro===3&&s.pending===0,'Tutorial not completed');
+    await call('Input.dispatchKeyEvent',{type:'keyDown',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+    await wait(s=>s.dev,'Dev menu did not open');
+    await call('Input.dispatchKeyEvent',{type:'keyUp',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+    await click((await state()).buttons.DEV_CHAT_REPORT);
+    await wait(s=>s.quiz&&!s.dev,'Report command failed');
+    await wait(s=>s.pending===0,'Report did not arrive');await capture('quiz');
+    if(perfect){
+      await call('Emulation.setDeviceMetricsOverride',{width:640,height:360,deviceScaleFactor:1,mobile:false});
+      await sleep(300);await capture('small');
+      await call('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
+      await sleep(300);
+    }
+    await answer(perfect?0:1);await answer(1);await answer(2);
+    const final=await wait(s=>s.frozen,'Result did not end run');
+    expect(final.score===(perfect?3:2)&&!final.audio,'Wrong score / audio after ending');
+    await capture(perfect?'win':'lose');
+  }
+  expect(errors.length===0,'Browser errors: '+errors.join('\n'));
+  console.log('CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
+} finally {ws?.close();browser.kill();server.close();}

@@ -25,6 +25,7 @@ var _focus_active: bool = true
 
 
 func _ready() -> void:
+	terminal_ui.report_finished.connect(_finish_report)
 	hud.bind_player(player)
 	terminal_ui.cctv.bind_system(cctv_system)
 	exit_button.pressed.connect(leave_computer)
@@ -288,3 +289,45 @@ func _on_dev_closed() -> void:
 	elif mode == Mode.FUSEBOX:
 		power.board.set_active(true, transition_camera)
 		power.set_interacting(_focus_active)
+
+
+func _finish_report(won: bool, score: int) -> void:
+	terminal_ui.suspend_desktop()
+	cctv_system.set_watching(false)
+	_release_pointer()
+	_kill_transition()
+	# Freeze this run, but keep only the result overlay processing input.
+	process_mode = Node.PROCESS_MODE_DISABLED
+	var result := CanvasLayer.new()
+	result.layer = 50
+	result.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(result)
+	var backdrop := ColorRect.new()
+	backdrop.color = Color("080d0b")
+	result.add_child(backdrop)
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var center := CenterContainer.new()
+	backdrop.add_child(center)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 18)
+	center.add_child(column)
+	var title := Label.new()
+	title.text = tr("CHAT_WIN" if won else "CHAT_LOSE")
+	title.add_theme_font_size_override("font_size", 32)
+	column.add_child(title)
+	var detail := Label.new()
+	detail.text = tr("CHAT_RESULT") % [score, ChatSession.CONTENT.QUESTIONS.size()]
+	column.add_child(detail)
+	var reply := Label.new()
+	reply.text = tr("CHAT_SUCCESS" if won else "CHAT_FAILURE")
+	reply.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	reply.custom_minimum_size.x = 300
+	column.add_child(reply)
+	for item: Array in [["CHAT_RESTART", "res://scenes/main.tscn"], ["CHAT_MENU", "res://scenes/menu/menu.tscn"]]:
+		var button := Button.new()
+		button.text = tr(item[0])
+		button.pressed.connect(func(): get_tree().change_scene_to_file(item[1]))
+		column.add_child(button)
+		if item[0] == "CHAT_RESTART":
+			button.grab_focus()
