@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://2y60eo8ns0ah"
-path="res://.godot/imported/IBMPlexMono-Regular.ttf-9776dfbf2ebf317ab969c1c02b95a7b0.fontdata"
+uid="uid://ceqj6yvj6334g"
+path="res://.godot/imported/Handjet-SemiBold.ttf-7bab8bb78364d3932221e4e1f9365291.fontdata"
 
 [deps]
 
-source_file="res://assets/fonts/IBMPlexMono-Regular.ttf"
-dest_files=["res://.godot/imported/IBMPlexMono-Regular.ttf-9776dfbf2ebf317ab969c1c02b95a7b0.fontdata"]
+source_file="res://assets/fonts/static/Handjet-SemiBold.ttf"
+dest_files=["res://.godot/imported/Handjet-SemiBold.ttf-7bab8bb78364d3932221e4e1f9365291.fontdata"]
 
 [params]
 

@@ -19,11 +19,11 @@ func _ready() -> void:
 	panel.content_margin_top = 10
 	panel.content_margin_bottom = 10
 	add_theme_stylebox_override("panel", panel)
-	# Bundled Cyrillic monospace: browsers cannot resolve desktop system fonts.
-	var font := preload("res://assets/fonts/IBMPlexMono-Regular.ttf")
+	# Artist-supplied pixel font (Handjet) covers Latin and Cyrillic.
+	var font := preload("res://assets/fonts/static/Handjet-SemiBold.ttf")
 	var terminal_theme := Theme.new()
 	terminal_theme.default_font = font
-	terminal_theme.default_font_size = 16
+	terminal_theme.default_font_size = 20
 	terminal_theme.set_color("font_color", "Label", Color("9ab69f"))
 	for state: String in ["normal", "hover", "pressed", "focus", "disabled"]:
 		var style := StyleBoxFlat.new()
@@ -46,19 +46,20 @@ func _ready() -> void:
 	var title := Label.new()
 	title.text = "RELAY / PRIVATE SESSION / 01"
 	title.add_theme_color_override("font_color", Color("86aa8d"))
-	title.add_theme_font_size_override("font_size", 14)
+	title.add_theme_font_override("font", font)
+	title.add_theme_font_size_override("font_size", 18)
 	column.add_child(title)
 	transcript = RichTextLabel.new()
 	transcript.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	transcript.custom_minimum_size.y = 75
 	transcript.add_theme_font_override("normal_font", font)
 	transcript.add_theme_color_override("default_color", Color("b4c6b5"))
-	transcript.add_theme_font_size_override("normal_font_size", 17)
+	transcript.add_theme_font_size_override("normal_font_size", 21)
 	transcript.scroll_following = true
 	transcript.selection_enabled = true
 	column.add_child(transcript)
 	status = Label.new()
-	status.add_theme_font_size_override("font_size", 13)
+	status.add_theme_font_size_override("font_size", 15)
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(status)
 	options = VBoxContainer.new()

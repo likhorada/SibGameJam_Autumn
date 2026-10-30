@@ -113,6 +113,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		_focus_active = false
+		# The window may never receive keyup for held keys (hand browser blur);
+		# drop stale action presses so the player cannot walk "by itself".
+		_drop_stale_key_state()
 		if is_instance_valid(power):
 			power.board.cancel_hold()
 			power.set_interacting(false)
@@ -121,6 +124,8 @@ func _notification(what: int) -> void:
 			player.stop_motion()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
 		_focus_active = true
+		# Clear again: keyups lost just before the blur can lag behind focus.
+		_drop_stale_key_state()
 		if is_instance_valid(power) and mode == Mode.FUSEBOX and not dev_menu.is_open:
 			power.set_interacting(true)
 
@@ -178,8 +183,19 @@ func _leave_from_ui_escape() -> void:
 func _resume_walking() -> void:
 	mode = Mode.WALKING
 	player.camera.make_current()
+	# WASD typed in the terminal/fusebox UI stays "pressed" in the Input singleton
+	# (typing reaches Input before the GUI consumes it) and would re-enable auto-walk.
+	_drop_stale_key_state()
 	player.set_controls_enabled(not dev_menu.is_open)
 	hud.show()
+
+
+func _drop_stale_key_state() -> void:
+	# Godot 4.6 has no GDScript binding for Input.release_pressed_events();
+	# replaying buffered events plus explicit action releases covers our controls.
+	Input.flush_buffered_events()
+	for action: StringName in [&"move_forward", &"move_backward", &"move_left", &"move_right", &"sprint", &"interact"]:
+		Input.action_release(action)
 
 
 func _capture_pointer() -> void:
@@ -282,6 +298,7 @@ func _on_dev_opened() -> void:
 
 func _on_dev_closed() -> void:
 	if mode == Mode.WALKING:
+		_drop_stale_key_state()
 		player.set_controls_enabled(true)
 	elif mode == Mode.COMPUTER and power.powered:
 		terminal_ui.show()
@@ -311,10 +328,16 @@ func _finish_report(won: bool, score: int) -> void:
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 18)
+	# Same artist font as EXIT for a consistent result screen.
+	var report_font := preload("res://assets/fonts/static/Handjet-SemiBold.ttf")
+	var report_theme := Theme.new()
+	report_theme.default_font = report_font
+	report_theme.default_font_size = 20
+	column.theme = report_theme
 	center.add_child(column)
 	var title := Label.new()
 	title.text = tr("CHAT_WIN" if won else "CHAT_LOSE")
-	title.add_theme_font_size_override("font_size", 32)
+	title.add_theme_font_size_override("font_size", 40)
 	column.add_child(title)
 	var detail := Label.new()
 	detail.text = tr("CHAT_RESULT") % [score, ChatSession.CONTENT.QUESTIONS.size()]
