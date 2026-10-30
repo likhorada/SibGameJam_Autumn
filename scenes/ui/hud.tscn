@@ -1,6 +1,13 @@
 [gd_scene format=3 uid="uid://c2vkdvmmj8wf0"]
 
+[ext_resource type="Script" path="res://scripts/ui/player_hud.gd" id="1"]
+[ext_resource type="Shader" path="res://assets/shaders/fatigue_smear.gdshader" id="2"]
+
+[sub_resource type="ShaderMaterial" id="FatigueMaterial"]
+shader = ExtResource("2")
+
 [node name="HUD" type="Control" unique_id=1137078049]
+script = ExtResource("1")
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -8,6 +15,48 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="Fatigue" type="ColorRect" parent="."]
+visible = false
+material = SubResource("FatigueMaterial")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="StaminaBar" type="Control" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -29.0
+offset_right = 80.0
+offset_bottom = -26.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Track" type="ColorRect" parent="StaminaBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.65, 0.66, 0.61, 0.12)
+
+[node name="Fill" type="ColorRect" parent="StaminaBar"]
+layout_mode = 0
+offset_right = 160.0
+offset_bottom = 3.0
+mouse_filter = 2
+color = Color(0.76, 0.77, 0.7, 0.48)
 
 [node name="Crosshair" type="Label" parent="." unique_id=1346297205]
 layout_mode = 1

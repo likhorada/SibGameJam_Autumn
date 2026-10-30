@@ -13,6 +13,7 @@ extends CharacterBody3D
 
 var controls_enabled: bool = true
 var interaction_id: StringName = &""
+var is_sprinting: bool = false
 var _pending_look := Vector2.ZERO
 var _motion_velocity := Vector3.ZERO
 var _motion_acceleration := Vector3.ZERO
@@ -20,6 +21,7 @@ var _motion_acceleration := Vector3.ZERO
 @onready var head: Node3D = $Head
 @onready var camera_motion: PlayerCameraMotion = $Head/CameraMotion
 @onready var camera: Camera3D = $Head/CameraMotion/Camera3D
+@onready var stamina: PlayerStamina = $Stamina
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -50,7 +52,7 @@ func _process(delta: float) -> void:
 	var local_acceleration := global_basis.inverse() * _motion_acceleration
 	camera_motion.update_feedback(
 		delta, local_velocity, local_acceleration, applied_look / maxf(delta, 0.0001),
-		is_on_floor(), Input.is_action_pressed("sprint"), active, walk_speed, sprint_speed
+		is_on_floor(), is_sprinting, active, walk_speed, sprint_speed
 	)
 
 
@@ -63,12 +65,16 @@ func _physics_process(delta: float) -> void:
 	interaction_id = &""
 	if not controls_enabled:
 		stop_motion()
+		stamina.advance(delta, false, false)
 		return
 	var direction := Vector3.ZERO
+	var axis := Vector2.ZERO
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		var axis := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+		axis = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 		direction = global_basis * Vector3(axis.x, 0.0, axis.y)
-	var speed := sprint_speed if Input.is_action_pressed("sprint") else walk_speed
+	# Forward and forward-diagonal only. Sideways/backward movement stays walking.
+	var requested_sprint := axis.y < -0.01 and Input.is_action_pressed("sprint") and stamina.can_sprint() and is_on_floor()
+	var speed := sprint_speed if requested_sprint else walk_speed
 	var horizontal := Vector3(velocity.x, 0.0, velocity.z)
 	var target := direction * speed
 	var rate := acceleration if target.length_squared() > horizontal.length_squared() else braking
@@ -85,6 +91,11 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	var actual_velocity := get_real_velocity()
 	actual_velocity.y = 0.0
+	var moving := actual_velocity.length() > 0.08
+	is_sprinting = requested_sprint and moving and is_on_floor()
+	stamina.advance(delta, is_sprinting, moving)
+	if not stamina.can_sprint():
+		is_sprinting = false
 	_motion_acceleration = ((actual_velocity - _motion_velocity) / maxf(delta, 0.0001)).limit_length(30.0)
 	_motion_velocity = actual_velocity
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -115,6 +126,7 @@ func set_controls_enabled(enabled: bool) -> void:
 
 
 func stop_motion(reset_camera: bool = false) -> void:
+	is_sprinting = false
 	velocity = Vector3.ZERO
 	_motion_velocity = Vector3.ZERO
 	_motion_acceleration = Vector3.ZERO

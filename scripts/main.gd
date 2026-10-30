@@ -14,13 +14,14 @@ var pointer_retry_after_msec: int = 0
 @onready var transition_camera: Camera3D = $TransitionCamera
 @onready var terminal_ui: TerminalDesktop = $UI/TerminalUI
 @onready var exit_button: Button = terminal_ui.exit_button
-@onready var hud: Control = $UI/HUD
+@onready var hud: PlayerHUD = $UI/HUD
 @onready var hint: Label = $UI/HUD/Hint
 @onready var crosshair: Label = $UI/HUD/Crosshair
 @onready var cctv_system: CCTVSystem = $CCTVSystem
 
 
 func _ready() -> void:
+	hud.bind_player(player)
 	terminal_ui.cctv.bind_system(cctv_system)
 	exit_button.pressed.connect(leave_computer)
 	terminal_ui.leave_requested.connect(_leave_from_ui_escape)
@@ -84,6 +85,7 @@ func enter_computer() -> void:
 	transition_camera.global_transform = player.camera.global_transform
 	transition_camera.fov = player.camera.fov
 	player.set_controls_enabled(false)
+	hud.clear_smear()
 	player.interaction_id = &""
 	hud.hide()
 	transition_camera.make_current()
@@ -141,6 +143,8 @@ func _release_pointer() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if is_instance_valid(player):
 		player.stop_motion()
+	if is_instance_valid(hud):
+		hud.clear_smear()
 
 
 func _record_pointer_release() -> void:
