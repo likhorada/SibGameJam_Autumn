@@ -1,41 +1,39 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene format=3 uid="uid://bu88m2er72nj5"]
 
-[ext_resource type="Script" path="res://scripts/main.gd" id="1"]
+[ext_resource type="Script" uid="uid://6pjn4n14wy7j" path="res://scripts/main.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/apartment/apartment.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/terminal/terminal.tscn" id="4"]
+[ext_resource type="PackedScene" uid="uid://bp1xoeo2obebg" path="res://scenes/terminal/terminal.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/terminal_ui.tscn" id="5"]
+[ext_resource type="PackedScene" uid="uid://c2vkdvmmj8wf0" path="res://scenes/ui/hud.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/cctv/cctv_system.tscn" id="7"]
-[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="6"]
-
 [ext_resource type="Script" path="res://scripts/power/power_system.gd" id="Power"]
 [ext_resource type="Script" path="res://scripts/ui/dev_menu.gd" id="Dev"]
 
-[node name="Main" type="Node3D"]
+[node name="Main" type="Node3D" unique_id=309523320]
 script = ExtResource("1")
 
-[node name="Apartment" parent="." instance=ExtResource("2")]
+[node name="Apartment" parent="." unique_id=137882563 instance=ExtResource("2")]
 
-[node name="Terminal" parent="." instance=ExtResource("4")]
-position = Vector3(0, 0, -2.35)
+[node name="Terminal" parent="." unique_id=1528586934 instance=ExtResource("4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.35)
 
-[node name="Player" parent="." instance=ExtResource("3")]
-position = Vector3(0, 0.05, 0.7)
+[node name="Player" parent="." unique_id=1755970685 instance=ExtResource("3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0.7)
 
-[node name="TransitionCamera" type="Camera3D" parent="."]
+[node name="TransitionCamera" type="Camera3D" parent="." unique_id=609629691]
 near = 0.03
-fov = 75.0
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." unique_id=1362820732]
 
-[node name="HUD" parent="UI" instance=ExtResource("6")]
+[node name="HUD" parent="UI" unique_id=462914021 instance=ExtResource("6")]
 ghost_weight = 0.5
 ghost_distance = 3.5
 
-[node name="TerminalUI" parent="UI" instance=ExtResource("5")]
+[node name="TerminalUI" parent="UI" unique_id=1919385803 instance=ExtResource("5")]
 visible = false
 
-[node name="CCTVSystem" parent="." instance=ExtResource("7")]
+[node name="CCTVSystem" parent="." unique_id=1557007587 instance=ExtResource("7")]
 
 [node name="PowerSystem" type="Node" parent="."]
 script = ExtResource("Power")

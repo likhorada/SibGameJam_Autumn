@@ -20,6 +20,7 @@ func _run() -> void:
 	game = load("res://scenes/main.tscn").instantiate()
 	root.add_child(game)
 	current_scene = game
+	game.power.random_outages_enabled = false
 	player = game.get_node("Player")
 	game.transition_seconds = 0.02
 	await _frames(3)
@@ -103,9 +104,37 @@ func _run() -> void:
 		_expect(_standing_space_is_clear(), "Exit point clear")
 		_expect(player.position.distance_to(game.terminal.get_node("ExitPoint").global_position) < 0.1, "Returns beside chair")
 
+	# Regression: a movement action left "pressed" while seated (typing W/A/S/D in
+	# the terminal reaches Input before the GUI consumes it) must not auto-walk
+	# after standing up.
+	Input.action_press("move_forward")
+	player.position = Vector3(0, 0.02, -0.55)
+	player.rotation = Vector3.ZERO
+	player.head.rotation = Vector3(-0.18, 0, 0)
+	player.stop_motion(true)
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	await _frames(3)
+	game._unhandled_input(_action("interact"))
+	_expect(game.mode == game.Mode.ENTERING, "Re-entered computer for stale-key check")
+	await create_timer(0.12).timeout
+	_expect(game.mode == game.Mode.COMPUTER, "Computer mode for stale-key check")
+	game._input(_action("back"))
+	game.leave_computer() # Repeated exit must be ignored.
+	await create_timer(0.12).timeout
+	await _frames(3)
+	_expect(game.mode == game.Mode.WALKING, "Returned to walking for stale-key check")
+	_expect(not Input.is_action_pressed("move_forward"), "Standing up clears keys held at the terminal")
+	_expect(player.velocity == Vector3.ZERO, "No ghost walk after standing up")
+	Input.action_release("move_forward")
+
 	game._notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
 	_expect(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, "Focus loss releases mouse")
 	_expect(player.velocity == Vector3.ZERO, "Focus loss clears velocity")
+	# Regression: browser tab blur swallows keyup for held keys; nothing may leak.
+	Input.action_press("move_forward")
+	game._notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
+	_expect(not Input.is_action_pressed("move_forward"), "Focus loss clears stale key presses")
+	game._notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
 
 	# Optional real-render captures for visual inspection (not available headless).
 	if "--capture" in OS.get_cmdline_user_args():
