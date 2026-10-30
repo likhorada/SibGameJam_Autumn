@@ -16,6 +16,7 @@ func _initialize() -> void:
 func _run() -> void:
 	root.size = Vector2i(1280, 720)
 	game = load("res://scenes/main.tscn").instantiate()
+	game.observation_shift_enabled = false
 	root.add_child(game)
 	current_scene = game
 	game.transition_seconds = 0.02

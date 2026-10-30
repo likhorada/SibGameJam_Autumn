@@ -3,6 +3,7 @@ extends RefCounted
 ## Run-local state; independent of desktop visibility, localization and presentation.
 signal changed
 signal finished(won: bool, score: int)
+signal intro_completed
 const CONTENT := preload("res://data/chat/contract.gd")
 var history: Array[Dictionary] = []
 var pending: Array[String] = []
@@ -15,6 +16,8 @@ var score: int = 0
 var quiz_started: bool = false
 var ended: bool = false
 var answers: Dictionary = {}
+var questions: Array = CONTENT.QUESTIONS.duplicate(true)
+var live_report: bool = false
 
 
 func start() -> void:
@@ -29,8 +32,9 @@ func _intro() -> void:
 		pending.assign(CONTENT.INTRO[intro_step].messages)
 		choices.assign(CONTENT.INTRO[intro_step].answers)
 	else:
-		pending.assign(["CHAT_WAIT"])
+		pending.assign(["OBS_GO"] if live_report else ["CHAT_WAIT"])
 		choices.clear()
+		intro_completed.emit()
 	changed.emit()
 
 
@@ -40,7 +44,7 @@ func deliver_next() -> void:
 	history.append({"sender": "handler", "text": pending.pop_front()})
 	changed.emit()
 	if pending.is_empty() and ended:
-		finished.emit(score == CONTENT.QUESTIONS.size(), score)
+		finished.emit(score == questions.size(), score)
 
 
 func select_reply(key: String) -> void:
@@ -66,14 +70,14 @@ func submit(length: int) -> bool:
 	typed = 0
 	choices.clear()
 	if quiz_started:
-		var question: Dictionary = CONTENT.QUESTIONS[question_index]
+		var question: Dictionary = questions[question_index]
 		answers[question.id] = reply
 		if reply == question.correct:
 			score += 1
 		question_index += 1
-		if question_index == CONTENT.QUESTIONS.size():
+		if question_index == questions.size():
 			ended = true
-			pending.assign(["CHAT_SUCCESS" if score == CONTENT.QUESTIONS.size() else "CHAT_FAILURE"])
+			pending.assign(["CHAT_SUCCESS" if score == questions.size() else "CHAT_FAILURE"])
 		else:
 			_question()
 	else:
@@ -90,12 +94,12 @@ func start_quiz() -> void:
 	question_index = 0
 	selected = ""
 	typed = 0
-	pending.assign(["CHAT_TEST_FACTS", "CHAT_REPORT"])
+	pending.assign(["CHAT_REPORT"] if live_report else ["CHAT_TEST_FACTS", "CHAT_REPORT"])
 	_question()
 	changed.emit()
 
 
 func _question() -> void:
-	var question: Dictionary = CONTENT.QUESTIONS[question_index]
+	var question: Dictionary = questions[question_index]
 	pending.append(question.prompt)
 	choices.assign(question.answers)

@@ -8,6 +8,7 @@ const artifacts=path.join(process.env.LOCALAPPDATA,'Temp/opencode');
 const profile=await fs.mkdtemp(path.join(artifacts,'chat-chrome-'));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const errors=[];
+const shiftMode=process.env.SHIFT_WEB==='1';
 const server=http.createServer(async(req,res)=>{
   try {
     const name=new URL(req.url,'http://localhost').pathname;
@@ -88,11 +89,27 @@ try {
     await wait(s=>s.pending===0,'Intro did not arrive');await capture('intro');
     await answer(0);await answer(0);await answer(0);
     await wait(s=>s.intro===3&&s.pending===0,'Tutorial not completed');
+    if(shiftMode){
+      const command=async name=>{await evaluate('window.shiftCommand='+JSON.stringify(name));await sleep(250);};
+      const shiftState=()=>evaluate('window.shiftTelemetry');
+      await command('hack');
+      await click((await shiftState()).hack);
+      expect((await shiftState()).state===2,'Alarm button did not start the route');
+      await command('next');
+      expect((await shiftState()).state===3,'Office did not end in scare');
+      await command('scare');
+      expect((await shiftState()).stage===1&&(await shiftState()).cameras===3,'Shop camera replacement failed');
+      await command('next');await command('scare');
+      expect((await shiftState()).stage===2,'Street did not start');
+      await command('next');await command('return');
+      await wait(s=>s.quiz&&s.mode===2,'Live report did not open');
+    }else{
     await call('Input.dispatchKeyEvent',{type:'keyDown',code:'F7',key:'F7',windowsVirtualKeyCode:118});
     await wait(s=>s.dev,'Dev menu did not open');
     await call('Input.dispatchKeyEvent',{type:'keyUp',code:'F7',key:'F7',windowsVirtualKeyCode:118});
     await click((await state()).buttons.DEV_CHAT_REPORT);
     await wait(s=>s.quiz&&!s.dev,'Report command failed');
+    }
     await wait(s=>s.pending===0,'Report did not arrive');await capture('quiz');
     if(perfect){
       await call('Emulation.setDeviceMetricsOverride',{width:640,height:360,deviceScaleFactor:1,mobile:false});
@@ -100,11 +117,17 @@ try {
       await call('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
       await sleep(300);
     }
-    await answer(perfect?0:1);await answer(1);await answer(2);
+    if(shiftMode){
+      for(let q=0;q<3;q++){
+        await wait(s=>s.pending===0&&s.options.length>0,'No live question');
+        const correct=(await evaluate('window.shiftTelemetry')).correct;
+        await answer(!perfect&&q===0?(correct+1)%3:correct);
+      }
+    }else{await answer(perfect?0:1);await answer(1);await answer(2);}
     const final=await wait(s=>s.frozen,'Result did not end run');
     expect(final.score===(perfect?3:2)&&!final.audio,'Wrong score / audio after ending');
     await capture(perfect?'win':'lose');
   }
   expect(errors.length===0,'Browser errors: '+errors.join('\n'));
-  console.log('CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
+  console.log(shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
 } finally {ws?.close();browser.kill();server.close();}

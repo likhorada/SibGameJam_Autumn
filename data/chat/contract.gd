@@ -1,9 +1,9 @@
 extends RefCounted
-## Placeholder script, not target-observation evidence. Replace with timeline facts later.
+## Briefing plus legacy dev quiz. Live questions come from ShiftDirector's run facts.
 const INTRO := [
 	{"messages": ["CHAT_INTRO_1", "CHAT_INTRO_2"], "answers": ["CHAT_REPLY_1", "CHAT_REPLY_2"]},
 	{"messages": ["CHAT_TUTORIAL_1", "CHAT_TUTORIAL_2", "CHAT_TUTORIAL_3"], "answers": ["CHAT_REPLY_3"]},
-	{"messages": ["CHAT_THREAT_1", "CHAT_THREAT_2", "CHAT_TEST_FACTS"], "answers": ["CHAT_REPLY_4", "CHAT_REPLY_5"]},
+	{"messages": ["CHAT_THREAT_1", "CHAT_THREAT_2", "OBS_BRIEF"], "answers": ["CHAT_REPLY_4", "CHAT_REPLY_5"]},
 ]
 const QUESTIONS := [
 	{"id": "target", "prompt": "CHAT_Q1", "answers": ["CHAT_A_VIKTOR", "CHAT_A_ANTON", "CHAT_A_PAVEL"], "correct": "CHAT_A_VIKTOR"},

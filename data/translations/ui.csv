@@ -108,6 +108,28 @@ CHAT_LOSE,PLAN B,ПЛАН Б
 CHAT_RESULT,Correct answers: %d / %d,Правильных ответов: %d / %d
 CHAT_RESTART,New run,Новый забег
 CHAT_MENU,Main menu,Главное меню
+OBS_BRIEF,"Target wears an ochre jacket. Read the four digits on his office screen BEFORE triggering the alarm in ALARM.sh. After your reply you have 60 seconds. Miss the deadline and we use plan B. Remember his drink and street exit too.","Цель в охристой куртке. Подсмотри четыре цифры на его офисном экране ДО запуска сигнализации через ALARM.sh. После твоего ответа у тебя 60 секунд. Просрочишь — план Б. Запомни также напиток и направление на улице."
+OBS_GO,Clock is ticking. Read the code then run ALARM.sh.,Время пошло. Подсмотри код и запусти ALARM.sh.
+OBS_WAIT_INTRO,Finish the RELAY briefing before running the alarm.,Заверши инструктаж в RELAY перед запуском сигнализации.
+OBS_HACK_START,TRIGGER OFFICE ALARM,ЗАПУСТИТЬ СИГНАЛИЗАЦИЮ ОФИСА
+OBS_DEADLINE,Read code and trigger alarm: %d s,Подсмотри код и запусти сигнализацию: %d с
+OBS_RUNNING,Alarm sent. Follow the target on CCTV.,Сигнализация запущена. Следи за целью через CCTV.
+OBS_SCARE,[TEST SCARE] Look around. Next feed in %d s.,[ТЕСТ ПУГАЧКИ] Осмотрись. Следующая сцена через %d с.
+OBS_RETURN,Return to the PC for your RELAY report.,Вернись к ПК для отчёта в RELAY.
+OBS_OFFICE,OFFICE,ОФИС
+OBS_SHOP,SHOP,МАГАЗИН
+OBS_STREET,STREET,УЛИЦА
+OBS_TEA,Tea,Чай
+OBS_COFFEE,Coffee,Кофе
+OBS_WINE,Red wine,Красное вино
+OBS_SODA,Green soda,Зелёная газировка
+OBS_ALLEY,Side alley,Переулок
+OBS_AVENUE,Tree-lined avenue,Аллея
+OBS_PARK,Park,Парк
+OBS_Q_CODE,Which four digits were on the office screen?,Какие четыре цифры были на офисном экране?
+OBS_Q_DRINK,Which drink did the target take?,Какой напиток взяла цель?
+OBS_Q_PATH,Where did the target go after the junction?,Куда цель пошла после развилки?
+OBS_DEV_NEXT,DEV: complete current route / test scare,DEV: завершить маршрут / тестовую пугачку
 FUSEBOX,FUSEBOX,ЭЛЕКТРОЩИТОК
 NO_POWER,No power. Find the fusebox.,Нет питания. Найди электрощиток.
 POWER_OK,Power is on,Питание включено

@@ -17,7 +17,7 @@ func _run() -> void:
 	desktop = load("res://scenes/ui/terminal_ui.tscn").instantiate()
 	root.add_child(desktop)
 	await _frames(4)
-	_expect(desktop.windows.size() == 4, "Four applications including RELAY")
+	_expect(desktop.windows.size() == 5, "Five applications including RELAY and ALARM.sh")
 	_expect(desktop.active_app.is_empty(), "No app starts open")
 	_expect(desktop.clock.text == "09:00", "Clock starts at fictional 09:00")
 	var note: DesktopAppWindow = desktop.windows[&"notepad"]

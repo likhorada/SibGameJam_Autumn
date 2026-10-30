@@ -52,10 +52,21 @@ func bind(value: Node3D) -> void:
 	_button(column, "DEV_POWER_OFF", func(): game.power.trigger_outage())
 	_button(column, "DEV_POWER_ON", func(): game.power.restore_power())
 	_button(column, "DEV_CLEAR_COOLDOWN", func(): game.power.clear_cooldown())
+	_button(column, "OBS_DEV_NEXT", func():
+		close_menu()
+		if not is_instance_valid(game.shift):
+			return
+		if game.shift.state == ShiftDirector.State.ROUTE:
+			game.shift.advance(300.0)
+		elif game.shift.state == ShiftDirector.State.SCARE:
+			game.shift.complete_scare())
 	_button(column, "DEV_CHAT_REPORT", func():
 		if not game.power.powered or game.mode not in [game.Mode.WALKING, game.Mode.COMPUTER]:
 			return
 		close_menu()
+		if is_instance_valid(game.shift):
+			game.shift.state = ShiftDirector.State.ENDED
+		game.terminal_ui.chat.session.live_report = false
 		game.terminal_ui.chat.session.start_quiz()
 		game.terminal_ui.launch_app(&"chat")
 		if game.mode == game.Mode.WALKING:

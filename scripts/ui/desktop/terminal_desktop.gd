@@ -12,12 +12,13 @@ const CCTV_SCENE := preload("res://scenes/ui/desktop/cctv_app.tscn")
 const CHAT_SCENE := preload("res://scenes/ui/desktop/chat.tscn")
 const INPUT_AUDIO := preload("res://scripts/ui/desktop/desktop_input_audio.gd")
 const ICONS := {
+	&"hack": preload("res://assets/ui/chat.svg"),
 	&"chat": preload("res://assets/ui/chat.svg"),
 	&"notepad": preload("res://assets/ui/notepad.svg"),
 	&"calculator": preload("res://assets/ui/calculator.svg"),
 	&"cctv": preload("res://assets/ui/cctv.svg"),
 }
-const TITLES := {&"notepad": "Блокнот", &"calculator": "Калькулятор", &"cctv": "CCTV", &"chat": "RELAY"}
+const TITLES := {&"notepad": "Блокнот", &"calculator": "Калькулятор", &"cctv": "CCTV", &"chat": "RELAY", &"hack": "ALARM.sh"}
 const TASKBAR_HEIGHT := 44.0
 
 var windows: Dictionary = {}
@@ -67,6 +68,7 @@ func _ready() -> void:
 	chat = CHAT_SCENE.instantiate()
 	windows[&"chat"].content.add_child(chat)
 	chat.finished.connect(func(won: bool, score: int): report_finished.emit(won, score))
+	_create_app(&"hack", Vector2(240, 140), Vector2(480, 220), Vector2(330, 180))
 	input_audio = INPUT_AUDIO.new()
 	add_child(input_audio)
 	resized.connect(_fit_workspace)

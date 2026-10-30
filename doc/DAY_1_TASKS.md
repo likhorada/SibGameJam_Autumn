@@ -8,8 +8,8 @@
 | --- | --- | --- |
 | D1-01 | Prototype ready | Godot 4.6.2 Compatibility, editable apartment blockout, walking/sprint, desktop and clean-copy smoke tests pass. |
 | D1-02 | Core interaction ready | Smooth full-screen PC enter/exit, 10 desktop cycles, Chrome input/resize checks pass. Browser focus-loss and later audio startup still need acceptance. |
-| D1-03 | Partial | CCTV app: four cameras in two editable test locations, color/BW, microphone flags, delayed pan/zoom, one active render target. No clue timeline or real feed audio yet. See `doc/CCTV.md`. |
-| D1-04 | Partial | Notepad preserves notes. RELAY chat has tutorial, dev-triggered placeholder quiz, 3/3 win condition and new-run/menu result. Not tied to observed CCTV events or day end yet. See `doc/CHAT.md`. |
+| D1-03 | Playable blockout | Office → shop → three-way street timeline, randomized evidence, alarm app, scene-specific camera replacement in one viewport. Real scares and feed audio pending. See `doc/OBSERVATION_SHIFT.md`. |
+| D1-04 | Playable prototype | RELAY briefing starts 60-second alarm deadline; final report uses this run's code, drink and street branch. 3/3 wins; restart/menu supported. See `doc/OBSERVATION_SHIFT.md`. |
 | D1-05 | Partial | Random outages, manual four-lever repair, emergency light and dev triggers implemented; native/Chrome checks in `doc/POWER.md`. No warning/grace/failure threat yet. |
 | D1-06 | Partial | Web and Windows exports work; Chrome prototype tested. CI workflow added; Pages requires owner setup. Full game-loop acceptance depends on D1-03..05. |
 

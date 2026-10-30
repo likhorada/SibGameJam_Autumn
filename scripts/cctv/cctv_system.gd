@@ -72,6 +72,24 @@ func _collect_cameras(node: Node) -> void:
 		_collect_cameras(child)
 
 
+func replace_location(location: Node3D) -> void:
+	# Keep the one viewport and environment; unload all previous scene cameras.
+	if is_instance_valid(selected):
+		selected.stop_immediately()
+	selected = null
+	cameras.clear()
+	var world := viewport.get_node("Locations")
+	for child: Node in world.get_children():
+		if not child is WorldEnvironment:
+			world.remove_child(child)
+			child.queue_free()
+	world.add_child(location)
+	_collect_cameras(location)
+	directory_changed.emit()
+	if not cameras.is_empty() and selected == null:
+		select_camera(0)
+
+
 func select_camera(index: int) -> void:
 	if index < 0 or index >= cameras.size():
 		return

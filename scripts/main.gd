@@ -3,6 +3,7 @@ extends Node3D
 enum Mode { WALKING, ENTERING, COMPUTER, LEAVING, FUSEBOX_ENTERING, FUSEBOX, FUSEBOX_LEAVING }
 
 @export_range(0.02, 2.0) var transition_seconds: float = 0.7
+@export var observation_shift_enabled: bool = true
 
 var mode: Mode = Mode.WALKING
 var transition: Tween
@@ -23,6 +24,7 @@ var _focus_active: bool = true
 @onready var power: ApartmentPower = $PowerSystem
 @onready var dev_menu = $DevMenu
 var ambient: AmbientDirector
+var shift: ShiftDirector
 
 
 func _ready() -> void:
@@ -54,6 +56,10 @@ func _ready() -> void:
 	fusebox_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	fusebox_hint.offset_top = -50
 	fusebox_hint.hide()
+	if observation_shift_enabled:
+		shift = ShiftDirector.new()
+		add_child(shift)
+		shift.bind(self)
 
 
 func _physics_process(_delta: float) -> void:
@@ -136,6 +142,8 @@ func _notification(what: int) -> void:
 
 
 func enter_computer() -> void:
+	if is_instance_valid(shift) and shift.state == ShiftDirector.State.SCARE:
+		return
 	if mode != Mode.WALKING or not power.powered or dev_menu.is_open:
 		return
 	mode = Mode.ENTERING
@@ -314,6 +322,8 @@ func _on_dev_closed() -> void:
 
 
 func _finish_report(won: bool, score: int) -> void:
+	if is_instance_valid(shift):
+		shift.state = ShiftDirector.State.ENDED
 	terminal_ui.suspend_desktop()
 	cctv_system.set_watching(false)
 	if ambient != null:

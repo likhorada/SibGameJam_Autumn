@@ -22,6 +22,8 @@ func _run() -> void:
 	game.transition_seconds = 0.04
 	await frames()
 	var power: ApartmentPower = game.power
+	# Exercise the outage system independently of the protected opening briefing.
+	power.random_outages_enabled = true
 	var board: ApartmentFusebox = power.board
 	power.set_process(false)
 	board.set_physics_process(false)
