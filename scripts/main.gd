@@ -12,8 +12,8 @@ var pointer_retry_after_msec: int = 0
 @onready var player: ApartmentPlayer = $Player
 @onready var terminal: Node3D = $Terminal
 @onready var transition_camera: Camera3D = $TransitionCamera
-@onready var terminal_ui: Control = $UI/TerminalUI
-@onready var exit_button: Button = $UI/TerminalUI/Margin/Layout/ExitButton
+@onready var terminal_ui: TerminalDesktop = $UI/TerminalUI
+@onready var exit_button: Button = terminal_ui.exit_button
 @onready var hud: Control = $UI/HUD
 @onready var hint: Label = $UI/HUD/Hint
 @onready var crosshair: Label = $UI/HUD/Crosshair
@@ -21,6 +21,7 @@ var pointer_retry_after_msec: int = 0
 
 func _ready() -> void:
 	exit_button.pressed.connect(leave_computer)
+	terminal_ui.leave_requested.connect(_leave_from_ui_escape)
 	# A click is required for browser pointer lock; desktop uses the same flow.
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
@@ -48,7 +49,7 @@ func _physics_process(_delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("back") and not event.is_echo():
 		if mode == Mode.COMPUTER:
-			leave_computer()
+			leave_computer(not OS.has_feature("web"))
 		elif mode == Mode.WALKING:
 			_release_pointer()
 		get_viewport().set_input_as_handled()
@@ -95,21 +96,28 @@ func _show_desktop() -> void:
 	mode = Mode.COMPUTER
 	terminal_ui.show()
 	_release_pointer()
-	exit_button.grab_focus()
+	terminal_ui.resume_desktop()
 
 
-func leave_computer() -> void:
+func leave_computer(capture_pointer: bool = true) -> void:
 	if mode != Mode.COMPUTER:
 		return
 	mode = Mode.LEAVING
+	terminal_ui.suspend_desktop()
 	terminal_ui.hide()
 	# Capture synchronously from the user's button/key gesture, not a tween callback.
-	_capture_pointer()
+	if capture_pointer:
+		_capture_pointer()
 	player.place_at(terminal.get_node("ExitPoint"))
 	transition = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	transition.tween_property(transition_camera, "global_transform", terminal.get_node("SeatView").global_transform, transition_seconds * 0.45)
 	transition.tween_property(transition_camera, "global_transform", player.camera.global_transform, transition_seconds * 0.55)
 	transition.tween_callback(_resume_walking)
+
+
+func _leave_from_ui_escape() -> void:
+	# Browser Esc can veto pointer lock in the very same key gesture.
+	leave_computer(not OS.has_feature("web"))
 
 
 func _resume_walking() -> void:

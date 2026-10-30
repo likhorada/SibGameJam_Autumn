@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/desktop/desktop_window.gd" id="1"]
+
+[node name="DesktopWindow" type="Control"]
+layout_mode = 0
+size = Vector2(480, 360)
+mouse_filter = 0
+clip_contents = true
+script = ExtResource("1")

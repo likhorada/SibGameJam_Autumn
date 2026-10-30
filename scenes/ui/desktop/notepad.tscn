@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/desktop/notepad_app.gd" id="1"]
+
+[node name="Notepad" type="VBoxContainer"]
+layout_mode = 2
+script = ExtResource("1")
+
+[node name="Editor" type="TextEdit" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+wrap_mode = 1
+placeholder_text = "Заметки…"
+
+[node name="Status" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Только текущая попытка · 0 символов"
