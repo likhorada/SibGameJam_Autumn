@@ -35,8 +35,8 @@ faster. Fill and visibility use exponential smoothing; gameplay never reads the 
   Resuming sprint at 35% still leaves mild fatigue, as requested.
 - The final walking camera's change in orientation determines a bounded directional
   shutter offset. This includes large immediate mouse flicks and smoothed look.
-- The Compatibility canvas shader uses six screen samples: directional blur and a weak
-  offset copy. **This is a ghosting approximation of the current image, not stored previous
+- The Compatibility canvas shader uses seven screen samples: directional blur and two
+  trailing offset copies. **This is a ghosting approximation of the current image, not stored previous
   frames, depth-based motion vectors or a static Gaussian blur.**
 - At rest the directional offset decays and the shader draw is hidden, even if stamina
   is empty. At full reserve, behind the PC, on mouse release, focus loss and during camera
@@ -76,7 +76,8 @@ so exhaustion, sideways movement and walls do not keep sprint FOV/bob active.
 | `smear_response` | 20; directional offset response |
 | `shutter_seconds` | 0.035; simulated exposure |
 | `max_smear_pixels` | 18 design-size pixels for the main shutter offset |
-| `ghost_weight` | 0.12; offset-copy weight; copy lies at 1.7× shutter offset |
+| `ghost_weight` | 0.32; combined weight of the two trailing copies |
+| `ghost_distance` | 2.6× shutter offset for the far copy; near copy is at 55% of that distance |
 
 Bar dimensions, bottom margin and colours are ordinary child Control/ColorRect
 properties in the HUD scene. Existing `CameraMotion.effect_strength` still controls bob,
@@ -130,6 +131,10 @@ saved under `%LOCALAPPDATA%/Temp/opencode/stamina_web_*.png` and still need visu
   Live telemetry recorded roughly 0.51 real vs 0.79 smoothed displayed stamina, a bounded
   16.9-pixel moving-camera offset at exhaustion, and shader hidden again at rest.
   Reviewed screenshots of bar, moving/stationary image, PC and resized view; no console errors.
+- Stronger-ghosting follow-up: combined copy weight raised from 0.12 to 0.32,
+  far offset from 1.7× to 2.6×, with a second trailing contour. Base shutter blur,
+  stamina thresholds and stationary clearing are unchanged. Native stamina smoke and
+  dedicated Chrome fixture from a fresh index copy passed again; viewed the longer trails.
 
 Firefox, low-end hardware performance and extended human comfort acceptance are not
 verified. Frame-step tests are numerical consistency checks, not GPU benchmarks. The

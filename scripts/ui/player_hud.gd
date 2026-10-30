@@ -14,7 +14,8 @@ extends Control
 @export_range(0.0, 0.1) var shutter_seconds: float = 0.035
 ## Logical pixels at the project's design resolution, scales with the window.
 @export_range(0.0, 40.0) var max_smear_pixels: float = 18.0
-@export_range(0.0, 0.3) var ghost_weight: float = 0.12
+@export_range(0.0, 0.5) var ghost_weight: float = 0.32
+@export_range(1.0, 4.0) var ghost_distance: float = 2.6
 
 var player: ApartmentPlayer
 var displayed_ratio: float = 1.0
@@ -86,6 +87,7 @@ func update_smear(delta: float, fatigue_amount: float, view_basis: Basis, active
 	_material.set_shader_parameter("smear_uv", smear_uv)
 	_material.set_shader_parameter("intensity", fatigue_blend)
 	_material.set_shader_parameter("ghost_weight", ghost_weight)
+	_material.set_shader_parameter("ghost_distance", ghost_distance)
 	# No screen copy or shader draw at rest, with full stamina, or behind the PC.
 	fatigue.visible = fatigue_blend > 0.001 and (smear_uv * view_size).length() > 0.05
 
