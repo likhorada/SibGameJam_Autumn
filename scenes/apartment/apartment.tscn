@@ -1,5 +1,7 @@
 [gd_scene format=3]
 
+[ext_resource type="PackedScene" path="res://scenes/power/fusebox.tscn" id="Fusebox"]
+
 [sub_resource type="Environment" id="Environment"]
 background_mode = 1
 background_color = Color(0.025, 0.03, 0.025, 1)
@@ -738,11 +740,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 1.45, -6.82)
 mesh = SubResource("BoxMesh_4rlm7")
 
 [node name="@StaticBody3D@84" type="StaticBody3D" parent="Fusebox" unique_id=321207419]
+metadata/interaction = &"fusebox"
 
 [node name="@CollisionShape3D@83" type="CollisionShape3D" parent="Fusebox/@StaticBody3D@84" unique_id=1108602427]
 shape = SubResource("BoxShape3D_so762")
 
+[node name="Breakers" parent="Fusebox" instance=ExtResource("Fusebox")]
+position = Vector3(0, 0, 0.14)
+
 [node name="FuseboxStripe" type="MeshInstance3D" parent="." unique_id=818213549]
+visible = false
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 1.55, -6.695)
 mesh = SubResource("BoxMesh_6dsm6")
 
@@ -750,8 +757,7 @@ mesh = SubResource("BoxMesh_6dsm6")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 2.15, -6.65)
 pixel_size = 0.008
 modulate = Color(0.8, 0.8, 0.65, 1)
-text = "ЩИТОК
-(пока без механики)"
+text = "FUSEBOX"
 font_size = 28
 
 [node name="BathroomLabel" type="Label3D" parent="." unique_id=530287518]

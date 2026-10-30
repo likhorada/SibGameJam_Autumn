@@ -10,7 +10,7 @@
 | D1-02 | Core interaction ready | Smooth full-screen PC enter/exit, 10 desktop cycles, Chrome input/resize checks pass. Browser focus-loss and later audio startup still need acceptance. |
 | D1-03 | Partial | CCTV app: four cameras in two editable test locations, color/BW, microphone flags, delayed pan/zoom, one active render target. No clue timeline or real feed audio yet. See `doc/CCTV.md`. |
 | D1-04 | Partial | Freeform Notepad preserves notes within the run; no quiz, scoring or full session restart yet. See `doc/DESKTOP_UI.md`. |
-| D1-05 | Not started | Fusebox is decorative, not an implemented threat. |
+| D1-05 | Partial | Random outages, manual four-lever repair, emergency light and dev triggers implemented; native/Chrome checks in `doc/POWER.md`. No warning/grace/failure threat yet. |
 | D1-06 | Partial | Web and Windows exports work; Chrome prototype tested. CI workflow added; Pages requires owner setup. Full game-loop acceptance depends on D1-03..05. |
 
 See `doc/PROTOTYPE_TESTS.md` for actual checks and limitations. The user approved the

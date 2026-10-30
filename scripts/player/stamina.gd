@@ -15,6 +15,7 @@ var value: float = 1.0
 var exhausted: bool = false
 var fatigue_latched: bool = false
 var delay_left: float = 0.0
+var unlimited: bool = false
 
 
 func can_sprint() -> bool:
@@ -22,6 +23,9 @@ func can_sprint() -> bool:
 
 
 func advance(delta: float, sprinting: bool, moving: bool) -> void:
+	if unlimited:
+		reset()
+		return
 	if sprinting and can_sprint():
 		value = maxf(0.0, value - delta / sprint_seconds)
 		delay_left = recovery_delay
@@ -53,3 +57,8 @@ func reset() -> void:
 	exhausted = false
 	fatigue_latched = false
 	delay_left = 0.0
+
+
+func set_unlimited(enabled: bool) -> void:
+	unlimited = enabled
+	reset()

@@ -1,0 +1,61 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/power/fusebox.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/power/lever.tscn" id="2"]
+
+[sub_resource type="StandardMaterial3D" id="TrackMaterial"]
+albedo_color = Color(0.045, 0.04, 0.03, 1)
+
+[sub_resource type="BoxMesh" id="Track"]
+size = Vector3(0.125, 0.55, 0.012)
+material = SubResource("TrackMaterial")
+
+[node name="Breakers" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Track1" type="MeshInstance3D" parent="."]
+position = Vector3(-0.225, 0, -0.025)
+mesh = SubResource("Track")
+
+[node name="Track2" type="MeshInstance3D" parent="."]
+position = Vector3(-0.075, 0, -0.025)
+mesh = SubResource("Track")
+
+[node name="Track3" type="MeshInstance3D" parent="."]
+position = Vector3(0.075, 0, -0.025)
+mesh = SubResource("Track")
+
+[node name="Track4" type="MeshInstance3D" parent="."]
+position = Vector3(0.225, 0, -0.025)
+mesh = SubResource("Track")
+
+[node name="Handles" type="Node3D" parent="."]
+
+[node name="Lever1" parent="Handles" instance=ExtResource("2")]
+position = Vector3(-0.225, 0, 0.035)
+
+[node name="Lever2" parent="Handles" instance=ExtResource("2")]
+position = Vector3(-0.075, 0, 0.035)
+
+[node name="Lever3" parent="Handles" instance=ExtResource("2")]
+position = Vector3(0.075, 0, 0.035)
+
+[node name="Lever4" parent="Handles" instance=ExtResource("2")]
+position = Vector3(0.225, 0, 0.035)
+
+[node name="CloseView" type="Marker3D" parent="."]
+position = Vector3(0, 0.03, 0.92)
+
+[node name="MotionAudio" type="AudioStreamPlayer3D" parent="."]
+bus = &"SFX"
+max_distance = 7.0
+volume_db = -12.0
+
+[node name="ClickAudio" type="AudioStreamPlayer3D" parent="."]
+bus = &"SFX"
+max_distance = 9.0
+
+[editable path="Handles/Lever1"]
+[editable path="Handles/Lever2"]
+[editable path="Handles/Lever3"]
+[editable path="Handles/Lever4"]
