@@ -7,6 +7,10 @@ var transcript: RichTextLabel
 var composer: Button
 var options: VBoxContainer
 var status: Label
+var draft_header: HBoxContainer
+var draft_label: Label
+var change_reply: Button
+var send_reply: Button
 var _delay: float = 0.0
 var _blink: float = 0.0
 
@@ -58,6 +62,19 @@ func _ready() -> void:
 	column.add_child(status)
 	options = VBoxContainer.new()
 	column.add_child(options)
+	draft_header = HBoxContainer.new()
+	column.add_child(draft_header)
+	draft_label = Label.new()
+	draft_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	draft_label.add_theme_font_size_override("font_size", 13)
+	draft_header.add_child(draft_label)
+	change_reply = Button.new()
+	change_reply.pressed.connect(func():
+		if input_enabled:
+			session.cancel_reply()
+			if options.get_child_count() > 0:
+				options.get_child(0).grab_focus())
+	draft_header.add_child(change_reply)
 	composer = Button.new()
 	composer.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	composer.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -65,6 +82,11 @@ func _ready() -> void:
 	composer.pressed.connect(composer.grab_focus)
 	composer.gui_input.connect(_composer_input)
 	column.add_child(composer)
+	send_reply = Button.new()
+	send_reply.pressed.connect(func():
+		if input_enabled:
+			session.submit(tr(session.selected).length()))
+	column.add_child(send_reply)
 	session.changed.connect(_refresh)
 	session.finished.connect(func(won: bool, score: int): finished.emit(won, score))
 	_refresh()
@@ -102,7 +124,7 @@ func _refresh() -> void:
 	for child: Node in options.get_children():
 		options.remove_child(child)
 		child.queue_free()
-	if session.pending.is_empty() and not session.ended:
+	if session.pending.is_empty() and not session.ended and session.selected.is_empty():
 		for key: String in session.choices:
 			var button := Button.new()
 			button.text = tr(key)
@@ -112,12 +134,23 @@ func _refresh() -> void:
 				session.select_reply(key)
 				focus_composer())
 			options.add_child(button)
-	status.text = tr("CHAT_RECEIVING" if not session.pending.is_empty() else "CHAT_TYPE_HELP" if not session.selected.is_empty() else "CHAT_CHOOSE" if not session.choices.is_empty() else "CHAT_IDLE")
+	var drafting := not session.selected.is_empty()
+	options.visible = not drafting
+	status.visible = not drafting
+	draft_header.visible = drafting
+	composer.visible = drafting
+	draft_label.text = tr("CHAT_DRAFT")
+	change_reply.text = tr("CHAT_CHANGE_REPLY")
+	send_reply.text = tr("CHAT_SEND_REPLY")
+	status.text = tr("CHAT_RECEIVING" if not session.pending.is_empty() else "CHAT_CHOOSE" if not session.choices.is_empty() else "CHAT_IDLE")
 	_update_composer()
 
 
 func _update_composer() -> void:
-	composer.text = "> " + tr(session.selected).left(session.typed) + ("_" if fmod(_blink, 1.0) < 0.5 else " ")
+	var cursor := "_" if fmod(_blink, 1.0) < 0.5 else " "
+	var text := tr("CHAT_TYPE_HELP") if session.typed == 0 else tr(session.selected).left(session.typed)
+	composer.text = "> " + text + cursor
+	send_reply.visible = not session.selected.is_empty() and session.typed >= tr(session.selected).length()
 
 
 func _composer_input(event: InputEvent) -> void:

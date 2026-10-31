@@ -69,9 +69,20 @@ func _run() -> void:
 	var session := chat.session
 	expect(desktop.active_app == &"chat" and session.intro_step == 0, "Chat auto-opens on first PC login")
 	drain(session)
+	expect(chat.options.visible and not chat.composer.visible and not chat.send_reply.visible, "Choice state hides draft and send button")
 	chat.options.get_child(0).pressed.emit()
 	await process_frame
 	expect(root.gui_get_focus_owner() == chat.composer, "Choosing answer focuses composer")
+	expect(not chat.options.visible and chat.draft_header.visible and chat.composer.visible, "Selected reply replaces choices with draft")
+	expect(chat.composer.text.contains(tr("CHAT_TYPE_HELP")) and not chat.send_reply.visible, "Empty draft explains typing inside composer")
+	key(KEY_Z, 122)
+	await process_frame
+	chat.change_reply.pressed.emit()
+	await process_frame
+	expect(session.selected.is_empty() and session.typed == 0 and chat.options.visible, "Change discards draft and restores choices")
+	expect(session.intro_step == 0 and session.history.size() > 0, "Changing reply does not advance dialogue")
+	chat.options.get_child(0).pressed.emit()
+	await process_frame
 	key(KEY_ENTER)
 	await process_frame
 	expect(session.intro_step == 0, "Enter cannot send an incomplete answer")
@@ -97,6 +108,18 @@ func _run() -> void:
 	game.enter_computer()
 	await create_timer(0.2).timeout
 	expect(session.intro_step == 0 and session.typed == 2, "Returning to PC does not restart tutorial")
+	TranslationServer.set_locale("en")
+	await process_frame
+	expect(session.typed == 0 and chat.composer.text.contains(tr("CHAT_TYPE_HELP")), "Locale change resets draft and translates placeholder")
+	TranslationServer.set_locale("ru")
+	await process_frame
+	for index: int in tr(session.selected).length():
+		key(KEY_Z, 122)
+		await process_frame
+	expect(chat.send_reply.visible and not chat.options.visible, "Completed draft reveals send button only")
+	chat.send_reply.pressed.emit()
+	await process_frame
+	expect(session.selected.is_empty() and session.intro_step == 1 and not chat.composer.visible and not chat.send_reply.visible, "Send button submits completed draft and returns to receiving")
 	game.leave_computer(false)
 	await create_timer(0.2).timeout
 	game.dev_menu.open_menu()

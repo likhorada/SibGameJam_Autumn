@@ -55,6 +55,14 @@ func select_reply(key: String) -> void:
 	changed.emit()
 
 
+func cancel_reply() -> void:
+	if selected.is_empty() or ended:
+		return
+	selected = ""
+	typed = 0
+	changed.emit()
+
+
 func type_character(length: int) -> void:
 	if not selected.is_empty() and not ended:
 		typed = mini(typed + 2, length)

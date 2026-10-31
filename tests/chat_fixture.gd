@@ -40,5 +40,7 @@ func _publish() -> void:
 		"question": chat.session.question_index, "ended": chat.session.ended,
 		"score": chat.session.score, "frozen": process_mode == Node.PROCESS_MODE_DISABLED,
 		"presses": terminal_ui.input_audio.presses_played, "audio": terminal_ui.input_audio.enabled,
+		"draft_visible": chat.draft_header.visible, "send_visible": chat.send_reply.visible,
+		"placeholder": chat.session.typed == 0 and chat.composer.text.contains(tr("CHAT_TYPE_HELP")),
 		"composer": [point.x, point.y], "active": String(terminal_ui.active_app)}
 	JavaScriptBridge.eval("window.chatTelemetry = " + JSON.stringify(data))

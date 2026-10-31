@@ -100,7 +100,10 @@ CHAT_A_ANNA,Anna.,Анна.
 CHAT_SUCCESS,Good. You're useful after all. Stay available.,Хорошо. От тебя всё-таки есть польза. Будь на связи.
 CHAT_FAILURE,You had one job. We're going with plan B.,У тебя была одна задача. Переходим к плану Б.
 CHAT_RECEIVING,handler is typing...,заказчик печатает...
-CHAT_TYPE_HELP,Type any letters to compose the selected reply. Enter sends when complete.,Нажимай любые буквы чтобы набрать выбранный ответ. Когда допечатаешь — Enter.
+CHAT_TYPE_HELP,Type using any letter keys…,Печатайте любыми буквенными клавишами…
+CHAT_DRAFT,Reply draft,Черновик ответа
+CHAT_CHANGE_REPLY,Change,Изменить
+CHAT_SEND_REPLY,Send ↵,Отправить ↵
 CHAT_CHOOSE,Select a reply below.,Выбери ответ ниже.
 CHAT_IDLE,Awaiting messages.,Ожидание сообщений.
 CHAT_WIN,REPORT ACCEPTED,ОТЧЁТ ПРИНЯТ

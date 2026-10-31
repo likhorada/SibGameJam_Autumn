@@ -67,7 +67,9 @@ try {
     await sleep(200);
     const s=await state();
     await click(s.options[index]);
-    await wait(s=>s.selected.length>0,'Reply not selected');
+    const draft=await wait(s=>s.selected.length>0,'Reply not selected');
+    expect(draft.options.length===0&&draft.draft_visible&&draft.placeholder&&!draft.send_visible,'Draft must replace choices and explain typing');
+    await capture('draft_'+(await evaluate('new URL(location.href).searchParams.get("lang")')));
     const before=(await state()).presses;
     await tap('Enter','Enter',13);await sleep(80);
     expect((await state()).selected.length>0,'Incomplete answer submitted');
@@ -75,6 +77,7 @@ try {
     const count=Math.ceil(typed.length/2);
     for(let i=0;i<count;i++)await tap('KeyZ','z',90,'z');
     typed=await wait(s=>s.typed===s.length,'Text did not type');
+    expect(typed.send_visible&&!typed.placeholder,'Complete draft must reveal Send');
     expect(typed.presses===before+count+1,'Audio must trigger once per press');
     await tap('Enter','Enter',13);
     await wait(s=>s.selected==='', 'Reply not sent');
@@ -107,6 +110,7 @@ try {
     await call('Input.dispatchKeyEvent',{type:'keyDown',code:'F7',key:'F7',windowsVirtualKeyCode:118});
     await wait(s=>s.dev,'Dev menu did not open');
     await call('Input.dispatchKeyEvent',{type:'keyUp',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+    await sleep(250); // Let the newly opened overlay finish container layout and telemetry.
     await click((await state()).buttons.DEV_CHAT_REPORT);
     await wait(s=>s.quiz&&!s.dev,'Report command failed');
     }
