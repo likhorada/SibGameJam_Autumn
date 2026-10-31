@@ -4,6 +4,8 @@ extends Node3D
 
 signal changed(open: bool)
 
+const DEFAULT_DOOR_SOUND: AudioStream = preload("res://assets/audio/door_click.wav")
+
 @export var open_sound: AudioStream
 @export var close_sound: AudioStream
 var is_open: bool = false
@@ -45,7 +47,7 @@ func set_open(value: bool) -> bool:
 	blocked_seconds_left = 0.0
 	audio.stream = (open_sound if value else close_sound)
 	if audio.stream == null:
-		audio.stream = DoorAudio.latch()
+		audio.stream = DEFAULT_DOOR_SOUND
 	audio.play()
 	changed.emit(is_open)
 	return true

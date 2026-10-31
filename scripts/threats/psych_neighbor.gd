@@ -17,6 +17,7 @@ var _elapsed: float = 0.0
 var _handle_left: float = 0.0
 var _entry_from: Vector3
 var _departure_from: Vector3
+var _rng := RandomNumberGenerator.new()
 
 
 func bind(value: Node3D) -> void:
@@ -26,6 +27,7 @@ func bind(value: Node3D) -> void:
 
 
 func _ready() -> void:
+	_rng.randomize()
 	visual = VISUAL.instantiate()
 	add_child(visual)
 	footsteps_audio = AudioStreamPlayer3D.new()
@@ -41,7 +43,6 @@ func _ready() -> void:
 	handle_audio.unit_size = 6.0
 	handle_audio.max_distance = 20.0
 	handle_audio.volume_db = settings.handle_volume_db
-	handle_audio.stream = settings.handle_sound if settings.handle_sound != null else DoorAudio.rattle()
 	visual.add_child(handle_audio)
 	handle_audio.position.y = 1.1
 
@@ -78,7 +79,7 @@ func advance(delta: float) -> void:
 		Visit.RATTLING:
 			_handle_left -= delta
 			if _handle_left <= 0.0:
-				handle_audio.play()
+				_play_handle_sound()
 				_handle_left = 1.1
 			if _elapsed >= settings.rattle_seconds:
 				visit = Visit.DEPARTING
@@ -119,6 +120,17 @@ func _begin_rattle() -> void:
 	_handle_left = 1.1
 	footsteps_audio.stop()
 	_face(door.global_position)
+	_play_handle_sound()
+
+
+func _play_handle_sound() -> void:
+	var available: Array[AudioStream] = []
+	for stream: AudioStream in settings.handle_sounds:
+		if stream != null:
+			available.append(stream)
+	if available.is_empty():
+		return
+	handle_audio.stream = available[_rng.randi_range(0, available.size() - 1)]
 	handle_audio.play()
 
 

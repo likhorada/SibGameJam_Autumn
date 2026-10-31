@@ -104,6 +104,10 @@ try {
   await key('keyDown','F7','F7',118);await sleep(150);await key('keyUp','F7','F7',118);
   await sleep(200);expect(!(await state()).dev,'Brief F7 should not open dev');
   await openDev();await capture('dev');
+  await command('DEV_DEBUG_HUD');await wait(s=>s.debug_hud,'Debug HUD toggle failed');
+  await command('BACK');await wait(s=>!s.dev&&s.debug_hud,'Debug HUD did not persist after closing dev');
+  await capture('debug_hud');
+  await openDev();await command('DEV_DEBUG_HUD');await wait(s=>!s.debug_hud,'Debug HUD did not turn off');
   await command('DEV_UNLIMITED');expect((await state()).unlimited,'Unlimited toggle failed');
   await command('DEV_POWER_OFF');await wait(s=>!s.powered&&s.flashlight,'Dev outage failed');
   await command('DEV_CLEAR_COOLDOWN');expect((await state()).cooldown===0,'Clear cooldown failed');

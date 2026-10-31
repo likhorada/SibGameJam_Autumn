@@ -9,6 +9,7 @@ extends Resource
 @export_range(1.0, 60.0) var min_repeat_seconds: float = 15.0
 @export_range(1.0, 60.0) var max_repeat_seconds: float = 25.0
 @export_range(0.5, 8.0) var near_radius: float = 3.5
+@export_range(0.5, 8.0) var pursuit_speed: float = 3.2
 @export_range(1.0, 6.0) var min_spawn_distance: float = 2.0
 @export_range(1.0, 10.0) var max_spawn_distance: float = 4.0
 @export_range(0.01, 0.5) var movement_threshold: float = 0.08

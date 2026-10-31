@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/apartment/room_door.gd" id="1"]
+[ext_resource type="AudioStream" path="res://assets/audio/door_click.wav" id="2"]
 
 [sub_resource type="StandardMaterial3D" id="Wood"]
 albedo_color = Color(0.16, 0.115, 0.075, 1)
@@ -26,6 +27,8 @@ size = Vector3(0.3, 0.3, 0.12)
 
 [node name="RoomDoor" type="Node3D"]
 script = ExtResource("1")
+open_sound = ExtResource("2")
+close_sound = ExtResource("2")
 
 [node name="Hinge" type="Node3D" parent="."]
 position = Vector3(0, 0, 0.66)

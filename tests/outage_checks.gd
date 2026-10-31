@@ -137,6 +137,11 @@ func _run() -> void:
 	# First encounter: warning, then a quiet freeze survives.
 	await start_encounter()
 	danger_window(settings)
+	game.dev_menu.set_debug_hud_enabled(true)
+	game.dev_menu._process(0.0)
+	var debug_text: String = game.dev_menu._debug_hud_label.text
+	expect(debug_text.contains("ACTIVE") and debug_text.contains(tr("DEBUG_HUD_DANGER")) and debug_text.contains("0.00"), "Debug HUD marks the entity's active danger window and error budget")
+	game.dev_menu.set_debug_hud_enabled(false)
 	await capture("entity")
 	game.power.set_flashlight_enabled(false)
 	while entity.phase == CorridorEntity.Phase.ACTIVE:
@@ -162,16 +167,34 @@ func _run() -> void:
 	await start_encounter()
 	danger_window(settings)
 	var active: CorridorEntity = game.outage.entity
-	var spawn: Vector3 = active.visual.global_position
-	game.player.global_position = Vector3(4.1, 0.03, spawn.z - 1.2)
+	var spawn: Vector3 = active.global_position
+	game.power.set_flashlight_enabled(false)
+	game.player.global_position = Vector3(spawn.x, 0.03, spawn.z - 1.5)
 	active._last_player_position = game.player.global_position
-	game.player.global_position = Vector3(4.1, 0.03, spawn.z - 0.6)
+	game.player.global_position = Vector3(spawn.x, 0.03, spawn.z - 0.9)
 	game.threats.advance(0.1)
-	expect(not game.run_ended and active.error_seconds < settings.error_budget_seconds, "Partial movement error is survivable")
-	active.error_seconds = settings.error_budget_seconds - 0.01
-	game.player.global_position = Vector3(4.1, 0.03, spawn.z - 0.4)
-	game.threats.advance(0.02)
-	expect(game.run_ended and game.failure_reason == "ENTITY_DEATH" and game.process_mode == Node.PROCESS_MODE_DISABLED, "Enough movement in the dark is lethal")
+	expect(not game.run_ended and active.error_seconds > 0.0 and active.error_seconds < settings.error_budget_seconds, "Partial movement exposure is survivable")
+	active._from = active.global_position
+	active._to = active.global_position
+	game.power.set_flashlight_enabled(true)
+	aim_at_entity(active)
+	expect(active.beam_hits(), "Flashlight cone reaches the figure after partial movement exposure")
+	var remaining_budget := settings.error_budget_seconds - active.error_seconds + 0.01
+	game.threats.advance(remaining_budget)
+	expect(active.is_chasing and not game.run_ended and active.error_seconds >= settings.error_budget_seconds, "Movement and flashlight exposure together provoke a chase without instant death")
+	game.dev_menu.set_debug_hud_enabled(true)
+	game.dev_menu._process(0.0)
+	expect(game.dev_menu._debug_hud_label.text.contains(tr("DEBUG_HUD_CHASING")), "Debug HUD reports when the creature is pursuing")
+	game.dev_menu.set_debug_hud_enabled(false)
+	var distance_before_chase := Vector2(game.player.global_position.x - active.global_position.x, game.player.global_position.z - active.global_position.z).length()
+	await frames(2)
+	var distance_during_chase := Vector2(game.player.global_position.x - active.global_position.x, game.player.global_position.z - active.global_position.z).length()
+	expect(distance_during_chase < distance_before_chase and not game.run_ended, "Pursuing entity closes distance before contact")
+	for index: int in 120:
+		if game.run_ended:
+			break
+		await get_tree().physics_frame
+	expect(game.run_ended and game.failure_reason == "ENTITY_DEATH" and game.process_mode == Node.PROCESS_MODE_DISABLED, "Contact during pursuit causes entity death")
 	expect(not active.visual.visible and not active.footsteps_audio.playing, "Death cleans the encounter")
 	var death_text := ""
 	for label: Label in game.find_children("*", "Label", true, false):
@@ -190,7 +213,7 @@ func _run() -> void:
 	game.shift.set_process(false)
 	game.ambient.random_chance = 0.0
 	expect(game.power.powered and not game.run_ended and not game.room_door.is_open and game.outage.entity.phase == CorridorEntity.Phase.DORMANT, "Real restart resets power, entity and door")
-	# The flashlight cone aimed at the figure consumes the same shared budget.
+	# A flashlight alone can provoke the chase, but does not kill at a distance.
 	await setup()
 	start_outage()
 	await start_encounter()
@@ -200,8 +223,8 @@ func _run() -> void:
 	expect(game.outage.entity.beam_hits(), "Flashlight cone reaches the figure")
 	game.outage.entity.error_seconds = settings.error_budget_seconds - 0.01
 	game.threats.advance(0.05)
-	expect(game.run_ended and game.failure_reason == "ENTITY_DEATH", "Holding the beam on the figure is lethal")
-	# A dead beam or a settled player can never be punished.
+	expect(game.outage.entity.is_chasing and not game.run_ended, "Holding the beam provokes pursuit without causing a ranged death")
+	# A disabled flashlight cannot satisfy the beam part of exposure.
 	await setup()
 	start_outage()
 	await start_encounter()

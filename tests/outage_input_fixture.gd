@@ -44,14 +44,19 @@ func _publish_outage() -> void:
 			threats.advance(entity.settings.warning_seconds + 0.05)
 			threats.advance(0.1)
 		"die":
-			# Walking in the dark near the figure spends the shared error budget.
-			var spawn: Vector3 = entity.visual.global_position
-			player.global_position = Vector3(4.1, 0.03, spawn.z - 1.2)
+			# Movement exposure provokes pursuit; move into the pursuer to test contact death.
+			var spawn: Vector3 = entity.global_position
+			player.global_position = Vector3(spawn.x, 0.03, spawn.z - 1.2)
 			entity._last_player_position = player.global_position
-			player.global_position = Vector3(4.1, 0.03, spawn.z - 0.6)
 			entity.error_seconds = entity.settings.error_budget_seconds - 0.01
-			player.global_position = Vector3(4.1, 0.03, spawn.z - 0.4)
+			player.global_position = Vector3(spawn.x, 0.03, spawn.z - 0.9)
 			threats.advance(0.02)
+			var approach := player.global_position - entity.global_position
+			approach.y = 0.0
+			if approach.length_squared() < 0.0001:
+				approach = Vector3.FORWARD
+			player.global_position = entity.global_position + approach.normalized() * 0.7
+			entity._last_player_position = player.global_position
 		"toggle":
 			power.toggle_flashlight()
 	var buttons: Dictionary = {}
@@ -64,7 +69,7 @@ func _publish_outage() -> void:
 		"warn": entity.warning_audio.playing, "steps": entity.footsteps_audio.playing,
 		"phase": int(entity.phase), "visible": entity.visual.visible,
 		"in_corridor": entity.in_corridor(), "repeat": entity.repeat_left,
-		"error": entity.error_seconds, "state": int(threats.state),
+		"error": entity.error_seconds, "chasing": entity.is_chasing, "state": int(threats.state),
 		"dev": dev_menu.is_open, "ended": run_ended, "reason": failure_reason,
 		"buttons": buttons, "command": last_command,
 	}

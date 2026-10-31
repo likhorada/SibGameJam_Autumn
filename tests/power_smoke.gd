@@ -133,6 +133,15 @@ func _run() -> void:
 	expect(not game.dev_menu.is_open, "F7 does not open before five seconds")
 	await create_timer(0.4).timeout
 	expect(game.dev_menu.is_open and not board.active, "Five seconds opens dev and suspends board")
+	game.dev_menu.set_debug_hud_enabled(true)
+	game.dev_menu._process(0.0)
+	var entity_phase: String = CorridorEntity.Phase.keys()[game.outage.entity.phase]
+	expect(
+		game.dev_menu._debug_hud_toggle.button_pressed
+		and not game.dev_menu._debug_hud_panel.visible
+		and game.dev_menu._debug_hud_label.text.contains(entity_phase),
+		"Debug HUD toggle shows live threat phase without covering the dev menu"
+	)
 	game.player.stamina.set_unlimited(true)
 	game.player.stamina.advance(20.0, true, true)
 	expect(game.player.stamina.value == 1.0 and game.player.stamina.fatigue_amount() == 0.0, "Unlimited stamina fills and clears fatigue")
@@ -148,6 +157,12 @@ func _run() -> void:
 	await create_timer(0.12).timeout
 	expect(game.dev_menu.is_open and not game.player.controls_enabled, "Dev repair exits board without restoring walking input under overlay")
 	game.dev_menu.close_menu()
+	expect(game.dev_menu._debug_hud_panel.visible, "Debug HUD stays on after closing the dev menu")
+	if DisplayServer.get_name() != "headless":
+		await process_frame
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png(OS.get_environment("LOCALAPPDATA") + "/Temp/opencode/debug_hud.png")
+	game.dev_menu.set_debug_hud_enabled(false)
 	expect(game.player.controls_enabled and game.mode == game.Mode.WALKING, "Closing dev restores correct mode")
 	game.dev_menu.enabled = false
 	game.dev_menu.open_menu()

@@ -33,7 +33,7 @@ func _ready() -> void:
 	visual = VISUAL.instantiate()
 	add_child(visual)
 	knock_audio = _audio(settings.knock_sound, settings.warning_volume_db)
-	voice_audio = _audio(settings.warning_voice if settings.warning_voice != null else PoliceAudio.radio(), settings.warning_volume_db)
+	voice_audio = _audio(settings.warning_voice if settings.warning_voice != null else settings.knock_sound, settings.warning_volume_db)
 	footsteps_audio = _audio(settings.footsteps, settings.footsteps_volume_db)
 
 
@@ -105,7 +105,7 @@ func advance(delta: float) -> void:
 			if _elapsed >= settings.search_seconds:
 				visit = Visit.DEPARTING
 				_elapsed = 0.0
-				voice_audio.stream = settings.departure_sound if settings.departure_sound != null else PoliceAudio.radio()
+				voice_audio.stream = settings.departure_sound if settings.departure_sound != null else settings.knock_sound
 				voice_audio.play()
 				footsteps_audio.pitch_scale = 1.15
 		else:
@@ -142,6 +142,6 @@ func ended(_outcome: StringName) -> void:
 		knock_audio.stop()
 	if is_instance_valid(voice_audio):
 		voice_audio.stop()
-		voice_audio.stream = settings.warning_voice if settings.warning_voice != null else PoliceAudio.radio()
+		voice_audio.stream = settings.warning_voice if settings.warning_voice != null else settings.knock_sound
 	if is_instance_valid(footsteps_audio):
 		footsteps_audio.stop()

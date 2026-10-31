@@ -80,6 +80,7 @@ func _run() -> void:
 	var neighbor: PsychNeighbor = game.neighbor
 	var door: RoomDoor = game.room_door
 	expect(not door.is_open and not neighbor.visual.visible, "New run starts with closed door and no visible neighbor")
+	expect(door.open_sound != null and door.open_sound.resource_path == "res://assets/audio/door_click.wav" and door.close_sound != null and door.close_sound.resource_path == "res://assets/audio/door_click.wav", "Door opening and closing use door_click.wav")
 	await place(Vector3(1.5, 0.02, 1.1), -PI * 0.5)
 	expect(game.player.find_interaction() == &"room_door", "Existing physical interaction ray finds closed door")
 	await capture("closed_door")
@@ -120,7 +121,14 @@ func _run() -> void:
 	expect(manager.state == ThreatManager.State.WARNING and neighbor.footsteps_audio.playing, "Approach starts audible footsteps before danger")
 	manager.advance(5.0)
 	expect(manager.state == ThreatManager.State.ACTIVE and neighbor.visit == PsychNeighbor.Visit.RATTLING, "Closed door leads to handle attempt, not death")
-	expect(neighbor.handle_audio.playing and neighbor.handle_audio.stream != null, "Handle warning has a real temporary audio stream")
+	var handle_path := ""
+	if neighbor.handle_audio.stream != null:
+		handle_path = neighbor.handle_audio.stream.resource_path
+	expect(
+		neighbor.handle_audio.playing
+		and handle_path in ["res://assets/audio/scratchin1.wav", "res://assets/audio/scratchin2.wav"],
+		"Handle warning randomly uses one of the scratch WAVs"
+	)
 	game.power.trigger_outage()
 	expect(game.power.powered, "Neighbor reserves slot against real power outages")
 	finish_closed_visit()

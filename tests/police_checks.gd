@@ -159,7 +159,7 @@ func _run() -> void:
 		expect(game.trigger_police(), "Forced raid starts before random scheduling is allowed")
 		expect(game.police.knock_audio.playing and game.threats.phase_seconds_left == 12.0, "First knock starts full 12-second warning")
 		game.threats.advance(0.9)
-		expect(game.police.voice_audio.playing and game.police.voice_audio.stream != null, "Warning includes temporary radio audio")
+		expect(game.police.voice_audio.playing and game.police.voice_audio.stream.resource_path == "res://assets/audio/heavy_knock.wav", "Warning uses heavy_knock.wav")
 		if game.mode == game.Mode.COMPUTER:
 			game.leave_computer(false)
 			await wait_mode(game.Mode.WALKING)
@@ -175,6 +175,7 @@ func _run() -> void:
 		expect(game.shift.state == ShiftDirector.State.WAITING_SCARE, "Scare queues behind inspection")
 		game.threats.advance(6.0)
 		expect(game.police.visit == PoliceRaid.Visit.DEPARTING and game.is_hidden(), "Search lasts six seconds then departure begins")
+		expect(game.police.voice_audio.stream.resource_path == "res://assets/audio/steps.wav", "Departure uses steps.wav")
 		await capture("inspection_" + String(id))
 		game.threats.advance(2.99)
 		expect(game.police.visit == PoliceRaid.Visit.DEPARTING and not game.run_ended, "Last part of three-second departure is still dangerous")

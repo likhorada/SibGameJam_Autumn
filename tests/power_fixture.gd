@@ -29,6 +29,7 @@ func _process(_delta: float) -> void:
 	var data := {
 		"powered": power.powered, "cooldown": threats.wait_seconds_left,
 		"mode": int(mode), "dev": dev_menu.is_open,
+		"debug_hud": dev_menu._debug_hud_enabled,
 		"unlimited": player.stamina.unlimited, "stamina": player.stamina.value,
 		"progress": power.board.progress, "latched": power.board.latched,
 		"held": power.board.held, "flashlight": power.flashlight.visible,

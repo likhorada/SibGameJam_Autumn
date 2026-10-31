@@ -173,4 +173,19 @@ DEV_CLEAR_COOLDOWN,Enable random threats now,Разрешить угрозы п�
 DEV_STATUS,"%s · next threat in %.1fs
 Latched: %s","%s · угроза через %.1f сек
 Зафиксированы: %s"
+DEV_DEBUG_HUD,Debug HUD,Дебаг-худ
+DEBUG_HUD_TITLE,THREAT DEBUG,ОТЛАДКА УГРОЗ
+DEBUG_HUD_THREATS,"Threat: %s / %s · %.1fs","Угроза: %s / %s · %.1fс"
+DEBUG_HUD_NEIGHBOR,Neighbor: %s,Сосед: %s
+DEBUG_HUD_POLICE,Police: %s,Полиция: %s
+DEBUG_HUD_ENTITY,"Dark figure: %s — %s","Фигура в темноте: %s — %s"
+DEBUG_HUD_DANGER,DANGER WINDOW,ОКНО ОПАСНОСТИ
+DEBUG_HUD_CHASING,PURSUING,ПРЕСЛЕДУЕТ
+DEBUG_HUD_NO_DANGER,NOT ATTACKING,НЕ АТАКУЕТ
+DEBUG_HUD_ENTITY_TIMER,"Phase / repeat: %.1fs","Фаза / пауза: %.1fс"
+DEBUG_HUD_ENTITY_ERROR,"Error budget: %.2f / %.2fs","Запас ошибки: %.2f / %.2fс"
+DEBUG_HUD_ENTITY_DISTANCE,"Distance: %.1fm","Дистанция: %.1fм"
+DEBUG_HUD_ENTITY_BEAM,"Danger beam on figure: %s","Опасный луч на фигуре: %s"
+DEBUG_HUD_YES,YES,ДА
+DEBUG_HUD_NO,NO,НЕТ
 FLASHLIGHT_HINT,F — flashlight,F — фонарик

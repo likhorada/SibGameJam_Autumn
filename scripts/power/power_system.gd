@@ -4,17 +4,15 @@ extends Node
 signal power_changed(powered: bool)
 
 @export_group("Emergency flashlight")
-@export_range(0.0, 4.0) var flashlight_energy: float = 0.8
+@export_range(0.0, 4.0) var flashlight_energy: float = 0.9
 @export_range(0.5, 10.0) var flashlight_range: float = 3.5
 @export_range(5.0, 70.0) var flashlight_angle: float = 35.0
 ## Short, broad spill lights nearby floor/objects instead of only a distant spot.
-@export_range(0.0, 2.0) var flashlight_spill_energy: float = 0.35
-@export_range(0.5, 4.0) var flashlight_spill_range: float = 2.2
-@export_range(35.0, 85.0) var flashlight_spill_angle: float = 70.0
+@export_range(0.0, 2.0) var flashlight_spill_energy: float = 0.48
+@export_range(0.5, 4.0) var flashlight_spill_range: float = 3.0
+@export_range(35.0, 85.0) var flashlight_spill_angle: float = 82.0
 @export_range(0.0, 0.2) var blackout_ambient_energy: float = 0.012
-@export_group("Optional audio")
-@export var outage_sound: AudioStream
-@export var restore_sound: AudioStream
+@export_group("Behind ambience")
 @export var behind_sounds: Array[AudioStream] = []
 @export_range(0.0, 1.0) var behind_chance: float = 0.5
 @export_range(0.2, 60.0) var behind_min_interval: float = 5.0
@@ -37,7 +35,6 @@ var _normal_background: Color
 var _screen: MeshInstance3D
 var _screen_material: Material
 var _black_screen: StandardMaterial3D
-var _event_audio: AudioStreamPlayer3D
 var _behind_audio: AudioStreamPlayer3D
 var _rng := RandomNumberGenerator.new()
 ## Optional reservation guard supplied by the run's ThreatManager.
@@ -80,11 +77,6 @@ func bind(value: Node3D) -> void:
 	flashlight_spill.spot_attenuation = 0.6
 	flashlight_spill.visible = false
 	game.add_child(flashlight_spill)
-	_event_audio = AudioStreamPlayer3D.new()
-	_event_audio.bus = &"SFX"
-	_event_audio.unit_size = 6.0
-	_event_audio.max_distance = 20.0
-	board.add_child(_event_audio)
 	_behind_audio = AudioStreamPlayer3D.new()
 	_behind_audio.bus = &"Ambience"
 	_behind_audio.volume_db = -16.0
@@ -135,7 +127,6 @@ func cut_power() -> bool:
 	_environment.background_color = Color.BLACK
 	_screen.material_override = _black_screen
 	set_flashlight_enabled(true)
-	_play_event(outage_sound if outage_sound != null else DoorAudio.latch(), 0.55)
 	power_changed.emit(false)
 	return true
 
@@ -152,7 +143,6 @@ func restore_power() -> void:
 	_screen.material_override = _screen_material
 	set_flashlight_enabled(false)
 	set_interacting(false)
-	_play_event(restore_sound if restore_sound != null else DoorAudio.latch(), 1.2)
 	power_changed.emit(true)
 
 
@@ -189,10 +179,3 @@ func set_interacting(value: bool) -> void:
 
 func _schedule_behind() -> void:
 	_behind_left = _rng.randf_range(maxf(0.2, behind_min_interval), maxf(behind_min_interval, behind_max_interval))
-
-
-func _play_event(stream: AudioStream, pitch: float = 1.0) -> void:
-	if stream != null:
-		_event_audio.stream = stream
-		_event_audio.pitch_scale = pitch
-		_event_audio.play()

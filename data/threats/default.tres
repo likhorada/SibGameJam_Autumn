@@ -1,13 +1,11 @@
-[gd_resource type="Resource" script_class="ThreatConfig" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="ThreatConfig" format=3 uid="uid://cxf2ry3lc5gpq"]
 
-[ext_resource type="Script" path="res://scripts/threats/threat_config.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/threats/threat_profile.gd" id="2"]
+[ext_resource type="Script" uid="uid://bn55ybh8tm72" path="res://scripts/threats/threat_config.gd" id="1"]
+[ext_resource type="Script" uid="uid://biab1x1u1o777" path="res://scripts/threats/threat_profile.gd" id="2"]
 
 [sub_resource type="Resource" id="Neighbor"]
 script = ExtResource("2")
 id = &"psych_neighbor"
-warning_seconds = 5.0
-max_active_seconds = 30.0
 
 [sub_resource type="Resource" id="Police"]
 script = ExtResource("2")

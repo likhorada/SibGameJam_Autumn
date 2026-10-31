@@ -120,7 +120,8 @@ try {
       await wait(s=>s.phase===3&&s.steps&&!s.warn,'Danger window did not replace the warning with steps');
       await capture('outage_entity_'+lang);
       await command('die');
-      await wait(s=>s.ended&&s.reason==='ENTITY_DEATH','Walking error budget did not cause entity death');
+      await wait(s=>s.chasing,'Movement exposure did not provoke pursuit');
+      await wait(s=>s.ended&&s.reason==='ENTITY_DEATH','Contact with the pursuing entity did not cause death');
       await capture('outage_death_'+lang);
     }
   }else if(policeMode){
@@ -293,5 +294,5 @@ try {
     await capture(perfect?'win':'lose');
   }
   expect(errors.length===0,'Browser errors: '+errors.join('\n'));
-  console.log(outageMode?'OUTAGE INPUT WEB: PASS (RU/EN, F7 trigger, blackout eject, F flashlight, corridor encounter, budget death).':policeMode?'POLICE INPUT WEB: PASS (RU/EN, F7, PC escape, E hiding/exit, clamped mouse look, blocked walking, safe departure, early-exit death).':neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
+  console.log(outageMode?'OUTAGE INPUT WEB: PASS (RU/EN, F7 trigger, blackout eject, F flashlight, encounter, provoked chase, contact death).':policeMode?'POLICE INPUT WEB: PASS (RU/EN, F7, PC escape, E hiding/exit, clamped mouse look, blocked walking, safe departure, early-exit death).':neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
 } finally {ws?.close();browser.kill();server.close();}
