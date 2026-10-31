@@ -75,8 +75,11 @@ func _run() -> void:
 	game.power.board.latched[0] = true
 	game.power.board.begin_hold(1)
 	shift.advance(30)
-	expect(game.mode == game.Mode.WALKING and game.power.board.held == -1, "Scare interrupts fusebox hold")
+	expect(shift.state == ShiftDirector.State.WAITING_SCARE and game.power.board.held == 1, "Scare waits for blackout without interrupting repair")
 	expect(game.power.board.latched[0], "Scare preserves latched breakers")
+	game.power.restore_power()
+	shift._process(0)
+	expect(shift.state == ShiftDirector.State.SCARE and game.power.board.held == -1, "Deferred scare begins only after power is repaired")
 	shift.complete_scare()
 	expect(shift.stage == 2 and shift.branch == -1, "Street starts before branch selection")
 	for index: int in game.cctv_system.cameras.size():

@@ -3,12 +3,13 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
-const root=path.resolve(process.env.CHAT_WEB_ROOT || 'build/chat-web');
+const root=path.resolve(process.env.THREAT_WEB_ROOT || process.env.CHAT_WEB_ROOT || 'build/chat-web');
 const artifacts=path.join(process.env.LOCALAPPDATA,'Temp/opencode');
 const profile=await fs.mkdtemp(path.join(artifacts,'chat-chrome-'));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const errors=[];
 const shiftMode=process.env.SHIFT_WEB==='1';
+const threatMode=process.env.THREAT_WEB==='1';
 const server=http.createServer(async(req,res)=>{
   try {
     const name=new URL(req.url,'http://localhost').pathname;
@@ -85,7 +86,16 @@ try {
   await call('Runtime.enable');await call('Page.enable');
   await call('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
   const url='http://127.0.0.1:'+server.address().port+'/';
-  for(const perfect of [true,false]) {
+  if(threatMode){
+    await call('Page.navigate',{url});
+    let result;
+    for(let i=0;i<600;i++){
+      result=await evaluate('window.threatTestResult');
+      if(result)break;
+      await sleep(50);
+    }
+    expect(result&&result.failures===0,'Threat checks failed or timed out: '+JSON.stringify(result));
+  }else for(const perfect of [true,false]) {
     await call('Page.navigate',{url:url+'?lang='+(perfect?'ru':'en')});
     await wait(s=>s.mode===2&&s.active==='chat','First-login chat failed',30);
     await call('Page.bringToFront');
@@ -133,5 +143,5 @@ try {
     await capture(perfect?'win':'lose');
   }
   expect(errors.length===0,'Browser errors: '+errors.join('\n'));
-  console.log(shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
+  console.log(threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
 } finally {ws?.close();browser.kill();server.close();}

@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/cctv/cctv_system.tscn" id="7"]
 [ext_resource type="Script" path="res://scripts/power/power_system.gd" id="Power"]
 [ext_resource type="Script" path="res://scripts/ui/dev_menu.gd" id="Dev"]
+[ext_resource type="Script" path="res://scripts/threats/threat_manager.gd" id="Threats"]
 
 [node name="Main" type="Node3D" unique_id=309523320]
 script = ExtResource("1")
@@ -40,3 +41,6 @@ script = ExtResource("Power")
 
 [node name="DevMenu" type="CanvasLayer" parent="."]
 script = ExtResource("Dev")
+
+[node name="ThreatManager" type="Node" parent="."]
+script = ExtResource("Threats")

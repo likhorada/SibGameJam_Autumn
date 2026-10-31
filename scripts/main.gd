@@ -23,6 +23,7 @@ var _focus_active: bool = true
 @onready var cctv_system: CCTVSystem = $CCTVSystem
 @onready var power: ApartmentPower = $PowerSystem
 @onready var dev_menu = $DevMenu
+@onready var threats: ThreatManager = $ThreatManager
 var ambient: AmbientDirector
 var shift: ShiftDirector
 
@@ -37,6 +38,7 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	power.bind(self)
 	power.power_changed.connect(_on_power_changed)
+	power.outage_guard = threats.can_start_power_outage
 	ambient = AmbientDirector.new()
 	add_child(ambient)
 	ambient.bind(self)
@@ -63,6 +65,7 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	threats.random_allowed = is_instance_valid(shift) and shift.state == ShiftDirector.State.ROUTE
 	var captured := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
 	# Browsers may consume Esc before Godot receives it. Detect native unlock too.
 	if pointer_was_captured and not captured:
@@ -254,6 +257,7 @@ func _eject_from_computer() -> void:
 
 
 func _on_power_changed(powered: bool) -> void:
+	threats.set_blocked(&"blackout", not powered)
 	if not powered and mode in [Mode.ENTERING, Mode.COMPUTER, Mode.LEAVING]:
 		_eject_from_computer()
 	elif powered and mode in [Mode.FUSEBOX_ENTERING, Mode.FUSEBOX]:
@@ -321,7 +325,14 @@ func _on_dev_closed() -> void:
 		power.set_interacting(_focus_active)
 
 
+func disable_threats() -> void:
+	threats.disable_threats()
+	power.random_outages_enabled = false
+	power.restore_power()
+
+
 func _finish_report(won: bool, score: int) -> void:
+	threats.disable_threats()
 	if is_instance_valid(shift):
 		shift.state = ShiftDirector.State.ENDED
 	terminal_ui.suspend_desktop()

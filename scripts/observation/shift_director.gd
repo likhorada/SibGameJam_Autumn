@@ -1,7 +1,7 @@
 class_name ShiftDirector
 extends Node
 ## A run-local timeline independent of camera rendering and desktop visibility.
-enum State { INTRO, DEADLINE, ROUTE, SCARE, REPORT, ENDED }
+enum State { INTRO, DEADLINE, ROUTE, SCARE, REPORT, ENDED, WAITING_SCARE }
 const DATA := preload("res://data/observation/shift.gd")
 const LOCATION := preload("res://scripts/cctv/observation_location.gd")
 var state: State = State.INTRO
@@ -60,7 +60,7 @@ func _begin_deadline() -> void:
 func start_alarm() -> void:
 	if state != State.DEADLINE or not game.power.powered or game.mode != game.Mode.COMPUTER:
 		return
-	game.power.random_outages_enabled = outages_allowed
+	game.power.random_outages_enabled = outages_allowed and game.threats.enabled
 	_begin_route(DATA.OFFICE)
 	_update_status()
 
@@ -88,9 +88,11 @@ func _begin_route(points: Array) -> void:
 
 
 func _process(delta: float) -> void:
+	if state == State.WAITING_SCARE and not game.threats.is_busy() and game.power.powered:
+		_begin_scare()
 	advance(delta)
 	_update_status()
-	if state == State.REPORT and game.mode == game.Mode.COMPUTER and game.power.powered and not game.dev_menu.is_open:
+	if state == State.REPORT and game.mode == game.Mode.COMPUTER and game.power.powered and not game.dev_menu.is_open and not game.threats.is_busy():
 		var session: ChatSession = game.terminal_ui.chat.session
 		if not session.quiz_started:
 			session.questions = report_questions()
@@ -106,6 +108,7 @@ func advance(delta: float) -> void:
 				state = State.ENDED
 				game._finish_report(false, 0)
 			else:
+				game.threats.set_blocked(&"scripted_scare", false)
 				stage += 1
 				_load_stage()
 				_begin_route(DATA.SHOP if stage == 1 else DATA.STREET_ENTRY)
@@ -135,7 +138,20 @@ func advance(delta: float) -> void:
 func _finish_stage() -> void:
 	if stage == 2:
 		state = State.REPORT
+		game.threats.random_allowed = false
+		game.power.random_outages_enabled = false
 		return
+	game.threats.random_allowed = false
+	game.threats.set_blocked(&"scare_pending", true)
+	if game.threats.is_busy() or not game.power.powered:
+		state = State.WAITING_SCARE
+		return
+	_begin_scare()
+
+
+func _begin_scare() -> void:
+	game.threats.set_blocked(&"scare_pending", false)
+	game.threats.set_blocked(&"scripted_scare", true)
 	state = State.SCARE
 	seconds_left = 5.0
 	# A real scare will call complete_scare(); this explicit test event lasts five seconds.

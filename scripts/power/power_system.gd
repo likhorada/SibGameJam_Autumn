@@ -45,6 +45,8 @@ var _black_screen: StandardMaterial3D
 var _event_audio: AudioStreamPlayer3D
 var _behind_audio: AudioStreamPlayer3D
 var _rng := RandomNumberGenerator.new()
+## Optional reservation guard supplied by the run's ThreatManager.
+var outage_guard: Callable
 
 
 func bind(value: Node3D) -> void:
@@ -143,6 +145,8 @@ func clear_cooldown() -> void:
 
 func trigger_outage() -> void:
 	if not powered or not is_instance_valid(board):
+		return
+	if outage_guard.is_valid() and not outage_guard.call():
 		return
 	powered = false
 	_check_time = 0.0
