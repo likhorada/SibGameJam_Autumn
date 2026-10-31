@@ -19,6 +19,11 @@ var _zoom: float = 0.0
 var _material: ShaderMaterial
 
 
+func set_anxiety(amount: float) -> void:
+	if is_instance_valid(_material):
+		_material.set_shader_parameter("anxiety", amount)
+
+
 func _ready() -> void:
 	directory = OptionButton.new()
 	directory.name = "CameraDirectory"

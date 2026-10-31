@@ -157,6 +157,7 @@ func _run() -> void:
 			await wait_mode(game.Mode.COMPUTER)
 			game.terminal_ui.notepad.editor.text = "evidence survives"
 		expect(game.trigger_police(), "Forced raid starts before random scheduling is allowed")
+		expect(game.mode == game.Mode.WALKING and game.police.visual.visible, "Arrival is visible and ejects the PC")
 		expect(game.police.knock_audio.playing and game.threats.phase_seconds_left == 12.0, "First knock starts full 12-second warning")
 		game.threats.advance(0.9)
 		expect(game.police.voice_audio.playing and game.police.voice_audio.stream.resource_path == "res://assets/audio/heavy_knock.wav", "Warning uses heavy_knock.wav")
@@ -192,7 +193,7 @@ func _run() -> void:
 		game.threats.advance(5.0)
 		game.threats.advance(3.0)
 		if id == &"hide_wardrobe":
-			expect(game.failure_reason == "NEIGHBOR_DEATH", "Door left by police makes next neighbor dangerous")
+			expect(game.neighbor.visit == PsychNeighbor.Visit.SEARCHING and not game.run_ended, "Open door starts neighbor search, not global death")
 		else:
 			expect(not game.run_ended, "Closing police-opened door protects against next neighbor")
 	# Being at the PC or in the corridor instead of hiding loses after warning.
@@ -207,10 +208,18 @@ func _run() -> void:
 		game.threats.advance(11.9)
 		expect(not game.run_ended, "Unhidden player keeps full reaction window")
 		game.threats.advance(0.11)
-		expect(game.run_ended and game.failure_reason == "POLICE_DEATH" and game.process_mode == Node.PROCESS_MODE_DISABLED, "Unhidden PC/corridor player loses after deadline")
+		expect(not game.run_ended and game.police.visual.visible, "Deadline opens the door without invisible global death")
+		game.player.position = Vector3(0, 0.03, 1.1)
+		game.police.visual.global_position = Vector3(1.4, 0, 1.1)
+		game.police.visual.look_at(Vector3(0, 0, 1.1), Vector3.UP)
+		for sample: int in 11:
+			game.threats.advance(0.1)
+		expect(game.capture_reason == "POLICE_DEATH" and not game.run_ended, "Confirmed sight starts visible capture before result")
+		game._process(1.3)
+		expect(game.run_ended and game.failure_reason == "POLICE_DEATH", "Capture finishes with police result")
 		expect(game.police.visit == PoliceRaid.Visit.DORMANT and not game.police.knock_audio.playing and not game.police.voice_audio.playing and not game.police.footsteps_audio.playing, "Police death cleans all event state and audio")
 		await capture("death")
-	# Exiting during either dangerous phase loses synchronously, without another tick.
+	# Early exit alone is not a global detection check.
 	for during_departure: bool in [false, true]:
 		await setup()
 		await hide(&"hide_wardrobe")
@@ -219,7 +228,8 @@ func _run() -> void:
 		if during_departure:
 			game.threats.advance(6.0)
 		game.leave_hiding(false)
-		expect(game.run_ended and game.failure_reason == "POLICE_DEATH", "Leaving during search/departure immediately loses")
+		expect(not game.run_ended and game.capture_reason.is_empty(), "Leaving during search/departure requires real sight")
+	game.fail_from_threat("POLICE_DEATH")
 	# Actual scene restart resets hide/raid state and the door.
 	var restart: Button = get_viewport().gui_get_focus_owner()
 	restart.pressed.emit()

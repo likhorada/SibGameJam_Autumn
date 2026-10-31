@@ -84,8 +84,13 @@ func _process(delta: float) -> void:
 	if game == null:
 		return
 	var noise_target := noise_volume_db if powered else MUTE_DB
+	if game.threats.is_busy():
+		noise_target -= 10.0
 	_fade(noise_audio, noise_target, delta, noise_volume_db)
-	_fade(near_audio, _near_target_db(), delta, near_volume_db)
+	var near_target := _near_target_db()
+	if game.threats.is_busy():
+		near_target -= 10.0
+	_fade(near_audio, near_target, delta, near_volume_db)
 	_tick_events(delta)
 
 

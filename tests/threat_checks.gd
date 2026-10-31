@@ -109,7 +109,7 @@ func _run() -> void:
 	manager.reset_run()
 	manager.request_event(&"police_raid", true)
 	manager.advance(12.0)
-	manager.advance(20.0)
+	manager.advance(manager.config.profile_for(&"police_raid").max_active_seconds)
 	expect(manager.state == ThreatManager.State.RESOLVED and police.resolutions.back() == &"timeout", "Watchdog prevents a finite event from softlocking")
 	manager.advance(1.0)
 	expect(police.endings.back() == &"timeout", "Watchdog eventually cleans adapter")

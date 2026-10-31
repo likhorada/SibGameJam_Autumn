@@ -28,6 +28,7 @@ var _blockers: Dictionary = {}
 var _active_event: ThreatEvent
 var _outcome: StringName = &""
 var _rng := RandomNumberGenerator.new()
+var capture_in_progress: bool = false
 
 
 func _ready() -> void:
@@ -108,7 +109,7 @@ func request_event(id: StringName, forced: bool = false) -> bool:
 
 
 func advance(delta: float) -> void:
-	if not enabled or delta < 0.0:
+	if not enabled or capture_in_progress or delta < 0.0:
 		return
 	run_seconds += delta
 	if is_busy():
@@ -156,6 +157,8 @@ func _advance_event(delta: float) -> void:
 	var previous_state := state
 	var id := active_id
 	current.advance(delta)
+	if capture_in_progress:
+		return
 	if current != _active_event or state != previous_state:
 		return
 	phase_seconds_left = maxf(0.0, phase_seconds_left - delta)
@@ -223,6 +226,7 @@ func clear_cooldown() -> void:
 
 func reset_run() -> void:
 	disable_threats()
+	capture_in_progress = false
 	_blockers.clear()
 	_event_enabled.clear()
 	random_allowed = false

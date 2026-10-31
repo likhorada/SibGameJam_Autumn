@@ -10,18 +10,21 @@ extends Node3D
 @onready var view: Marker3D = $View
 
 
-func find_safe_exit(player: ApartmentPlayer, entry_pose: Transform3D) -> Variant:
+func find_safe_exit(player: ApartmentPlayer, entry_pose: Transform3D, game: Node3D = null) -> Variant:
 	var capsule: CollisionShape3D = player.get_node("CollisionShape3D")
 	var candidates: Array[Transform3D] = []
 	for marker: Node3D in $Exits.get_children():
 		candidates.append(marker.global_transform)
 	candidates.append(entry_pose)
+	# An enemy at the main exit is not a reason to teleport to another doorway.
+	if game != null and not candidates.is_empty() and game.enemy_blocks_exit(candidates[0].origin):
+		return null
 	for pose: Transform3D in candidates:
 		var query := PhysicsShapeQueryParameters3D.new()
 		query.shape = capsule.shape
 		query.transform = pose * capsule.transform
 		query.collision_mask = player.collision_mask
 		query.exclude = [player.get_rid()]
-		if player.get_world_3d().direct_space_state.intersect_shape(query).is_empty():
+		if player.get_world_3d().direct_space_state.intersect_shape(query).is_empty() and (game == null or not game.enemy_blocks_exit(pose.origin)):
 			return pose
 	return null

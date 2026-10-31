@@ -1,7 +1,7 @@
 extends Node3D
 
 signal hiding_changed(hidden: bool)
-enum Mode { WALKING, ENTERING, COMPUTER, LEAVING, FUSEBOX_ENTERING, FUSEBOX, FUSEBOX_LEAVING, HIDING }
+enum Mode { WALKING, ENTERING, COMPUTER, LEAVING, FUSEBOX_ENTERING, FUSEBOX, FUSEBOX_LEAVING, HIDING, CAPTURED }
 
 @export_range(0.02, 2.0) var transition_seconds: float = 0.7
 @export var observation_shift_enabled: bool = true
@@ -14,6 +14,11 @@ var fusebox_hint: Label
 var _focus_active: bool = true
 var run_ended: bool = false
 var failure_reason: String = ""
+var capture_reason: String = ""
+var _capture_elapsed: float = 0.0
+var _capture_overlay: ColorRect
+var _capture_close_view: Transform3D
+@onready var visual_effects: VisualEffects = $VisualEffects
 
 @onready var player: ApartmentPlayer = $Player
 @onready var terminal: Node3D = $Terminal
@@ -46,6 +51,7 @@ var _hide_blocked_left: float = 0.0
 func _ready() -> void:
 	terminal_ui.report_finished.connect(_finish_report)
 	hud.bind_player(player)
+	hud.game = self
 	terminal_ui.cctv.bind_system(cctv_system)
 	exit_button.pressed.connect(leave_computer)
 	terminal_ui.leave_requested.connect(_leave_from_ui_escape)
@@ -89,6 +95,7 @@ func _ready() -> void:
 		shift = ShiftDirector.new()
 		add_child(shift)
 		shift.bind(self)
+	visual_effects.bind(self)
 
 
 func _physics_process(_delta: float) -> void:
@@ -122,7 +129,7 @@ func _physics_process(_delta: float) -> void:
 	elif player.interaction_id == &"fusebox":
 		hint.text = tr("POWER_OK") if power.powered else tr("USE_FUSEBOX")
 	elif player.interaction_id == &"room_door":
-		hint.text = tr("DOOR_BLOCKED" if room_door.blocked_seconds_left > 0.0 else "DOOR_CLOSE" if room_door.is_open else "DOOR_OPEN")
+		hint.text = tr("DOOR_HELD" if room_door.held_by_police else "DOOR_BLOCKED" if room_door.blocked_seconds_left > 0.0 else "DOOR_CLOSE" if room_door.is_open else "DOOR_OPEN")
 	elif hiding_spots.has(player.interaction_id):
 		hint.text = tr(hiding_spots[player.interaction_id].prompt_key)
 	else:
@@ -225,6 +232,7 @@ func enter_hiding(spot: HidingSpot) -> bool:
 	player.set_controls_enabled(false)
 	player.interaction_id = &""
 	_drop_stale_key_state(false)
+	power.board.cancel_hold()
 	hud.clear_smear()
 	mode = Mode.HIDING
 	_update_hiding_view()
@@ -243,7 +251,7 @@ func _update_hiding_view() -> void:
 func leave_hiding(capture_pointer: bool = true) -> bool:
 	if mode != Mode.HIDING or run_ended:
 		return false
-	var pose: Variant = hiding_spot.find_safe_exit(player, _hide_entry_pose)
+	var pose: Variant = hiding_spot.find_safe_exit(player, _hide_entry_pose, self)
 	if pose == null:
 		_hide_blocked_left = 2.0
 		return false
@@ -254,7 +262,7 @@ func leave_hiding(capture_pointer: bool = true) -> bool:
 	_resume_walking(false)
 	if capture_pointer:
 		_capture_pointer()
-	# Last: police may end the run synchronously when the player is exposed.
+	# Exposure starts only after body, camera and controls agree.
 	hiding_changed.emit(false)
 	return true
 
@@ -472,6 +480,8 @@ func _finish_report(won: bool, score: int, reason: String = "") -> void:
 	if run_ended:
 		return
 	run_ended = true
+	if is_instance_valid(_capture_overlay):
+		_capture_overlay.queue_free()
 	failure_reason = reason
 	threats.disable_threats()
 	if is_instance_valid(shift):
@@ -526,3 +536,107 @@ func _finish_report(won: bool, score: int, reason: String = "") -> void:
 		column.add_child(button)
 		if item[0] == "CHAT_RESTART":
 			button.grab_focus()
+
+
+func threat_target_points() -> Array[Vector3]:
+	if is_hidden() or run_ended or not capture_reason.is_empty():
+		return []
+	return [player.global_position + Vector3.UP * 1.55, player.global_position + Vector3.UP * 0.95]
+
+
+func enemy_blocks_exit(position: Vector3) -> bool:
+	var enemies: Array[Node3D] = []
+	if is_instance_valid(police) and police.visit != PoliceRaid.Visit.DORMANT:
+		enemies.append(police.visual)
+	if is_instance_valid(neighbor) and neighbor.visit != PsychNeighbor.Visit.DORMANT:
+		enemies.append(neighbor.visual)
+	if is_instance_valid(outage) and outage.has_active_encounter():
+		enemies.append(outage.entity)
+	for enemy: Node3D in enemies:
+		if Vector2(enemy.global_position.x - position.x, enemy.global_position.z - position.z).length() < 0.85:
+			return true
+	return false
+
+
+func place_player_safely(position: Vector3) -> bool:
+	var capsule: CollisionShape3D = player.get_node("CollisionShape3D")
+	var pose := player.global_transform
+	pose.origin = position
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = capsule.shape
+	query.transform = pose * capsule.transform
+	query.collision_mask = player.collision_mask
+	query.exclude = [player.get_rid()]
+	if not get_world_3d().direct_space_state.intersect_shape(query).is_empty():
+		return false
+	player.global_transform = pose
+	player.stop_motion(true)
+	return true
+
+
+func prepare_for_threat() -> bool:
+	# No script can grant browser pointer lock without a real user gesture.
+	var forced := mode in [Mode.ENTERING, Mode.COMPUTER, Mode.LEAVING, Mode.FUSEBOX_ENTERING, Mode.FUSEBOX, Mode.FUSEBOX_LEAVING]
+	if not forced:
+		return false
+	_kill_transition()
+	terminal_ui.suspend_desktop()
+	terminal_ui.hide()
+	power.board.set_active(false)
+	power.set_interacting(false)
+	if mode in [Mode.ENTERING, Mode.COMPUTER, Mode.LEAVING]:
+		var exit_position: Vector3 = terminal.get_node("ExitPoint").global_position
+		for offset: Vector3 in [Vector3.ZERO, Vector3(0.7, 0, 0), Vector3(0, 0, -0.7)]:
+			if place_player_safely(exit_position + offset):
+				break
+	_resume_walking()
+	player.stop_motion(true)
+	if not OS.has_feature("web"):
+		_capture_pointer()
+	return true
+
+
+func begin_threat_capture(reason: String, enemy: Node3D) -> bool:
+	if run_ended or not capture_reason.is_empty() or is_hidden():
+		return false
+	capture_reason = reason
+	_capture_elapsed = 0.0
+	threats.capture_in_progress = true
+	if is_instance_valid(shift):
+		shift.set_process(false)
+	_kill_transition()
+	terminal_ui.suspend_desktop()
+	terminal_ui.hide()
+	power.board.set_active(false)
+	power.set_interacting(false)
+	transition_camera.global_transform = get_viewport().get_camera_3d().global_transform
+	transition_camera.fov = player.camera_motion.base_fov
+	transition_camera.make_current()
+	player.set_controls_enabled(false)
+	_drop_stale_key_state(false)
+	mode = Mode.CAPTURED
+	# Observe the actual attacker first, then cut to a close shot while black.
+	var face := enemy.global_position + Vector3.UP * 1.6
+	if transition_camera.global_position.distance_squared_to(face) > 0.001:
+		transition_camera.look_at(face, Vector3.UP)
+	_capture_close_view = Transform3D(Basis.IDENTITY, face + enemy.global_basis.z * -0.9)
+	_capture_close_view = _capture_close_view.looking_at(face, Vector3.UP)
+	_capture_overlay = ColorRect.new()
+	_capture_overlay.color = Color(0, 0, 0, 0)
+	_capture_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	$UI.add_child(_capture_overlay)
+	_capture_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	return true
+
+
+func _process(delta: float) -> void:
+	if capture_reason.is_empty() or run_ended:
+		return
+	_capture_elapsed += delta
+	if _capture_elapsed < 0.6:
+		_capture_overlay.color.a = clampf((_capture_elapsed - 0.3) / 0.3, 0.0, 1.0)
+	elif _capture_elapsed < 1.2:
+		transition_camera.global_transform = _capture_close_view
+		_capture_overlay.color.a = 1.0 - clampf((_capture_elapsed - 0.6) / 0.2, 0.0, 1.0)
+	else:
+		fail_from_threat(capture_reason)

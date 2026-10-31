@@ -104,7 +104,7 @@ func start_encounter(player_point: Vector3 = Vector3(4.1, 0, -2.0)) -> void:
 
 func danger_window(settings: CorridorEntityConfig) -> void:
 	var entity: CorridorEntity = game.outage.entity
-	game.threats.advance(settings.warning_seconds + 0.02)
+	game.threats.advance(entity.warning_duration + 0.02)
 	expect(entity.phase == CorridorEntity.Phase.ACTIVE, "Warning turns into the danger window")
 	expect(entity.duration >= settings.min_encounter_seconds and entity.duration <= settings.max_encounter_seconds, "Danger lasts a random 3-5 seconds")
 	expect(entity.footsteps_audio.playing and not entity.warning_audio.playing, "Footsteps replace the warning")
@@ -146,6 +146,7 @@ func _run() -> void:
 	game.power.set_flashlight_enabled(false)
 	while entity.phase == CorridorEntity.Phase.ACTIVE:
 		game.threats.advance(0.2)
+	game.threats.advance(settings.retreat_seconds)
 	expect(entity.phase == CorridorEntity.Phase.WAITING and not game.run_ended, "Freezing without the beam survives the window")
 	expect(entity.repeat_left >= settings.min_repeat_seconds and entity.repeat_left <= settings.max_repeat_seconds, "The next encounter waits 15-25 seconds")
 	expect(not entity.footsteps_audio.playing and entity.departure_audio.playing and not entity.visual.visible, "Departure plays and cleans the figure")
@@ -180,7 +181,8 @@ func _run() -> void:
 	aim_at_entity(active)
 	expect(active.beam_hits(), "Flashlight cone reaches the figure after partial movement exposure")
 	var remaining_budget := settings.error_budget_seconds - active.error_seconds + 0.01
-	game.threats.advance(remaining_budget)
+	for sample: int in ceili(remaining_budget / 0.1):
+		game.threats.advance(0.1)
 	expect(active.is_chasing and not game.run_ended and active.error_seconds >= settings.error_budget_seconds, "Movement and flashlight exposure together provoke a chase without instant death")
 	game.dev_menu.set_debug_hud_enabled(true)
 	game.dev_menu._process(0.0)

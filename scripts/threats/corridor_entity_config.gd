@@ -6,6 +6,12 @@ extends Resource
 @export_range(0.5, 15.0) var min_encounter_seconds: float = 3.0
 @export_range(0.5, 15.0) var max_encounter_seconds: float = 5.0
 @export_range(0.1, 5.0) var error_budget_seconds: float = 1.0
+@export_range(0.1, 8.0) var error_recovery_seconds: float = 2.0
+@export_range(1.0, 20.0) var chase_seconds: float = 6.0
+@export_range(0.0, 5.0) var forced_exit_warning_bonus: float = 2.0
+@export_range(0.2, 4.0) var retreat_seconds: float = 1.5
+## Optional designer-provided WAV, intentionally empty until assigned.
+@export var chase_sound: AudioStream
 @export_range(1.0, 60.0) var min_repeat_seconds: float = 15.0
 @export_range(1.0, 60.0) var max_repeat_seconds: float = 25.0
 @export_range(0.5, 8.0) var near_radius: float = 3.5

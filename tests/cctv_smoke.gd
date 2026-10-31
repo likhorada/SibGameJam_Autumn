@@ -38,7 +38,7 @@ func _run() -> void:
 	await create_timer(0.65).timeout
 	_expect(system.watching and app.image.visible, "Launching CCTV connects feed")
 	_expect(app.input_enabled, "Active CCTV receives controls")
-	_expect(_count_viewports(game) == 1, "Exactly one feed SubViewport")
+	_expect(_count_viewports(system) == 1, "Exactly one feed SubViewport (apartment rendering is separate)")
 	var combinations: Dictionary = {}
 	for index: int in system.cameras.size():
 		app.directory.select(index)

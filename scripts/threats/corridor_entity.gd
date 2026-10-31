@@ -1,7 +1,7 @@
 class_name CorridorEntity
 extends CharacterBody3D
 ## Driven by PowerOutage's encounter clock; pursuit uses the physics collision body.
-enum Phase { DORMANT, WAITING, WARNING, ACTIVE }
+enum Phase { DORMANT, WAITING, WARNING, ACTIVE, RETREATING }
 const VISUAL := preload("res://scenes/threats/corridor_entity.tscn")
 const SPILL_HIT_RANGE: float = 2.2
 const SPILL_HIT_ANGLE: float = 70.0
@@ -15,6 +15,7 @@ var visual: Node3D
 var warning_audio: AudioStreamPlayer3D
 var footsteps_audio: AudioStreamPlayer3D
 var departure_audio: AudioStreamPlayer3D
+var chase_audio: AudioStreamPlayer3D
 var error_seconds: float = 0.0
 var repeat_left: float = 0.0
 var duration: float = 0.0
@@ -26,6 +27,9 @@ var _collision_shape: CollisionShape3D
 var _zone: Area3D
 var _routes: Node3D
 var _rng := RandomNumberGenerator.new()
+var warning_duration: float = 2.0
+var chase_elapsed: float = 0.0
+var _retreat_elapsed: float = 0.0
 
 
 func bind(value: Node3D) -> void:
@@ -52,12 +56,26 @@ func _ready() -> void:
 	warning_audio.pitch_scale = settings.warning_pitch
 	footsteps_audio = _audio(settings.footsteps)
 	departure_audio = _audio(settings.departure_sound)
+	chase_audio = _audio(settings.chase_sound)
 
 
 func _physics_process(delta: float) -> void:
-	if phase != Phase.ACTIVE or not is_chasing or game.run_ended:
+	if game.run_ended or not game.capture_reason.is_empty():
 		return
-	_pursue_player(delta)
+	if phase == Phase.ACTIVE:
+		if is_chasing:
+			_pursue_player(delta)
+		else:
+			var destination := _from.lerp(_to, clampf(elapsed / maxf(duration, 0.1), 0.0, 1.0))
+			var motion := destination - global_position
+			# Walking routes also respect walls and the player; no position warps.
+			move_and_collide(motion.limit_length(2.5 * delta))
+	elif phase == Phase.RETREATING:
+		var direction: Vector3 = global_position - game.player.global_position
+		direction.y = 0.0
+		if direction.length_squared() > 0.001:
+			visual.look_at(global_position + direction, Vector3.UP)
+			move_and_collide(direction.normalized() * 1.5 * delta)
 
 
 func _audio(stream: AudioStream) -> AudioStreamPlayer3D:
@@ -90,6 +108,14 @@ func advance(delta: float) -> void:
 	if game.power.powered or game.run_ended:
 		stop()
 		return
+	if not game.capture_reason.is_empty():
+		return
+	if phase == Phase.RETREATING:
+		_retreat_elapsed += delta
+		visual.scale = Vector3.ONE * (1.0 - clampf(_retreat_elapsed / maxf(0.2, settings.retreat_seconds), 0.0, 1.0))
+		if _retreat_elapsed >= settings.retreat_seconds:
+			_finish_departure()
+		return
 	var position: Vector3 = game.player.global_position
 	var displacement := position - _last_player_position
 	displacement.y = 0.0
@@ -101,37 +127,52 @@ func advance(delta: float) -> void:
 		return
 	if phase == Phase.WARNING:
 		elapsed += delta
-		if elapsed >= settings.warning_seconds:
+		if elapsed >= warning_duration:
 			phase = Phase.ACTIVE
 			elapsed = 0.0
 			duration = _rng.randf_range(maxf(0.5, settings.min_encounter_seconds), maxf(settings.min_encounter_seconds, settings.max_encounter_seconds))
 			warning_audio.stop()
 			footsteps_audio.play()
 		return
+	if is_chasing:
+		chase_elapsed += delta
+		if chase_elapsed >= settings.chase_seconds:
+			_begin_departure()
+		return
 	var consumed := minf(delta, maxf(0.0, duration - elapsed))
 	elapsed += consumed
-	if not is_chasing:
-		global_position = _from.lerp(_to, clampf(elapsed / duration, 0.0, 1.0))
 	if not footsteps_audio.playing:
 		footsteps_audio.play()
 	var distance := Vector2(position.x - visual.global_position.x, position.z - visual.global_position.z).length()
 	var moving: bool = game.mode == game.Mode.WALKING and displacement.length() / maxf(delta, 0.001) > settings.movement_threshold
-	if not is_chasing and in_corridor() and distance <= settings.near_radius and (moving or beam_hits()):
-		error_seconds = minf(settings.error_budget_seconds, error_seconds + consumed)
+	var exposed: bool = not game.is_hidden() and distance <= settings.near_radius and ThreatAwareness.clear_line(game, global_position + Vector3.UP * 1.2, position + Vector3.UP * 1.0)
+	if exposed and (moving or beam_hits()):
+		error_seconds = minf(settings.error_budget_seconds, error_seconds + minf(consumed, 0.1))
 		if error_seconds + 0.000001 >= settings.error_budget_seconds:
+			error_seconds = settings.error_budget_seconds
 			is_chasing = true
+			chase_elapsed = 0.0
 			velocity = Vector3.ZERO
-	if elapsed >= duration:
-		visual.hide()
-		footsteps_audio.stop()
-		departure_audio.play()
-		phase = Phase.WAITING
-		is_chasing = false
-		velocity = Vector3.ZERO
-		repeat_left = _rng.randf_range(maxf(1.0, settings.min_repeat_seconds), maxf(settings.min_repeat_seconds, settings.max_repeat_seconds))
+			footsteps_audio.pitch_scale = 1.3
+			if chase_audio.stream != null:
+				chase_audio.play()
+	else:
+		error_seconds = maxf(0.0, error_seconds - consumed * settings.error_budget_seconds / maxf(0.1, settings.error_recovery_seconds))
+	if error_seconds > 0.0:
+		var target := Vector3(position.x, global_position.y, position.z)
+		if target.distance_squared_to(global_position) > 0.001:
+			visual.look_at(target, Vector3.UP)
+		visual.rotation.z = 0.15 * error_seconds / settings.error_budget_seconds
+	else:
+		visual.rotation.z = 0.0
+	if elapsed >= duration and not is_chasing:
+		_begin_departure()
 
 
 func _pursue_player(delta: float) -> void:
+	if game.is_hidden():
+		_begin_departure()
+		return
 	var player_position: Vector3 = game.player.global_position
 	var to_player := player_position - global_position
 	to_player.y = 0.0
@@ -152,6 +193,8 @@ func _pursue_player(delta: float) -> void:
 
 
 func _touching_player() -> bool:
+	if game.is_hidden() or not game.capture_reason.is_empty():
+		return false
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = _collision_shape.shape
 	query.transform = _collision_shape.global_transform
@@ -173,7 +216,7 @@ func _try_encounter() -> bool:
 			var origin := b if reversed else a
 			var target := a if reversed else b
 			var distance := origin.distance_to(game.player.global_position)
-			if distance >= settings.min_spawn_distance and distance <= settings.max_spawn_distance and _clear_spawn(origin):
+			if distance >= settings.min_spawn_distance and distance <= settings.max_spawn_distance and _clear_spawn(origin) and _clear_route(origin, target) and ThreatAwareness.clear_line(game, origin + Vector3.UP * 1.2, game.player.global_position + Vector3.UP * 1.2):
 				candidates.append(origin)
 				destinations.append(target)
 	if candidates.is_empty():
@@ -182,15 +225,56 @@ func _try_encounter() -> bool:
 	_from = candidates[index]
 	_to = destinations[index]
 	global_position = _from
+	visual.scale = Vector3.ONE
+	visual.rotation.z = 0.0
 	visual.look_at(_to, Vector3.UP)
 	visual.show()
 	phase = Phase.WARNING
 	elapsed = 0.0
 	error_seconds = 0.0
 	is_chasing = false
+	chase_elapsed = 0.0
+	warning_duration = settings.warning_seconds
+	if game.prepare_for_threat():
+		warning_duration += settings.forced_exit_warning_bonus
+	_last_player_position = game.player.global_position
+	footsteps_audio.pitch_scale = 1.0
 	departure_audio.stop()
 	warning_audio.play()
+	if is_instance_valid(game.visual_effects):
+		game.visual_effects.trigger_scare()
 	return true
+
+
+func _clear_route(origin: Vector3, target: Vector3) -> bool:
+	# Check the complete capsule sweep against architecture, not just the spawn.
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = _collision_shape.shape
+	query.transform.origin = origin + Vector3.UP * COLLISION_HEIGHT * 0.5
+	query.motion = target - origin
+	query.collision_mask = 1
+	query.exclude = [get_rid(), game.player.get_rid()]
+	var fractions := get_world_3d().direct_space_state.cast_motion(query)
+	return fractions[0] >= 0.999
+
+
+func _begin_departure() -> void:
+	phase = Phase.RETREATING
+	is_chasing = false
+	velocity = Vector3.ZERO
+	_retreat_elapsed = 0.0
+	footsteps_audio.pitch_scale = 0.85
+	chase_audio.stop()
+	departure_audio.play()
+
+
+func _finish_departure() -> void:
+	visual.hide()
+	visual.scale = Vector3.ONE
+	visual.rotation.z = 0.0
+	footsteps_audio.stop()
+	phase = Phase.WAITING
+	repeat_left = _rng.randf_range(maxf(1.0, settings.min_repeat_seconds), maxf(settings.min_repeat_seconds, settings.max_repeat_seconds))
 
 
 func _clear_spawn(origin: Vector3) -> bool:
@@ -231,9 +315,12 @@ func stop() -> void:
 	error_seconds = 0.0
 	repeat_left = 0.0
 	is_chasing = false
+	chase_elapsed = 0.0
 	velocity = Vector3.ZERO
 	if is_instance_valid(visual):
 		visual.hide()
-	for audio: AudioStreamPlayer3D in [warning_audio, footsteps_audio, departure_audio]:
+		visual.scale = Vector3.ONE
+		visual.rotation.z = 0.0
+	for audio: AudioStreamPlayer3D in [warning_audio, footsteps_audio, departure_audio, chase_audio]:
 		if is_instance_valid(audio):
 			audio.stop()

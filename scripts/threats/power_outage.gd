@@ -52,7 +52,7 @@ func set_entity_enabled(value: bool) -> void:
 
 
 func has_active_encounter() -> bool:
-	return entity.phase in [CorridorEntity.Phase.WARNING, CorridorEntity.Phase.ACTIVE]
+	return entity.phase in [CorridorEntity.Phase.WARNING, CorridorEntity.Phase.ACTIVE, CorridorEntity.Phase.RETREATING]
 
 
 func _on_power_changed(powered: bool) -> void:

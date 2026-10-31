@@ -1,8 +1,8 @@
 class_name PsychNeighbor
 extends ThreatEvent
-## Scripted visit only: no navigation, pursuit or player-position damage checks.
+## Door race followed by a visible search. An unseen hiding player is safe.
 
-enum Visit { DORMANT, APPROACHING, RATTLING, ENTERING, DEPARTING }
+enum Visit { DORMANT, APPROACHING, RATTLING, ENTERING, DEPARTING, RETREATING, SEARCHING }
 const VISUAL := preload("res://scenes/threats/psych_neighbor.tscn")
 
 @export var settings: PsychNeighborConfig = preload("res://data/threats/psych_neighbor.tres")
@@ -16,14 +16,21 @@ var entry_seconds: float = 0.0
 var _elapsed: float = 0.0
 var _handle_left: float = 0.0
 var _entry_from: Vector3
-var _departure_from: Vector3
 var _rng := RandomNumberGenerator.new()
+var awareness := ThreatAwareness.new()
+var _search_route: Array[Vector3] = []
+var _depart_route: Array[Vector3] = []
+var _inside: bool = false
 
 
 func bind(value: Node3D) -> void:
 	game = value
 	door = game.get_node("Apartment/RoomDoor")
 	door.changed.connect(_on_door_changed)
+	_search_route.append(door.get_node("Threshold").global_position)
+	for marker: Node3D in game.get_node("Apartment/PoliceRoute").get_children():
+		if marker.name != "Entry":
+			_search_route.append(marker.global_position)
 
 
 func _ready() -> void:
@@ -45,6 +52,10 @@ func _ready() -> void:
 	handle_audio.volume_db = settings.handle_volume_db
 	visual.add_child(handle_audio)
 	handle_audio.position.y = 1.1
+	awareness.confirm_seconds = settings.detection_seconds
+	awareness.recovery_seconds = settings.suspicion_recovery_seconds
+	awareness.sight_range = settings.sight_range
+	awareness.half_angle = settings.sight_half_angle
 
 
 func can_start() -> bool:
@@ -55,6 +66,8 @@ func warning_started() -> void:
 	visit = Visit.APPROACHING
 	_elapsed = 0.0
 	entry_seconds = 0.0
+	_inside = false
+	awareness.suspicion = 0.0
 	visual.global_position = door.get_node("Approach").global_position
 	visual.show()
 	_face(door.get_node("Waiting").global_position)
@@ -70,6 +83,15 @@ func active_started() -> void:
 
 
 func advance(delta: float) -> void:
+	if not game.capture_reason.is_empty():
+		return
+	if visit in [Visit.SEARCHING, Visit.DEPARTING] and _inside:
+		if awareness.advance(game, visual, delta):
+			game.begin_threat_capture("NEIGHBOR_DEATH", visual)
+			return
+		if awareness.suspicion > 0.0:
+			footsteps_audio.stop()
+			return
 	_elapsed += delta
 	match visit:
 		Visit.APPROACHING:
@@ -82,35 +104,43 @@ func advance(delta: float) -> void:
 				_play_handle_sound()
 				_handle_left = 1.1
 			if _elapsed >= settings.rattle_seconds:
-				visit = Visit.DEPARTING
-				_elapsed = 0.0
-				_departure_from = visual.global_position
-				handle_audio.stop()
-				_face(door.get_node("Approach").global_position)
-				footsteps_audio.play()
+				_begin_departure()
 		Visit.ENTERING:
 			entry_seconds += delta
 			var progress := clampf(entry_seconds / maxf(0.2, settings.attack_delay), 0.0, 1.0)
 			visual.global_position = _entry_from.lerp(door.get_node("Threshold").global_position, progress)
 			_steps()
 			if progress >= 1.0:
-				game.fail_from_threat("NEIGHBOR_DEATH")
+				_inside = true
+				visit = Visit.SEARCHING
+				_elapsed = 0.0
+		Visit.RETREATING:
+			visual.global_position = _entry_from.lerp(door.get_node("Waiting").global_position, clampf(_elapsed / 0.6, 0.0, 1.0))
+			if _elapsed >= 0.6:
+				_begin_rattle()
+		Visit.SEARCHING:
+			_move_route(_search_route, _elapsed / settings.search_seconds)
+			_steps()
+			if _elapsed >= settings.search_seconds:
+				_begin_departure()
 		Visit.DEPARTING:
-			visual.global_position = _departure_from.lerp(door.get_node("Approach").global_position, clampf(_elapsed / maxf(0.5, settings.departure_seconds), 0.0, 1.0))
+			_move_route(_depart_route, _elapsed / maxf(0.5, settings.departure_seconds))
 			_steps()
 			if _elapsed >= settings.departure_seconds:
 				resolved.emit(&"survived")
 
 
 func _on_door_changed(open: bool) -> void:
-	if visit not in [Visit.RATTLING, Visit.ENTERING, Visit.DEPARTING]:
+	if visit not in [Visit.RATTLING, Visit.ENTERING, Visit.DEPARTING, Visit.RETREATING] or _inside:
 		return
-	if open:
+	if open and visit != Visit.ENTERING:
 		_begin_entry()
 	elif visit == Visit.ENTERING:
 		# The door won the race; he remains dangerous until he actually leaves.
-		visual.global_position = door.get_node("Waiting").global_position
-		_begin_rattle()
+		visit = Visit.RETREATING
+		_entry_from = visual.global_position
+		_elapsed = 0.0
+		_face(door.get_node("Waiting").global_position)
 
 
 func _begin_rattle() -> void:
@@ -135,12 +165,42 @@ func _play_handle_sound() -> void:
 
 
 func _begin_entry() -> void:
+	if is_instance_valid(game.visual_effects):
+		game.visual_effects.trigger_scare()
 	visit = Visit.ENTERING
 	entry_seconds = 0.0
 	_elapsed = 0.0
 	_entry_from = visual.global_position
 	_face(door.get_node("Threshold").global_position)
 	footsteps_audio.play()
+	handle_audio.stop()
+
+
+func _begin_departure() -> void:
+	visit = Visit.DEPARTING
+	_elapsed = 0.0
+	_depart_route.clear()
+	_depart_route.append(visual.global_position)
+	if _inside:
+		for index: int in range(_search_route.size() - 2, -1, -1):
+			_depart_route.append(_search_route[index])
+	_depart_route.append(door.get_node("Waiting").global_position)
+	_depart_route.append(door.get_node("Approach").global_position)
+	handle_audio.stop()
+	_steps()
+
+
+func _move_route(points: Array[Vector3], progress: float) -> void:
+	var cursor := clampf(progress, 0.0, 1.0) * (points.size() - 1)
+	var index := mini(int(cursor), points.size() - 2)
+	var destination := points[index].lerp(points[index + 1], cursor - index)
+	# A closed entrance holds an indoor visitor instead of letting him phase out.
+	if _inside and not door.is_open and destination.x >= door.global_position.x:
+		if not door.set_open(true):
+			_elapsed = maxf(0.0, _elapsed - 0.1)
+			return
+	_face(destination)
+	visual.global_position = destination
 
 
 func _steps() -> void:
@@ -160,6 +220,8 @@ func resolved_started(_outcome: StringName) -> void:
 func ended(_outcome: StringName) -> void:
 	visit = Visit.DORMANT
 	entry_seconds = 0.0
+	awareness.suspicion = 0.0
+	_inside = false
 	if is_instance_valid(visual):
 		visual.hide()
 	if is_instance_valid(footsteps_audio):

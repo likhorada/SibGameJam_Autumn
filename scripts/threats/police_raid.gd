@@ -1,6 +1,6 @@
 class_name PoliceRaid
 extends ThreatEvent
-## Scripted room check. Hiding state is authoritative; no pursuit or navigation AI.
+## Visible visit; warning is safe, capture requires body-based confirmed sight.
 
 enum Visit { DORMANT, WARNING, SEARCHING, DEPARTING }
 const VISUAL := preload("res://scenes/threats/police_officer.tscn")
@@ -11,6 +11,10 @@ var visual: Node3D
 var knock_audio: AudioStreamPlayer3D
 var voice_audio: AudioStreamPlayer3D
 var footsteps_audio: AudioStreamPlayer3D
+var arrival_audio: AudioStreamPlayer3D
+var awareness := ThreatAwareness.new()
+var _approach: Vector3
+var _entry_pending: bool = false
 var _elapsed: float = 0.0
 var _knock_left: float = 0.0
 var _voice_left: float = 0.0
@@ -21,7 +25,6 @@ var _departure: Array[Vector3] = []
 
 func bind(value: Node3D) -> void:
 	game = value
-	game.hiding_changed.connect(_on_hiding_changed)
 	for marker: Node3D in game.get_node("Apartment/PoliceRoute").get_children():
 		_route.append(marker.global_position)
 	_departure.assign(_route)
@@ -35,6 +38,11 @@ func _ready() -> void:
 	knock_audio = _audio(settings.knock_sound, settings.warning_volume_db)
 	voice_audio = _audio(settings.warning_voice if settings.warning_voice != null else settings.knock_sound, settings.warning_volume_db)
 	footsteps_audio = _audio(settings.footsteps, settings.footsteps_volume_db)
+	arrival_audio = _audio(settings.arrival_sound, settings.warning_volume_db)
+	awareness.confirm_seconds = settings.detection_seconds
+	awareness.recovery_seconds = settings.suspicion_recovery_seconds
+	awareness.sight_range = settings.sight_range
+	awareness.half_angle = settings.sight_half_angle
 
 
 func _audio(stream: AudioStream, volume: float) -> AudioStreamPlayer3D:
@@ -56,8 +64,15 @@ func can_start() -> bool:
 func warning_started() -> void:
 	visit = Visit.WARNING
 	_elapsed = 0.0
-	visual.global_position = _route[0]
-	visual.hide()
+	awareness.suspicion = 0.0
+	_approach = game.room_door.get_node("Approach").global_position
+	visual.global_position = _approach
+	visual.look_at(_route[0], Vector3.UP)
+	visual.show()
+	game.prepare_for_threat()
+	if arrival_audio.stream != null:
+		arrival_audio.play()
+	footsteps_audio.play()
 	knock_audio.play()
 	_knock_left = maxf(1.0, settings.knock_interval)
 	_voice_left = maxf(0.0, settings.voice_delay)
@@ -70,10 +85,7 @@ func active_started() -> void:
 	_voice_pending = false
 	knock_audio.stop()
 	voice_audio.stop()
-	game.room_door.set_open(true)
-	if not game.is_hidden():
-		game.fail_from_threat("POLICE_DEATH")
-		return
+	_entry_pending = not game.room_door.force_open(game)
 	visual.show()
 	visual.global_position = _route[0]
 	footsteps_audio.pitch_scale = 1.0
@@ -81,8 +93,14 @@ func active_started() -> void:
 
 
 func advance(delta: float) -> void:
+	if not game.capture_reason.is_empty():
+		return
 	_elapsed += delta
 	if visit == Visit.WARNING:
+		var approach_progress := clampf(_elapsed / 3.0, 0.0, 1.0)
+		visual.global_position = _approach.lerp(_route[0], approach_progress)
+		if approach_progress >= 1.0:
+			footsteps_audio.stop()
 		if _voice_pending:
 			_voice_left -= delta
 			if _voice_left <= 0.0:
@@ -95,8 +113,16 @@ func advance(delta: float) -> void:
 			_voice_left = maxf(0.0, settings.voice_delay)
 			_voice_pending = true
 	elif visit in [Visit.SEARCHING, Visit.DEPARTING]:
-		if not game.is_hidden():
-			game.fail_from_threat("POLICE_DEATH")
+		if _entry_pending:
+			_entry_pending = not game.room_door.force_open(game)
+			_elapsed = 0.0
+			return
+		if awareness.advance(game, visual, delta):
+			game.begin_threat_capture("POLICE_DEATH", visual)
+			return
+		if awareness.suspicion > 0.0:
+			_elapsed = maxf(0.0, _elapsed - delta)
+			footsteps_audio.stop()
 			return
 		if not footsteps_audio.playing:
 			footsteps_audio.play()
@@ -123,11 +149,6 @@ func _move(points: Array[Vector3], progress: float) -> void:
 	visual.global_position = position
 
 
-func _on_hiding_changed(hidden: bool) -> void:
-	if not hidden and visit in [Visit.SEARCHING, Visit.DEPARTING]:
-		game.fail_from_threat("POLICE_DEATH")
-
-
 func resolved_started(outcome: StringName) -> void:
 	ended(outcome)
 
@@ -136,6 +157,9 @@ func ended(_outcome: StringName) -> void:
 	visit = Visit.DORMANT
 	_voice_pending = false
 	_elapsed = 0.0
+	_entry_pending = false
+	awareness.suspicion = 0.0
+	game.room_door.held_by_police = false
 	if is_instance_valid(visual):
 		visual.hide()
 	if is_instance_valid(knock_audio):
@@ -145,3 +169,5 @@ func ended(_outcome: StringName) -> void:
 		voice_audio.stream = settings.warning_voice if settings.warning_voice != null else settings.knock_sound
 	if is_instance_valid(footsteps_audio):
 		footsteps_audio.stop()
+	if is_instance_valid(arrival_audio):
+		arrival_audio.stop()

@@ -11,7 +11,7 @@ id = &"psych_neighbor"
 script = ExtResource("2")
 id = &"police_raid"
 warning_seconds = 12.0
-max_active_seconds = 20.0
+max_active_seconds = 40.0
 
 [sub_resource type="Resource" id="Outage"]
 script = ExtResource("2")
