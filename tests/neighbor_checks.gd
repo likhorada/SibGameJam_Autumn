@@ -25,7 +25,7 @@ func setup() -> void:
 	get_tree().root.add_child(game)
 	get_tree().current_scene = game
 	game.transition_seconds = 0.02
-	game.power.random_outages_enabled = false
+	game.threats.set_event_enabled(&"power_outage", false)
 	game.threats.set_process(false)
 	game.threats.set_event_enabled(&"police_raid", false)
 	game.shift.set_process(false)
@@ -188,7 +188,7 @@ func _run() -> void:
 	game = get_tree().current_scene
 	game.threats.set_process(false)
 	game.threats.set_event_enabled(&"police_raid", false)
-	game.power.random_outages_enabled = false
+	game.threats.set_event_enabled(&"power_outage", false)
 	expect(not game.run_ended and game.failure_reason.is_empty() and not game.room_door.is_open and game.neighbor.visit == PsychNeighbor.Visit.DORMANT and not game.threats.is_busy(), "Real restart creates closed door, clean neighbor and fresh run")
 	game.shift.set_process(false)
 	game.threats.run_seconds = 46.0

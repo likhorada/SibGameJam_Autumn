@@ -37,7 +37,7 @@ func _run() -> void:
 	game.transition_seconds = 0.04
 	var shift: ShiftDirector = game.shift
 	shift.set_process(false)
-	expect(not game.power.random_outages_enabled, "Random power outages blocked before alarm")
+	expect(not game.threats.random_allowed and not game.threats.is_busy(), "Random threats blocked before alarm")
 	expect(shift.code.length() == 4 and shift.branch == -1, "Code generated; street branch not chosen early")
 	game.enter_computer()
 	await create_timer(0.4).timeout
@@ -51,7 +51,9 @@ func _run() -> void:
 	shift.advance(59)
 	expect(is_equal_approx(shift.seconds_left, 1), "Deadline advances independently of chat")
 	shift.start_alarm()
-	expect(shift.state == ShiftDirector.State.ROUTE and game.power.random_outages_enabled, "Alarm starts route and enables outages")
+	await physics_frame
+	await physics_frame
+	expect(shift.state == ShiftDirector.State.ROUTE and game.threats.random_allowed, "Alarm starts route and enables random threats")
 	shift.advance(20)
 	expect(shift.state == ShiftDirector.State.SCARE and game.mode == game.Mode.WALKING, "Office exit ejects player")
 	game.enter_computer()

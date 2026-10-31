@@ -20,7 +20,7 @@ func _run() -> void:
 	game = load("res://scenes/main.tscn").instantiate()
 	root.add_child(game)
 	current_scene = game
-	game.power.random_outages_enabled = false
+	game.threats.set_event_enabled(&"power_outage", false)
 	player = game.get_node("Player")
 	game.transition_seconds = 0.02
 	await _frames(3)

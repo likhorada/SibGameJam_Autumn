@@ -23,28 +23,24 @@ func _run() -> void:
 	await frames()
 	var power: ApartmentPower = game.power
 	# Exercise the outage system independently of the protected opening briefing.
-	power.random_outages_enabled = true
 	var board: ApartmentFusebox = power.board
+	game.threats.set_process(false)
 	power.set_process(false)
 	board.set_physics_process(false)
 	expect(power.powered and not power.flashlight.visible, "Starts powered without flashlight")
 	expect(not power.flashlight_spill.visible, "Near spill starts disabled")
-	expect(power.cooldown_left > 119.0 and power.cooldown_left <= 120.0, "Initial 120-second protection")
-	power.cooldown_left = 120.0
-	power._check_time = 0.0
-	power.outage_chance_per_second = 1.0
-	power.advance_outage_timer(119.5)
-	expect(power.powered, "Protection prevents even guaranteed random outage")
-	power.advance_outage_timer(0.5)
-	expect(power.powered, "End of protection does not force outage")
-	power.advance_outage_timer(0.99)
-	expect(power.powered, "One-second checks, not per-frame chance")
-	power.advance_outage_timer(0.02)
-	expect(not power.powered and power.flashlight.visible, "Eligible chance triggers outage and flashlight")
+	expect(game.threats.is_event_enabled(&"power_outage"), "Outage event stays enabled for the forced test")
+	power.trigger_outage()
+	expect(power.powered == false and power.flashlight.visible, "Forced outage cuts light and shows flashlight")
 	expect(power.flashlight_spill.visible, "Outage enables broad near spill")
 	for light: Light3D in power._lights:
 		expect(not light.visible, "Apartment light goes dark")
 	expect(power._environment.ambient_light_energy < 0.02, "Ambient is darkened too")
+	expect(power.flashlight_on, "Emergency flashlight starts on during blackout")
+	power.toggle_flashlight()
+	expect(not power.flashlight.visible and not power.flashlight_spill.visible, "F turns the flashlight off in the dark")
+	power.toggle_flashlight()
+	expect(power.flashlight.visible and power.flashlight_spill.visible, "F turns it back on")
 	game.enter_computer()
 	expect(game.mode == game.Mode.WALKING, "Computer cannot be entered without power")
 	board.set_active(true, game.transition_camera)
@@ -66,7 +62,7 @@ func _run() -> void:
 		board.advance(3.5)
 	expect(power.powered and not power.flashlight.visible, "Four latched levers restore power")
 	expect(not power.flashlight_spill.visible, "Repair disables near spill too")
-	expect(power.cooldown_left == 120.0, "Repair resets protection")
+	expect(not power.flashlight_on, "Repair clears flashlight state")
 	for light: Light3D in power._lights:
 		expect(light.visible, "Light restored")
 	# Cancel PC camera transitions safely on either side of the seated state.
@@ -143,9 +139,12 @@ func _run() -> void:
 	game.player.stamina.set_unlimited(false)
 	game.player.stamina.advance(1.5, true, true)
 	expect(is_equal_approx(game.player.stamina.value, 0.5), "Disabling unlimited restores drain")
-	power.clear_cooldown()
-	expect(power.cooldown_left == 0.0, "Dev clears cooldown")
+	power.toggle_flashlight()
+	expect(not power.flashlight.visible, "F cannot light a powered apartment")
 	power.restore_power()
+	game.threats.clear_cooldown()
+	expect(game.threats.wait_seconds_left == 0.0 and not game.threats.is_busy(), "Dev clears the threat wait without forcing an event")
+	await create_timer(0.12).timeout
 	await create_timer(0.12).timeout
 	expect(game.dev_menu.is_open and not game.player.controls_enabled, "Dev repair exits board without restoring walking input under overlay")
 	game.dev_menu.close_menu()

@@ -59,7 +59,20 @@ try {
   const tap=async(code,name,vkey)=>{await key('keyDown',code,name,vkey);await key('keyUp',code,name,vkey);await sleep(150);};
   const mouse=async(type,point,buttons=0)=>call('Input.dispatchMouseEvent',{type,x:point[0],y:point[1],button:type==='mouseMoved'?'none':'left',buttons,clickCount:type==='mouseMoved'?0:1});
   const click=async point=>{await mouse('mouseMoved',point);await mouse('mousePressed',point,1);await mouse('mouseReleased',point);await sleep(150);};
-  const command=async name=>{const s=await state();expect(s.buttons[name], 'Missing dev button '+name);await click(s.buttons[name]);};
+  const command=async name=>{
+    let s=await state();expect(s.buttons[name], 'Missing dev button '+name);
+    if(name==='BACK'){
+      // Dev column may exceed the viewport: wheel the panel down before clicking.
+      for(let i=0;i<6;i++){
+        await call('Input.dispatchMouseEvent',{type:'mouseWheel',x:636,y:600,deltaX:0,deltaY:240});
+        await sleep(140);
+        const next=await state();
+        if(next.buttons.BACK[1]>=s.buttons.BACK[1]-1)break;
+        s=next;
+      }
+    }
+    await click(s.buttons[name]);
+  };
   const capture=async name=>{
     const image=await call('Page.captureScreenshot',{format:'png'});
     await fs.writeFile(path.join(artifacts,'power_web_'+name+'.png'),Buffer.from(image.data,'base64'));

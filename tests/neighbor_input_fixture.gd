@@ -7,7 +7,7 @@ func _ready() -> void:
 	TranslationServer.set_locale("ru")
 	super._ready()
 	transition_seconds = 0.04
-	power.random_outages_enabled = false
+	threats.set_event_enabled(&"power_outage", false)
 	threats.set_process(false)
 	shift.set_process(false)
 	_look_door()

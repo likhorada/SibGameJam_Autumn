@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" path="res://scenes/power/fusebox.tscn" id="Fusebox"]
 [ext_resource type="PackedScene" path="res://scenes/apartment/room_door.tscn" id="RoomDoor"]
 [ext_resource type="PackedScene" path="res://scenes/apartment/hiding_spots.tscn" id="HidingSpots"]
+[ext_resource type="PackedScene" path="res://scenes/apartment/corridor_encounters.tscn" id="CorridorEncounters"]
 [ext_resource type="PackedScene" path="res://scenes/apartment/wardrobe_shell.tscn" id="WardrobeShell"]
 
 [sub_resource type="Environment" id="Environment"]
@@ -367,6 +368,8 @@ size = Vector3(0.35, 0.07, 0.35)
 position = Vector3(3, 0, 1.1)
 
 [node name="HidingSpots" parent="." instance=ExtResource("HidingSpots")]
+
+[node name="CorridorEncounters" parent="." instance=ExtResource("CorridorEncounters")]
 
 [node name="PoliceRoute" type="Node3D" parent="."]
 

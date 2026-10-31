@@ -161,7 +161,7 @@ func _integration() -> void:
 	game.transition_seconds = 0.02
 	var manager: ThreatManager = game.threats
 	manager.set_process(false)
-	expect(manager._events.size() == 2 and manager._events[&"psych_neighbor"] is PsychNeighbor and manager._events[&"police_raid"] is PoliceRaid, "Production registers two real threats")
+	expect(manager._events.size() == 3 and manager._events[&"psych_neighbor"] is PsychNeighbor and manager._events[&"police_raid"] is PoliceRaid and manager._events[&"power_outage"] is PowerOutage, "Production registers three real threats")
 	var neighbor: PsychNeighbor = game.neighbor
 	manager.request_event(&"psych_neighbor", true)
 	game.power.trigger_outage()
@@ -177,21 +177,20 @@ func _integration() -> void:
 	expect(game.power.powered, "Power cannot interrupt the scripted scare")
 	game.shift.complete_scare()
 	expect(not manager.has_blocker(&"scripted_scare"), "Scare completion releases reservation")
-	game.power.random_outages_enabled = false
+	game.threats.set_event_enabled(&"power_outage", true)
 	game.power.trigger_outage()
 	expect(not game.power.powered and manager.has_blocker(&"blackout"), "Real blackout holds blocker until repair")
-	expect(not manager.request_event(&"psych_neighbor", true), "Probe cannot start during real blackout")
+	expect(not manager.request_event(&"psych_neighbor", true), "Manual blackout reserves the world")
 	game.disable_threats()
 	expect(game.power.powered and not manager.has_blocker(&"blackout") and not manager.enabled, "DisableThreats safely restores real power and clears blocker")
 	manager.reset_run()
-	var outage := ProbeEvent.new()
-	manager.register_event(&"power_outage", outage)
-	manager.request_event(&"power_outage", true)
+	game.player.global_position = Vector3(0, 0.03, 1.0)
 	game.power.trigger_outage()
-	expect(not game.power.powered and manager.active_id == &"power_outage", "Power adapter can cut real power inside its own reservation")
-	expect(not manager.request_event(&"psych_neighbor", true), "Power adapter permission cannot admit a second threat")
+	expect(not game.power.powered and manager.active_id == &"power_outage", "Outage adapter cuts real power inside its own reservation")
+	expect(not manager.request_event(&"psych_neighbor", true), "Owned outage cannot admit a second threat")
+	expect(game.outage.entity.phase == CorridorEntity.Phase.WAITING and not game.outage.entity.visual.visible, "Entity stays patient while the player is far from the corridor")
 	game.disable_threats()
-	expect(game.power.powered and outage.endings == [&"disabled"], "Disabling a reserved blackout cleans adapter and restores real power")
+	expect(game.power.powered and manager.active_id.is_empty() and not manager.enabled, "Disabling a reserved blackout cleans adapter and restores real power")
 	game.queue_free()
 	await get_tree().process_frame
 	game = load("res://scenes/main.tscn").instantiate()
@@ -199,7 +198,7 @@ func _integration() -> void:
 	get_tree().current_scene = game
 	manager = game.threats
 	manager.set_process(false)
-	expect(manager.enabled and manager.active_id.is_empty() and manager.run_seconds < 1.0 and manager._events.size() == 2, "New scene resets flags and active event, and registers fresh threats")
+	expect(manager.enabled and manager.active_id.is_empty() and manager.run_seconds < 1.0 and manager._events.size() == 3, "New scene resets flags and active event, and registers fresh threats")
 	neighbor = game.neighbor
 	manager.request_event(&"psych_neighbor", true)
 	game.shift.stage = 2
@@ -207,7 +206,7 @@ func _integration() -> void:
 	game.mode = game.Mode.COMPUTER
 	game.shift._process(0.0)
 	expect(not game.terminal_ui.chat.session.quiz_started, "Final report waits for outstanding threat")
-	expect(not manager.random_allowed and not game.power.random_outages_enabled, "Report disables new random threats including legacy outages")
+	expect(not manager.random_allowed, "Report stage stops random threat selection including outages")
 	neighbor.resolved.emit(&"survived")
 	manager.advance(1.0)
 	game.shift._process(0.0)

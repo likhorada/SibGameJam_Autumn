@@ -3,7 +3,7 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
-const root=path.resolve(process.env.POLICE_WEB_ROOT || process.env.NEIGHBOR_WEB_ROOT || process.env.THREAT_WEB_ROOT || process.env.CHAT_WEB_ROOT || 'build/chat-web');
+const root=path.resolve(process.env.OUTAGE_WEB_ROOT || process.env.POLICE_WEB_ROOT || process.env.NEIGHBOR_WEB_ROOT || process.env.THREAT_WEB_ROOT || process.env.CHAT_WEB_ROOT || 'build/chat-web');
 const artifacts=path.join(process.env.LOCALAPPDATA,'Temp/opencode');
 const profile=await fs.mkdtemp(path.join(artifacts,'chat-chrome-'));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -12,6 +12,7 @@ const shiftMode=process.env.SHIFT_WEB==='1';
 const threatMode=process.env.THREAT_WEB==='1';
 const neighborMode=process.env.NEIGHBOR_WEB==='1';
 const policeMode=process.env.POLICE_WEB==='1';
+const outageMode=process.env.OUTAGE_WEB==='1';
 const server=http.createServer(async(req,res)=>{
   try {
     const name=new URL(req.url,'http://localhost').pathname;
@@ -48,7 +49,7 @@ try {
     requests.set(n,{resolve,reject,timer});ws.send(JSON.stringify({id:n,method,params}));
   });
   const evaluate=async expression=>(await call('Runtime.evaluate',{expression,returnByValue:true})).result.value;
-  const state=()=>evaluate(policeMode?'window.policeTelemetry':neighborMode?'window.neighborTelemetry':'window.chatTelemetry');
+  const state=()=>evaluate(outageMode?'window.outageTelemetry':policeMode?'window.policeTelemetry':neighborMode?'window.neighborTelemetry':'window.chatTelemetry');
   const expect=(value,message)=>{if(!value)throw Error(message);};
   const wait=async(predicate,message,seconds=10)=>{
     for(let i=0;i<seconds*20;i++){const s=await state();if(s&&predicate(s))return s;await sleep(50);}
@@ -88,7 +89,41 @@ try {
   await call('Runtime.enable');await call('Page.enable');
   await call('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
   const url='http://127.0.0.1:'+server.address().port+'/';
-  if(policeMode){
+  if(outageMode){
+    const command=async name=>{
+      await evaluate('window.outageTelemetry.command="";window.outageCommand='+JSON.stringify(name));
+      await wait(s=>s.command===name,'Outage test command not acknowledged: '+name);
+    };
+    for(const lang of ['ru','en']){
+      await call('Page.navigate',{url:url+'?lang='+lang});
+      await wait(s=>s.mode===2&&s.powered,'Outage PC fixture did not load',30);
+      await call('Page.bringToFront');
+      await call('Input.dispatchKeyEvent',{type:'keyDown',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+      await wait(s=>s.dev,'Outage F7 menu did not open');
+      await call('Input.dispatchKeyEvent',{type:'keyUp',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+      await sleep(300);
+      await click((await state()).buttons.TriggerPowerOutage);
+      await wait(s=>!s.dev&&!s.powered&&s.mode===0&&s.light,'TriggerPowerOutage did not cut power and eject into the dark');
+      await capture('outage_blackout_'+lang);
+      await command('corridor');
+      await sleep(2200); // Browser cooldown after the dev-menu pointer release.
+      await click([640,360]);
+      await wait(s=>s.captured&&s.in_corridor,'Corridor pointer capture failed');
+      await tap('KeyF','f',70,'f');
+      await wait(s=>!s.light,'Real F did not turn off the flashlight');
+      await tap('KeyF','f',70,'f');
+      await wait(s=>s.light,'Real F did not turn the flashlight back on');
+      await command('encounter');
+      await wait(s=>s.phase===2&&s.visible&&s.warn&&s.state===2,'Encounter warning did not start from a corridor route');
+      await capture('outage_warning_'+lang);
+      await command('active');
+      await wait(s=>s.phase===3&&s.steps&&!s.warn,'Danger window did not replace the warning with steps');
+      await capture('outage_entity_'+lang);
+      await command('die');
+      await wait(s=>s.ended&&s.reason==='ENTITY_DEATH','Walking error budget did not cause entity death');
+      await capture('outage_death_'+lang);
+    }
+  }else if(policeMode){
     const command=async name=>{
       await evaluate('window.policeTelemetry.command="";window.policeCommand='+JSON.stringify(name));
       await wait(s=>s.command===name,'Police test command not acknowledged: '+name);
@@ -258,5 +293,5 @@ try {
     await capture(perfect?'win':'lose');
   }
   expect(errors.length===0,'Browser errors: '+errors.join('\n'));
-  console.log(policeMode?'POLICE INPUT WEB: PASS (RU/EN, F7, PC escape, E hiding/exit, clamped mouse look, blocked walking, safe departure, early-exit death).':neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
+  console.log(outageMode?'OUTAGE INPUT WEB: PASS (RU/EN, F7 trigger, blackout eject, F flashlight, corridor encounter, budget death).':policeMode?'POLICE INPUT WEB: PASS (RU/EN, F7, PC escape, E hiding/exit, clamped mouse look, blocked walking, safe departure, early-exit death).':neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
 } finally {ws?.close();browser.kill();server.close();}

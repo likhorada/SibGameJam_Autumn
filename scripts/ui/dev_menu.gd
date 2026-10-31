@@ -17,6 +17,9 @@ var _neighbor_enabled: CheckButton
 var _trigger_neighbor: Button
 var _police_enabled: CheckButton
 var _trigger_police: Button
+var _outage_enabled: CheckButton
+var _entity_enabled: CheckButton
+var _trigger_outage: Button
 var _scroll: ScrollContainer
 
 
@@ -45,14 +48,14 @@ func bind(value: Node3D) -> void:
 		margin.add_theme_constant_override("margin_" + edge, 16)
 	_scroll.add_child(margin)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 10)
+	column.add_theme_constant_override("separation", 6)
 	margin.add_child(column)
 	var title := Label.new()
 	title.text = "DEV MENU"
 	title.add_theme_font_size_override("font_size", 24)
 	column.add_child(title)
 	_status = Label.new()
-	_status.custom_minimum_size = Vector2(420, 65)
+	_status.custom_minimum_size = Vector2(420, 42)
 	column.add_child(_status)
 	_unlimited = CheckButton.new()
 	_unlimited.text = "DEV_UNLIMITED"
@@ -60,7 +63,7 @@ func bind(value: Node3D) -> void:
 	column.add_child(_unlimited)
 	_button(column, "DEV_POWER_OFF", func(): game.power.trigger_outage())
 	_button(column, "DEV_POWER_ON", func(): game.power.restore_power())
-	_button(column, "DEV_CLEAR_COOLDOWN", func(): game.power.clear_cooldown())
+	_button(column, "DEV_CLEAR_COOLDOWN", func(): game.threats.clear_cooldown())
 	_neighbor_enabled = CheckButton.new()
 	_neighbor_enabled.text = "PsychNeighbor"
 	_neighbor_enabled.toggled.connect(func(value_enabled: bool): game.threats.set_event_enabled(&"psych_neighbor", value_enabled))
@@ -75,6 +78,17 @@ func bind(value: Node3D) -> void:
 	_trigger_police = _button(column, "TriggerPolice", func():
 		close_menu()
 		game.trigger_police())
+	_outage_enabled = CheckButton.new()
+	_outage_enabled.text = "PowerOutage"
+	_outage_enabled.toggled.connect(func(value_enabled: bool): game.threats.set_event_enabled(&"power_outage", value_enabled))
+	column.add_child(_outage_enabled)
+	_entity_enabled = CheckButton.new()
+	_entity_enabled.text = "CorridorEntity"
+	_entity_enabled.toggled.connect(func(value_enabled: bool): game.outage.set_entity_enabled(value_enabled))
+	column.add_child(_entity_enabled)
+	_trigger_outage = _button(column, "TriggerPowerOutage", func():
+		close_menu()
+		game.trigger_power_outage())
 	_button(column, "DisableThreats", func(): game.disable_threats())
 	_button(column, "OBS_DEV_NEXT", func():
 		close_menu()
@@ -87,7 +101,6 @@ func bind(value: Node3D) -> void:
 	_button(column, "DEV_CHAT_REPORT", func():
 		if not game.power.powered or game.threats.is_busy() or game.mode not in [game.Mode.WALKING, game.Mode.COMPUTER]:
 			return
-		game.power.random_outages_enabled = false
 		close_menu()
 		if is_instance_valid(game.shift):
 			game.shift.state = ShiftDirector.State.ENDED
@@ -103,7 +116,7 @@ func bind(value: Node3D) -> void:
 func _button(parent: Node, text: String, action: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
-	button.custom_minimum_size.y = 36
+	button.custom_minimum_size.y = 30
 	button.pressed.connect(action)
 	parent.add_child(button)
 	return button
@@ -133,13 +146,16 @@ func _process(delta: float) -> void:
 			open_menu()
 	if is_open:
 		_scroll.custom_minimum_size = Vector2(470, minf(620.0, maxf(180.0, get_viewport().get_visible_rect().size.y - 36.0)))
-		_status.text = tr("DEV_STATUS") % ["POWER_ON" if game.power.powered else "POWER_OFF", game.power.cooldown_left, str(game.power.board.latched)]
+		_status.text = tr("DEV_STATUS") % ["POWER_ON" if game.power.powered else "POWER_OFF", game.threats.wait_seconds_left, str(game.power.board.latched)]
 		_status.text += "\nThreats: %s / %s\nDoor: %s" % [ThreatManager.State.keys()[game.threats.state], game.threats.active_id, "OPEN" if game.room_door.is_open else "CLOSED"]
 		_unlimited.set_pressed_no_signal(game.player.stamina.unlimited)
 		_neighbor_enabled.set_pressed_no_signal(game.threats.is_event_enabled(&"psych_neighbor"))
 		_trigger_neighbor.disabled = not game.threats.can_start_external_event() or not game.threats.is_event_enabled(&"psych_neighbor")
 		_police_enabled.set_pressed_no_signal(game.threats.is_event_enabled(&"police_raid"))
 		_trigger_police.disabled = not game.threats.can_start_external_event() or not game.threats.is_event_enabled(&"police_raid")
+		_outage_enabled.set_pressed_no_signal(game.threats.is_event_enabled(&"power_outage"))
+		_entity_enabled.set_pressed_no_signal(game.outage.entity_enabled)
+		_trigger_outage.disabled = not game.threats.can_start_external_event() or not game.threats.is_event_enabled(&"power_outage")
 
 
 func open_menu() -> void:

@@ -31,6 +31,7 @@ var ambient: AmbientDirector
 var shift: ShiftDirector
 var neighbor: PsychNeighbor
 var police: PoliceRaid
+var outage: PowerOutage
 var hiding_spot: HidingSpot
 var _hide_entry_pose: Transform3D
 var _hidden_look := Vector2.ZERO
@@ -59,6 +60,12 @@ func _ready() -> void:
 	police = PoliceRaid.new()
 	police.bind(self)
 	threats.register_event(&"police_raid", police)
+	outage = PowerOutage.new()
+	outage.bind(self)
+	threats.register_event(&"power_outage", outage)
+	power.outage_request = threats.request_event.bind(&"power_outage", true)
+	power.danger_audio_active = func() -> bool:
+		return is_instance_valid(outage) and outage.has_active_encounter()
 	ambient = AmbientDirector.new()
 	add_child(ambient)
 	ambient.bind(self)
@@ -119,13 +126,18 @@ func _physics_process(_delta: float) -> void:
 	elif hiding_spots.has(player.interaction_id):
 		hint.text = tr(hiding_spots[player.interaction_id].prompt_key)
 	else:
-		hint.text = ""
+		hint.text = "" if power.powered else tr("FLASHLIGHT_HINT")
 
 
 func _input(event: InputEvent) -> void:
 	if dev_menu.is_open:
 		return
 	if mode == Mode.FUSEBOX or mode == Mode.FUSEBOX_ENTERING:
+		# The flashlight also stays one keypress away while repairing.
+		if event.is_action_pressed("flashlight") and not event.is_echo():
+			power.toggle_flashlight()
+			get_viewport().set_input_as_handled()
+			return
 		var moving := false
 		for action: String in ["move_forward", "move_backward", "move_left", "move_right"]:
 			moving = moving or event.is_action_pressed(action)
@@ -174,6 +186,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and hiding_spots.has(player.interaction_id):
 			enter_hiding(hiding_spots[player.interaction_id])
 			get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("flashlight") and not event.is_echo() and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		power.toggle_flashlight()
+		get_viewport().set_input_as_handled()
 
 
 func _notification(what: int) -> void:
@@ -434,7 +449,6 @@ func _on_dev_closed() -> void:
 
 func disable_threats() -> void:
 	threats.disable_threats()
-	power.random_outages_enabled = false
 	power.restore_power()
 
 
@@ -444,6 +458,10 @@ func trigger_neighbor() -> bool:
 
 func trigger_police() -> bool:
 	return threats.request_event(&"police_raid", true)
+
+
+func trigger_power_outage() -> bool:
+	return threats.request_event(&"power_outage", true)
 
 
 func fail_from_threat(reason: String) -> void:

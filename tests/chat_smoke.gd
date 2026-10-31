@@ -61,7 +61,6 @@ func _run() -> void:
 	current_scene = game
 	root.size = Vector2i(1280, 720)
 	game.transition_seconds = 0.04
-	game.power.random_outages_enabled = false
 	game.enter_computer()
 	await create_timer(0.2).timeout
 	var desktop: TerminalDesktop = game.terminal_ui
@@ -148,7 +147,6 @@ func _run() -> void:
 	await process_frame
 	var fresh := current_scene
 	expect(fresh != game and not fresh.terminal_ui.chat.session.quiz_started, "New run loads fresh scene and session")
-	fresh.power.random_outages_enabled = false
 	fresh.transition_seconds = 0.04
 	fresh.enter_computer()
 	await create_timer(0.2).timeout

@@ -35,7 +35,7 @@ func setup() -> void:
 	get_tree().root.add_child(game)
 	get_tree().current_scene = game
 	game.transition_seconds = 0.02
-	game.power.random_outages_enabled = false
+	game.threats.set_event_enabled(&"power_outage", false)
 	game.threats.set_process(false)
 	game.threats.set_event_enabled(&"psych_neighbor", false)
 	game.shift.set_process(false)
@@ -226,7 +226,7 @@ func _run() -> void:
 	await get_tree().process_frame
 	game = get_tree().current_scene
 	game.threats.set_process(false)
-	game.power.random_outages_enabled = false
+	game.threats.set_event_enabled(&"power_outage", false)
 	expect(not game.is_hidden() and game.hiding_spot == null and not game.run_ended and game.police.visit == PoliceRaid.Visit.DORMANT and not game.room_door.is_open, "Real restart clears hiding, police, death and opened door")
 	# Disabling a raid is safe and never forcibly exposes the player.
 	await setup()

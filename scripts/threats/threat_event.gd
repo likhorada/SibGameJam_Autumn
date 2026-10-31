@@ -11,6 +11,10 @@ func can_start() -> bool:
 	return false
 
 
+func can_schedule() -> bool:
+	return can_start()
+
+
 func warning_started() -> void:
 	pass
 

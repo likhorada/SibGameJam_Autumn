@@ -7,7 +7,6 @@ func _ready() -> void:
 	player.rotation = Vector3.ZERO
 	player.head.rotation = Vector3.ZERO
 	player.stop_motion(true)
-	power.random_outages_enabled = false
 
 
 func _process(_delta: float) -> void:
@@ -28,7 +27,7 @@ func _process(_delta: float) -> void:
 		var point := button.get_global_rect().get_center()
 		buttons[button.text] = [point.x, point.y]
 	var data := {
-		"powered": power.powered, "cooldown": power.cooldown_left,
+		"powered": power.powered, "cooldown": threats.wait_seconds_left,
 		"mode": int(mode), "dev": dev_menu.is_open,
 		"unlimited": player.stamina.unlimited, "stamina": player.stamina.value,
 		"progress": power.board.progress, "latched": power.board.latched,

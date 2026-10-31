@@ -19,7 +19,6 @@ var start_point: Vector3
 var status: Label
 var hack_status: Label
 var hack_button: Button
-var outages_allowed: bool
 var rng := RandomNumberGenerator.new()
 
 
@@ -28,8 +27,6 @@ func bind(value: Node3D) -> void:
 	rng.randomize()
 	code = "%04d" % rng.randi_range(1000, 9999)
 	drink = rng.randi_range(0, DATA.DRINKS.size() - 1)
-	outages_allowed = game.power.random_outages_enabled
-	game.power.random_outages_enabled = false
 	game.terminal_ui.chat.session.intro_completed.connect(_begin_deadline)
 	game.terminal_ui.chat.session.live_report = true
 	status = Label.new()
@@ -60,7 +57,6 @@ func _begin_deadline() -> void:
 func start_alarm() -> void:
 	if state != State.DEADLINE or not game.power.powered or game.mode != game.Mode.COMPUTER:
 		return
-	game.power.random_outages_enabled = outages_allowed and game.threats.enabled
 	_begin_route(DATA.OFFICE)
 	_update_status()
 
@@ -139,7 +135,6 @@ func _finish_stage() -> void:
 	if stage == 2:
 		state = State.REPORT
 		game.threats.random_allowed = false
-		game.power.random_outages_enabled = false
 		return
 	game.threats.random_allowed = false
 	game.threats.set_blocked(&"scare_pending", true)

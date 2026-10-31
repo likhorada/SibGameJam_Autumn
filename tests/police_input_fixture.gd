@@ -8,7 +8,7 @@ func _ready() -> void:
 		TranslationServer.set_locale(str(JavaScriptBridge.eval("new URL(location.href).searchParams.get('lang') || 'ru'")))
 	super._ready()
 	transition_seconds = 0.04
-	power.random_outages_enabled = false
+	threats.set_event_enabled(&"power_outage", false)
 	threats.set_process(false)
 	shift.set_process(false)
 	enter_computer.call_deferred()

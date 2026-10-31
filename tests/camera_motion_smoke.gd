@@ -73,15 +73,17 @@ func _run() -> void:
 	Input.action_release("sprint")
 
 	_spawn(Vector3(4.2, 0.02, 1.1))
+	# Player look uses the saved user sensitivity; keep expectations relative to it.
+	var look_total := 20.0 * player.mouse_sensitivity
 	var mouse := InputEventMouseMotion.new()
 	mouse.screen_relative = Vector2(20, 0)
 	player._unhandled_input(mouse)
 	_expect(absf(player.rotation.y) < 0.001, "Small mouse input starts with a bounded look lag")
 	await _frames(3)
-	_expect(player.rotation.y < -0.001 and player.rotation.y > -0.044, "Look smoothly catches up")
+	_expect(player.rotation.y < -0.001 and player.rotation.y > -look_total * 0.95, "Look smoothly catches up")
 	_expect(absf(player.camera_motion.rotation.z) > 0.0001, "Turning gives visual roll")
 	await _frames(40)
-	_expect(absf(player.rotation.y + 0.044) < 0.001, "Smoothed look preserves total mouse input")
+	_expect(absf(player.rotation.y + look_total) < 0.001, "Smoothed look preserves total mouse input")
 	mouse.screen_relative = Vector2(0, -20000)
 	player._unhandled_input(mouse)
 	await _frames(3)

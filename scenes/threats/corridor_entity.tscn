@@ -1,0 +1,49 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Shadow"]
+shading_mode = 0
+albedo_color = Color(0.035, 0.045, 0.04, 1)
+
+[sub_resource type="BoxMesh" id="Body"]
+size = Vector3(0.3, 0.85, 0.25)
+material = SubResource("Shadow")
+
+[sub_resource type="BoxMesh" id="Head"]
+size = Vector3(0.22, 0.35, 0.22)
+material = SubResource("Shadow")
+
+[sub_resource type="BoxMesh" id="Leg"]
+size = Vector3(0.09, 1.1, 0.12)
+material = SubResource("Shadow")
+
+[sub_resource type="BoxMesh" id="Arm"]
+size = Vector3(0.07, 1.25, 0.1)
+material = SubResource("Shadow")
+
+[node name="CorridorEntityVisual" type="Node3D"]
+visible = false
+
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.4, 0)
+mesh = SubResource("Body")
+
+[node name="Head" type="MeshInstance3D" parent="."]
+position = Vector3(0.06, 2.0, -0.05)
+rotation = Vector3(0, 0, 0.3)
+mesh = SubResource("Head")
+
+[node name="LeftLeg" type="MeshInstance3D" parent="."]
+position = Vector3(-0.1, 0.55, 0)
+mesh = SubResource("Leg")
+
+[node name="RightLeg" type="MeshInstance3D" parent="."]
+position = Vector3(0.1, 0.55, 0)
+mesh = SubResource("Leg")
+
+[node name="LeftArm" type="MeshInstance3D" parent="."]
+position = Vector3(-0.23, 1.15, 0)
+mesh = SubResource("Arm")
+
+[node name="RightArm" type="MeshInstance3D" parent="."]
+position = Vector3(0.23, 1.15, 0)
+mesh = SubResource("Arm")

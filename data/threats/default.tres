@@ -20,6 +20,7 @@ script = ExtResource("2")
 id = &"power_outage"
 warning_seconds = 0.0
 max_active_seconds = 0.0
+resolved_seconds = 0.0
 
 [resource]
 script = ExtResource("1")

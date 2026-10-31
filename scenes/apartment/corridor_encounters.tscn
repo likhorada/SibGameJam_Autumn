@@ -1,0 +1,42 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="BoxShape3D" id="Zone"]
+size = Vector3(2.1, 2.4, 13.4)
+
+[node name="CorridorEncounters" type="Node3D"]
+
+[node name="Zone" type="Area3D" parent="."]
+position = Vector3(4.2, 1, -0.05)
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape3D" parent="Zone"]
+shape = SubResource("Zone")
+
+[node name="Routes" type="Node3D" parent="."]
+
+[node name="Entry" type="Node3D" parent="Routes"]
+
+[node name="A" type="Marker3D" parent="Routes/Entry"]
+position = Vector3(4.6, 0, -1.6)
+
+[node name="B" type="Marker3D" parent="Routes/Entry"]
+position = Vector3(4.6, 0, 4.2)
+
+[node name="Middle" type="Node3D" parent="Routes"]
+
+[node name="A" type="Marker3D" parent="Routes/Middle"]
+position = Vector3(3.65, 0, -4)
+
+[node name="B" type="Marker3D" parent="Routes/Middle"]
+position = Vector3(3.65, 0, 1)
+
+[node name="Fusebox" type="Node3D" parent="Routes"]
+
+[node name="A" type="Marker3D" parent="Routes/Fusebox"]
+position = Vector3(4.65, 0, -6.4)
+
+[node name="B" type="Marker3D" parent="Routes/Fusebox"]
+position = Vector3(4.65, 0, -2.2)

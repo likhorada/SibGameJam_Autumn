@@ -7,7 +7,7 @@ func _ready() -> void:
 		TranslationServer.set_locale(str(language))
 	super._ready()
 	transition_seconds = 0.04
-	power.random_outages_enabled = false
+	threats.set_event_enabled(&"power_outage", false)
 	enter_computer.call_deferred()
 	# Continue telemetry after the result freezes the run.
 	var bridge := Node.new()

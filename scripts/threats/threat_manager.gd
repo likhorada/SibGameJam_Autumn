@@ -75,9 +75,7 @@ func can_start_external_event() -> bool:
 
 
 func can_start_power_outage() -> bool:
-	# A future power_outage adapter must be able to cut power inside its own slot.
-	# This permission does NOT allow a second threat to claim that slot.
-	return enabled and (active_id == &"power_outage" or can_start_external_event())
+	return enabled and active_id == &"power_outage"
 
 
 func set_event_enabled(id: StringName, value: bool) -> void:
@@ -94,7 +92,7 @@ func is_event_enabled(id: StringName) -> bool:
 
 func request_event(id: StringName, forced: bool = false) -> bool:
 	# Forced tests bypass timing/selection, never exclusivity or world blockers.
-	if not can_start_external_event() or not _available(id):
+	if not can_start_external_event() or not _available(id, not forced):
 		return false
 	if not forced and (not random_allowed or run_seconds < config.opening_safe_seconds or safe_seconds_left > 0.0 or wait_seconds_left > 0.0):
 		return false
@@ -129,7 +127,7 @@ func advance(delta: float) -> void:
 	var candidates: Array[StringName] = []
 	var total_weight: float = 0.0
 	for id: StringName in _events:
-		if _available(id):
+		if _available(id, true):
 			candidates.append(id)
 			total_weight += config.profile_for(id).weight
 	# No catch-up burst after a long frame, repair, tab switch or dev session.
@@ -143,9 +141,11 @@ func advance(delta: float) -> void:
 	_schedule()
 
 
-func _available(id: StringName) -> bool:
+func _available(id: StringName, scheduled: bool = false) -> bool:
 	var profile := config.profile_for(id)
-	return profile != null and bool(_event_enabled.get(id, profile.enabled)) and profile.weight > 0.0 and is_registered(id) and _events[id].can_start()
+	if profile == null or not is_event_enabled(id) or profile.weight <= 0.0 or not is_registered(id):
+		return false
+	return _events[id].can_schedule() if scheduled else _events[id].can_start()
 
 
 func _advance_event(delta: float) -> void:
@@ -189,6 +189,8 @@ func _resolve(outcome: StringName) -> void:
 	state_changed.emit(state, active_id)
 	if state == State.RESOLVED and current == _active_event:
 		current.resolved_started(outcome)
+	if state == State.RESOLVED and current == _active_event and phase_seconds_left <= 0.0:
+		_finish_event(outcome)
 
 
 func _finish_event(outcome: StringName) -> void:
@@ -211,6 +213,12 @@ func _finish_event(outcome: StringName) -> void:
 func disable_threats() -> void:
 	enabled = false
 	_finish_event(&"disabled")
+
+
+func clear_cooldown() -> void:
+	run_seconds = maxf(run_seconds, config.opening_safe_seconds)
+	safe_seconds_left = 0.0
+	wait_seconds_left = 0.0
 
 
 func reset_run() -> void:

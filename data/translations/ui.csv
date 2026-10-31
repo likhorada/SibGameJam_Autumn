@@ -112,6 +112,7 @@ DOOR_BLOCKED,Step away from the door leaf.,Отойди от дверного п
 THREAT_GAME_OVER,THEY FOUND YOU,ТЕБЯ НАШЛИ
 NEIGHBOR_DEATH,The door stayed open. The neighbor crossed the threshold.,Дверь осталась открытой. Сосед переступил порог.
 POLICE_DEATH,You were found during the police inspection.,Тебя обнаружили во время полицейской проверки.
+ENTITY_DEATH,The thing in the dark caught you.,Существо в темноте тебя настигло.
 HIDE_BED,E — hide under the bed,E — спрятаться под кроватью
 HIDE_WARDROBE,E — hide in the wardrobe,E — спрятаться в шкафу
 HIDE_EXIT,E — leave hiding,E — выйти из укрытия
@@ -164,11 +165,12 @@ FUSEBOX,FUSEBOX,ЭЛЕКТРОЩИТОК
 NO_POWER,No power. Find the fusebox.,Нет питания. Найди электрощиток.
 POWER_OK,Power is on,Питание включено
 USE_FUSEBOX,E — repair fusebox,E — открыть электрощиток
-FUSEBOX_HELP,Hold LMB on a lever · Esc / WASD — step away,Удерживай ЛКМ на рубильнике · Esc / WASD — отойти
+FUSEBOX_HELP,Hold LMB on a lever · F — flashlight · Esc / WASD — step away,Удерживай ЛКМ на рубильнике · F — фонарик · Esc / WASD — отойти
 DEV_UNLIMITED,Unlimited stamina,Бесконечная выносливость
 DEV_POWER_OFF,Trigger power outage,Отключить питание
 DEV_POWER_ON,Restore power (skip repair),Восстановить питание (без ремонта)
-DEV_CLEAR_COOLDOWN,Clear outage cooldown,Обнулить защиту от отключения
-DEV_STATUS,"%s · cooldown %.1fs
-Latched: %s","%s · защита %.1f сек
+DEV_CLEAR_COOLDOWN,Enable random threats now,Разрешить угрозы прямо сейчас
+DEV_STATUS,"%s · next threat in %.1fs
+Latched: %s","%s · угроза через %.1f сек
 Зафиксированы: %s"
+FLASHLIGHT_HINT,F — flashlight,F — фонарик
