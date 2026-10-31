@@ -15,6 +15,8 @@ var _unlimited: CheckButton
 var _close_button: Button
 var _neighbor_enabled: CheckButton
 var _trigger_neighbor: Button
+var _police_enabled: CheckButton
+var _trigger_police: Button
 var _scroll: ScrollContainer
 
 
@@ -66,6 +68,13 @@ func bind(value: Node3D) -> void:
 	_trigger_neighbor = _button(column, "TriggerNeighbor", func():
 		close_menu()
 		game.trigger_neighbor())
+	_police_enabled = CheckButton.new()
+	_police_enabled.text = "PoliceRaid"
+	_police_enabled.toggled.connect(func(value_enabled: bool): game.threats.set_event_enabled(&"police_raid", value_enabled))
+	column.add_child(_police_enabled)
+	_trigger_police = _button(column, "TriggerPolice", func():
+		close_menu()
+		game.trigger_police())
 	_button(column, "DisableThreats", func(): game.disable_threats())
 	_button(column, "OBS_DEV_NEXT", func():
 		close_menu()
@@ -120,7 +129,7 @@ func _process(delta: float) -> void:
 		return
 	if _holding:
 		_held_seconds += delta
-		if _held_seconds >= hold_seconds and game.mode in [game.Mode.WALKING, game.Mode.COMPUTER, game.Mode.FUSEBOX]:
+		if _held_seconds >= hold_seconds and game.mode in [game.Mode.WALKING, game.Mode.COMPUTER, game.Mode.FUSEBOX, game.Mode.HIDING]:
 			open_menu()
 	if is_open:
 		_scroll.custom_minimum_size = Vector2(470, minf(620.0, maxf(180.0, get_viewport().get_visible_rect().size.y - 36.0)))
@@ -129,6 +138,8 @@ func _process(delta: float) -> void:
 		_unlimited.set_pressed_no_signal(game.player.stamina.unlimited)
 		_neighbor_enabled.set_pressed_no_signal(game.threats.is_event_enabled(&"psych_neighbor"))
 		_trigger_neighbor.disabled = not game.threats.can_start_external_event() or not game.threats.is_event_enabled(&"psych_neighbor")
+		_police_enabled.set_pressed_no_signal(game.threats.is_event_enabled(&"police_raid"))
+		_trigger_police.disabled = not game.threats.can_start_external_event() or not game.threats.is_event_enabled(&"police_raid")
 
 
 func open_menu() -> void:

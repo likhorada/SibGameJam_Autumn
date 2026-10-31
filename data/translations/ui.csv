@@ -111,6 +111,11 @@ DOOR_CLOSE,E — close door,E — закрыть дверь
 DOOR_BLOCKED,Step away from the door leaf.,Отойди от дверного полотна.
 THREAT_GAME_OVER,THEY FOUND YOU,ТЕБЯ НАШЛИ
 NEIGHBOR_DEATH,The door stayed open. The neighbor crossed the threshold.,Дверь осталась открытой. Сосед переступил порог.
+POLICE_DEATH,You were found during the police inspection.,Тебя обнаружили во время полицейской проверки.
+HIDE_BED,E — hide under the bed,E — спрятаться под кроватью
+HIDE_WARDROBE,E — hide in the wardrobe,E — спрятаться в шкафу
+HIDE_EXIT,E — leave hiding,E — выйти из укрытия
+HIDE_EXIT_BLOCKED,The way out is obstructed.,Выход из укрытия загорожен.
 NIGHT_NOTE_TEXT,"Don't delete this.
 
 The neighbor again. I know those dragging steps now. Then the handle. A shut door still keeps him out. If I leave it open I only have a moment to slam it before he crosses the threshold. Don't open it again until his steps are gone.

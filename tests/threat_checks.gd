@@ -161,10 +161,9 @@ func _integration() -> void:
 	game.transition_seconds = 0.02
 	var manager: ThreatManager = game.threats
 	manager.set_process(false)
-	expect(manager._events.size() == 1 and manager._events[&"psych_neighbor"] is PsychNeighbor, "Production registers the real neighbor only")
-	var neighbor := ProbeEvent.new()
-	manager.register_event(&"police_raid", neighbor)
-	manager.request_event(&"police_raid", true)
+	expect(manager._events.size() == 2 and manager._events[&"psych_neighbor"] is PsychNeighbor and manager._events[&"police_raid"] is PoliceRaid, "Production registers two real threats")
+	var neighbor: PsychNeighbor = game.neighbor
+	manager.request_event(&"psych_neighbor", true)
 	game.power.trigger_outage()
 	expect(game.power.powered, "Real outage is rejected while event owns the slot")
 	game.shift._finish_stage()
@@ -200,10 +199,9 @@ func _integration() -> void:
 	get_tree().current_scene = game
 	manager = game.threats
 	manager.set_process(false)
-	expect(manager.enabled and manager.active_id.is_empty() and manager.run_seconds < 1.0 and manager._events.size() == 1, "New scene resets flags and active event, and registers a fresh neighbor")
-	neighbor = ProbeEvent.new()
-	manager.register_event(&"police_raid", neighbor)
-	manager.request_event(&"police_raid", true)
+	expect(manager.enabled and manager.active_id.is_empty() and manager.run_seconds < 1.0 and manager._events.size() == 2, "New scene resets flags and active event, and registers fresh threats")
+	neighbor = game.neighbor
+	manager.request_event(&"psych_neighbor", true)
 	game.shift.stage = 2
 	game.shift._finish_stage()
 	game.mode = game.Mode.COMPUTER
@@ -214,8 +212,8 @@ func _integration() -> void:
 	manager.advance(1.0)
 	game.shift._process(0.0)
 	expect(game.terminal_ui.chat.session.quiz_started, "Report opens after active event resolves")
-	manager.request_event(&"police_raid", true)
+	manager.request_event(&"psych_neighbor", true)
 	game._finish_report(false, 0)
-	expect(not manager.enabled and not manager.is_busy() and neighbor.endings.back() == &"disabled", "Result stops threat scheduling and cleans active slot")
+	expect(not manager.enabled and not manager.is_busy() and neighbor.visit == PsychNeighbor.Visit.DORMANT, "Result stops threat scheduling and cleans active slot")
 	game.queue_free()
 	await get_tree().process_frame

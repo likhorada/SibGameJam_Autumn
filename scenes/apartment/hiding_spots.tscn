@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/apartment/hiding_spot.gd" id="1"]
+
+[node name="HidingSpots" type="Node3D"]
+
+[node name="Wardrobe" type="Node3D" parent="."]
+script = ExtResource("1")
+max_yaw_degrees = 12.0
+view_fov = 55.0
+
+[node name="View" type="Marker3D" parent="Wardrobe"]
+position = Vector3(-1.85, 1.4, 2.65)
+
+[node name="Exits" type="Node3D" parent="Wardrobe"]
+
+[node name="Front" type="Marker3D" parent="Wardrobe/Exits"]
+position = Vector3(-1.85, 0.03, 1.45)
+rotation = Vector3(0, 3.1415927, 0)
+
+[node name="Side" type="Marker3D" parent="Wardrobe/Exits"]
+position = Vector3(-0.4, 0.03, 1.45)
+
+[node name="Bed" type="Node3D" parent="."]
+script = ExtResource("1")
+prompt_key = "HIDE_BED"
+view_fov = 65.0
+
+[node name="View" type="Marker3D" parent="Bed"]
+position = Vector3(-1.65, 0.2, 5.15)
+rotation = Vector3(0, -0.924, 0)
+
+[node name="Exits" type="Node3D" parent="Bed"]
+
+[node name="Side" type="Marker3D" parent="Bed/Exits"]
+position = Vector3(-0.55, 0.03, 4.5)
+
+[node name="Aisle" type="Marker3D" parent="Bed/Exits"]
+position = Vector3(0.2, 0.03, 4.6)

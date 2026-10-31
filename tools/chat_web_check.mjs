@@ -3,7 +3,7 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
-const root=path.resolve(process.env.NEIGHBOR_WEB_ROOT || process.env.THREAT_WEB_ROOT || process.env.CHAT_WEB_ROOT || 'build/chat-web');
+const root=path.resolve(process.env.POLICE_WEB_ROOT || process.env.NEIGHBOR_WEB_ROOT || process.env.THREAT_WEB_ROOT || process.env.CHAT_WEB_ROOT || 'build/chat-web');
 const artifacts=path.join(process.env.LOCALAPPDATA,'Temp/opencode');
 const profile=await fs.mkdtemp(path.join(artifacts,'chat-chrome-'));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -11,6 +11,7 @@ const errors=[];
 const shiftMode=process.env.SHIFT_WEB==='1';
 const threatMode=process.env.THREAT_WEB==='1';
 const neighborMode=process.env.NEIGHBOR_WEB==='1';
+const policeMode=process.env.POLICE_WEB==='1';
 const server=http.createServer(async(req,res)=>{
   try {
     const name=new URL(req.url,'http://localhost').pathname;
@@ -47,7 +48,7 @@ try {
     requests.set(n,{resolve,reject,timer});ws.send(JSON.stringify({id:n,method,params}));
   });
   const evaluate=async expression=>(await call('Runtime.evaluate',{expression,returnByValue:true})).result.value;
-  const state=()=>evaluate(neighborMode?'window.neighborTelemetry':'window.chatTelemetry');
+  const state=()=>evaluate(policeMode?'window.policeTelemetry':neighborMode?'window.neighborTelemetry':'window.chatTelemetry');
   const expect=(value,message)=>{if(!value)throw Error(message);};
   const wait=async(predicate,message,seconds=10)=>{
     for(let i=0;i<seconds*20;i++){const s=await state();if(s&&predicate(s))return s;await sleep(50);}
@@ -87,7 +88,64 @@ try {
   await call('Runtime.enable');await call('Page.enable');
   await call('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
   const url='http://127.0.0.1:'+server.address().port+'/';
-  if(neighborMode){
+  if(policeMode){
+    const command=async name=>{
+      await evaluate('window.policeTelemetry.command="";window.policeCommand='+JSON.stringify(name));
+      await wait(s=>s.command===name,'Police test command not acknowledged: '+name);
+    };
+    for(const lang of ['ru','en']){
+      await call('Page.navigate',{url:url+'?lang='+lang});
+      await wait(s=>s.mode===2,'Police PC fixture did not load',30);
+      await call('Page.bringToFront');
+      await call('Input.dispatchKeyEvent',{type:'keyDown',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+      await wait(s=>s.dev,'Police F7 menu did not open');
+      await call('Input.dispatchKeyEvent',{type:'keyUp',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+      await sleep(300);
+      await click((await state()).buttons.TriggerPolice);
+      await wait(s=>!s.dev&&s.visit===1&&s.knock,'TriggerPolice did not start knock warning');
+      await tap('Escape','Escape',27);
+      await wait(s=>s.mode===0,'Could not leave PC during warning');
+      await command('wardrobe');
+      await sleep(2200);
+      await click([640,360]);
+      await wait(s=>s.captured&&s.interaction==='hide_wardrobe','Wardrobe interaction ray missing');
+      await tap('KeyE','e',69,'e');
+      let hidden=await wait(s=>s.hidden&&!s.controls,'Physical E did not enter wardrobe');
+      const body=hidden.body,camera=hidden.camera;
+      await call('Input.dispatchMouseEvent',{type:'mouseMoved',x:1100,y:600});
+      hidden=await wait(s=>Math.abs(s.look[0])>0.001,'Mouse look did not reach hiding camera');
+      expect(Math.abs(hidden.look[0])<=12*Math.PI/180+0.0001&&Math.abs(hidden.look[1])<=6*Math.PI/180+0.0001,'Wardrobe look escaped limits');
+      await call('Input.dispatchKeyEvent',{type:'keyDown',code:'KeyW',key:'w',windowsVirtualKeyCode:87});
+      await sleep(250);
+      await call('Input.dispatchKeyEvent',{type:'keyUp',code:'KeyW',key:'w',windowsVirtualKeyCode:87});
+      hidden=await state();
+      expect(hidden.body.every((n,i)=>Math.abs(n-body[i])<0.001)&&hidden.camera.every((n,i)=>Math.abs(n-camera[i])<0.001),'WASD or look moved hidden player/camera');
+      await command('active');
+      await wait(s=>s.visit===2&&s.hidden&&s.open&&!s.ended,'Wardrobe did not survive closed-door raid');
+      await capture('police_wardrobe_'+lang);
+      await command('search_done');
+      await wait(s=>s.visit===3&&s.hidden,'Police departure did not begin');
+      await tap('Escape','Escape',27);
+      await wait(s=>s.hidden&&!s.captured,'Esc exposed hidden player instead of releasing pointer');
+      await sleep(2200);await click([640,360]);
+      await wait(s=>s.hidden&&s.captured,'Cannot recapture pointer inside hiding');
+      await command('gone');
+      await wait(s=>s.state===0&&s.hidden&&!s.steps,'Police departure did not clean up');
+      await tap('KeyE','e',69,'e');
+      await wait(s=>s.mode===0&&!s.hidden&&!s.ended&&s.open,'Exit after departure was not safe');
+      await command('bed');
+      await wait(s=>s.interaction==='hide_bed','Bed interaction ray missing');
+      await command('trigger');
+      await tap('KeyE','e',69,'e');
+      await wait(s=>s.hidden,'Physical E did not enter bed');
+      await command('active');
+      await wait(s=>s.hidden&&s.visit===2&&!s.ended,'Bed did not survive police entry');
+      await capture('police_bed_'+lang);
+      await tap('KeyE','e',69,'e');
+      await wait(s=>s.ended&&s.reason==='POLICE_DEATH','Early E exit did not cause police death');
+      await capture('police_death_'+lang);
+    }
+  }else if(neighborMode){
     const command=async name=>{
       await evaluate('window.neighborTelemetry.command="";window.neighborCommand='+JSON.stringify(name));
       await wait(s=>s.command===name,'Test command not acknowledged: '+name);
@@ -200,5 +258,5 @@ try {
     await capture(perfect?'win':'lose');
   }
   expect(errors.length===0,'Browser errors: '+errors.join('\n'));
-  console.log(neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
+  console.log(policeMode?'POLICE INPUT WEB: PASS (RU/EN, F7, PC escape, E hiding/exit, clamped mouse look, blocked walking, safe departure, early-exit death).':neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
 } finally {ws?.close();browser.kill();server.close();}

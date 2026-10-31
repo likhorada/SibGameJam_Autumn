@@ -1,0 +1,51 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Wood"]
+albedo_color = Color(0.19, 0.12, 0.075, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="Side"]
+size = Vector3(0.06, 2.1, 0.65)
+material = SubResource("Wood")
+
+[sub_resource type="BoxMesh" id="Back"]
+size = Vector3(1.5, 2.1, 0.06)
+material = SubResource("Wood")
+
+[sub_resource type="BoxMesh" id="Shelf"]
+size = Vector3(1.5, 0.06, 0.65)
+material = SubResource("Wood")
+
+[sub_resource type="BoxMesh" id="Door"]
+size = Vector3(0.71, 2.1, 0.05)
+material = SubResource("Wood")
+
+[node name="WardrobeShell" type="Node3D"]
+
+[node name="Left" type="MeshInstance3D" parent="."]
+position = Vector3(-0.72, 0, 0)
+mesh = SubResource("Side")
+
+[node name="Right" type="MeshInstance3D" parent="."]
+position = Vector3(0.72, 0, 0)
+mesh = SubResource("Side")
+
+[node name="Back" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, 0.295)
+mesh = SubResource("Back")
+
+[node name="Top" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.02, 0)
+mesh = SubResource("Shelf")
+
+[node name="Bottom" type="MeshInstance3D" parent="."]
+position = Vector3(0, -1.02, 0)
+mesh = SubResource("Shelf")
+
+[node name="LeftDoor" type="MeshInstance3D" parent="."]
+position = Vector3(-0.395, 0, -0.31)
+mesh = SubResource("Door")
+
+[node name="RightDoor" type="MeshInstance3D" parent="."]
+position = Vector3(0.395, 0, -0.31)
+mesh = SubResource("Door")

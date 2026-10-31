@@ -162,6 +162,9 @@ func _begin_scare() -> void:
 	game._kill_transition()
 	game.terminal_ui.suspend_desktop()
 	game.terminal_ui.hide()
+	if game.is_hidden():
+		# A queued non-enemy scare must not pull a survivor out of their hiding spot.
+		return
 	if game.mode in [game.Mode.ENTERING, game.Mode.COMPUTER, game.Mode.LEAVING]:
 		game.player.place_at(game.terminal.get_node("ExitPoint"))
 	game._resume_walking()
