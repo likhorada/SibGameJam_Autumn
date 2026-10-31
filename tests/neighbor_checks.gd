@@ -238,6 +238,8 @@ func _run() -> void:
 	expect(not game.threats.enabled and not game.threats.is_busy(), "Dev DisableThreats cleans real event")
 	game.queue_free()
 	await get_tree().process_frame
+	# Let AudioServer's mixing thread release the final run's stopped loop voices.
+	await get_tree().create_timer(0.2).timeout
 	print("NEIGHBOR SMOKE: %s (%d failures)" % ["PASS" if failures == 0 else "FAIL", failures])
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("window.threatTestResult = " + JSON.stringify({"failures": failures}))
