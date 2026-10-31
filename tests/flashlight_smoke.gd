@@ -18,7 +18,6 @@ func _run() -> void:
 	root.add_child(game)
 	current_scene = game
 	await process_frame
-	game.power.random_outages_enabled = false
 	game.power.set_process(false)
 	game.player.set_physics_process(false)
 	game.player.set_process(false)

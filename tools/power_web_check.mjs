@@ -59,7 +59,20 @@ try {
   const tap=async(code,name,vkey)=>{await key('keyDown',code,name,vkey);await key('keyUp',code,name,vkey);await sleep(150);};
   const mouse=async(type,point,buttons=0)=>call('Input.dispatchMouseEvent',{type,x:point[0],y:point[1],button:type==='mouseMoved'?'none':'left',buttons,clickCount:type==='mouseMoved'?0:1});
   const click=async point=>{await mouse('mouseMoved',point);await mouse('mousePressed',point,1);await mouse('mouseReleased',point);await sleep(150);};
-  const command=async name=>{const s=await state();expect(s.buttons[name], 'Missing dev button '+name);await click(s.buttons[name]);};
+  const command=async name=>{
+    let s=await state();expect(s.buttons[name], 'Missing dev button '+name);
+    if(name==='BACK'){
+      // Dev column may exceed the viewport: wheel the panel down before clicking.
+      for(let i=0;i<6;i++){
+        await call('Input.dispatchMouseEvent',{type:'mouseWheel',x:636,y:600,deltaX:0,deltaY:240});
+        await sleep(140);
+        const next=await state();
+        if(next.buttons.BACK[1]>=s.buttons.BACK[1]-1)break;
+        s=next;
+      }
+    }
+    await click(s.buttons[name]);
+  };
   const capture=async name=>{
     const image=await call('Page.captureScreenshot',{format:'png'});
     await fs.writeFile(path.join(artifacts,'power_web_'+name+'.png'),Buffer.from(image.data,'base64'));
@@ -91,6 +104,10 @@ try {
   await key('keyDown','F7','F7',118);await sleep(150);await key('keyUp','F7','F7',118);
   await sleep(200);expect(!(await state()).dev,'Brief F7 should not open dev');
   await openDev();await capture('dev');
+  await command('DEV_DEBUG_HUD');await wait(s=>s.debug_hud,'Debug HUD toggle failed');
+  await command('BACK');await wait(s=>!s.dev&&s.debug_hud,'Debug HUD did not persist after closing dev');
+  await capture('debug_hud');
+  await openDev();await command('DEV_DEBUG_HUD');await wait(s=>!s.debug_hud,'Debug HUD did not turn off');
   await command('DEV_UNLIMITED');expect((await state()).unlimited,'Unlimited toggle failed');
   await command('DEV_POWER_OFF');await wait(s=>!s.powered&&s.flashlight,'Dev outage failed');
   await command('DEV_CLEAR_COOLDOWN');expect((await state()).cooldown===0,'Clear cooldown failed');

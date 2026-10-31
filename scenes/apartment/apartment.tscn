@@ -1,6 +1,10 @@
 [gd_scene format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/power/fusebox.tscn" id="Fusebox"]
+[ext_resource type="PackedScene" path="res://scenes/apartment/room_door.tscn" id="RoomDoor"]
+[ext_resource type="PackedScene" path="res://scenes/apartment/hiding_spots.tscn" id="HidingSpots"]
+[ext_resource type="PackedScene" path="res://scenes/apartment/corridor_encounters.tscn" id="CorridorEncounters"]
+[ext_resource type="PackedScene" path="res://scenes/apartment/wardrobe_shell.tscn" id="WardrobeShell"]
 
 [sub_resource type="Environment" id="Environment"]
 background_mode = 1
@@ -237,10 +241,14 @@ size = Vector3(0.025, 2, 0.015)
 
 [sub_resource type="BoxMesh" id="BoxMesh_6japt"]
 material = SubResource("StandardMaterial3D_n5k1t")
-size = Vector3(1.4, 0.55, 2.1)
+size = Vector3(1.4, 0.16, 2.1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3entc"]
-size = Vector3(1.4, 0.55, 2.1)
+size = Vector3(1.4, 0.16, 2.1)
+
+[sub_resource type="BoxMesh" id="BedLeg"]
+material = SubResource("StandardMaterial3D_n5k1t")
+size = Vector3(0.1, 0.4, 0.1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pxk46"]
 albedo_color = Color(0.55, 0.56, 0.47, 1)
@@ -355,6 +363,27 @@ material = SubResource("StandardMaterial3D_pxk46")
 size = Vector3(0.35, 0.07, 0.35)
 
 [node name="Apartment" type="Node3D" unique_id=1269526120]
+
+[node name="RoomDoor" parent="." instance=ExtResource("RoomDoor")]
+position = Vector3(3, 0, 1.1)
+
+[node name="HidingSpots" parent="." instance=ExtResource("HidingSpots")]
+
+[node name="CorridorEncounters" parent="." instance=ExtResource("CorridorEncounters")]
+
+[node name="PoliceRoute" type="Node3D" parent="."]
+
+[node name="Entry" type="Marker3D" parent="PoliceRoute"]
+position = Vector3(3.9, 0, 1.1)
+
+[node name="MainRoom" type="Marker3D" parent="PoliceRoute"]
+position = Vector3(1.2, 0, 1.1)
+
+[node name="BedroomDoor" type="Marker3D" parent="PoliceRoute"]
+position = Vector3(1.2, 0, 3.4)
+
+[node name="Bedside" type="Marker3D" parent="PoliceRoute"]
+position = Vector3(-0.35, 0, 4.6)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1489028802]
 environment = SubResource("Environment")
@@ -620,24 +649,44 @@ mesh = SubResource("BoxMesh_2ch7s")
 [node name="@CollisionShape3D@58" type="CollisionShape3D" parent="CorridorWestSouth/@StaticBody3D@59" unique_id=2015962462]
 shape = SubResource("BoxShape3D_q5mj5")
 
-[node name="Wardrobe" type="MeshInstance3D" parent="." unique_id=118096849]
+[node name="Wardrobe" type="Node3D" parent="." unique_id=118096849]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.85, 1.05, 2.55)
-mesh = SubResource("BoxMesh_mg67m")
+
+[node name="Shell" parent="Wardrobe" instance=ExtResource("WardrobeShell")]
 
 [node name="@StaticBody3D@61" type="StaticBody3D" parent="Wardrobe" unique_id=855702285]
+metadata/interaction = &"hide_wardrobe"
 
 [node name="@CollisionShape3D@60" type="CollisionShape3D" parent="Wardrobe/@StaticBody3D@61" unique_id=1049166574]
 shape = SubResource("BoxShape3D_fh2xi")
 
 [node name="WardrobeSeam" type="MeshInstance3D" parent="." unique_id=288633544]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.85, 1.05, 2.215)
+visible = false
 mesh = SubResource("BoxMesh_rouoy")
 
 [node name="BedFrame" type="MeshInstance3D" parent="." unique_id=1643421635]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 0.28, 5.1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 0.47, 5.1)
 mesh = SubResource("BoxMesh_6japt")
 
+[node name="FrontLeftLeg" type="MeshInstance3D" parent="BedFrame"]
+position = Vector3(-0.57, -0.27, -0.9)
+mesh = SubResource("BedLeg")
+
+[node name="FrontRightLeg" type="MeshInstance3D" parent="BedFrame"]
+position = Vector3(0.57, -0.27, -0.9)
+mesh = SubResource("BedLeg")
+
+[node name="BackLeftLeg" type="MeshInstance3D" parent="BedFrame"]
+position = Vector3(-0.57, -0.27, 0.9)
+mesh = SubResource("BedLeg")
+
+[node name="BackRightLeg" type="MeshInstance3D" parent="BedFrame"]
+position = Vector3(0.57, -0.27, 0.9)
+mesh = SubResource("BedLeg")
+
 [node name="@StaticBody3D@63" type="StaticBody3D" parent="BedFrame" unique_id=1128782826]
+metadata/interaction = &"hide_bed"
 
 [node name="@CollisionShape3D@62" type="CollisionShape3D" parent="BedFrame/@StaticBody3D@63" unique_id=627513552]
 shape = SubResource("BoxShape3D_3entc")
@@ -647,6 +696,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 0.61, 5.1)
 mesh = SubResource("BoxMesh_kgcbh")
 
 [node name="@StaticBody3D@65" type="StaticBody3D" parent="Mattress" unique_id=1611196946]
+metadata/interaction = &"hide_bed"
 
 [node name="@CollisionShape3D@64" type="CollisionShape3D" parent="Mattress/@StaticBody3D@65" unique_id=1619042840]
 shape = SubResource("BoxShape3D_r5opw")

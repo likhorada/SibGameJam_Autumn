@@ -106,6 +106,34 @@ CHAT_CHANGE_REPLY,Change,Изменить
 CHAT_SEND_REPLY,Send ↵,Отправить ↵
 CHAT_CHOOSE,Select a reply below.,Выбери ответ ниже.
 CHAT_IDLE,Awaiting messages.,Ожидание сообщений.
+DOOR_OPEN,E — open door,E — открыть дверь
+DOOR_CLOSE,E — close door,E — закрыть дверь
+DOOR_BLOCKED,Step away from the door leaf.,Отойди от дверного полотна.
+THREAT_GAME_OVER,THEY FOUND YOU,ТЕБЯ НАШЛИ
+NEIGHBOR_DEATH,The door stayed open. The neighbor crossed the threshold.,Дверь осталась открытой. Сосед переступил порог.
+POLICE_DEATH,You were found during the police inspection.,Тебя обнаружили во время полицейской проверки.
+ENTITY_DEATH,The thing in the dark caught you.,Существо в темноте тебя настигло.
+HIDE_BED,E — hide under the bed,E — спрятаться под кроватью
+HIDE_WARDROBE,E — hide in the wardrobe,E — спрятаться в шкафу
+HIDE_EXIT,E — leave hiding,E — выйти из укрытия
+HIDE_EXIT_BLOCKED,The way out is obstructed.,Выход из укрытия загорожен.
+NIGHT_NOTE_TEXT,"Don't delete this.
+
+The neighbor again. I know those dragging steps now. Then the handle. A shut door still keeps him out. If I leave it open I only have a moment to slam it before he crosses the threshold. Don't open it again until his steps are gone.
+
+If it's the police: loud knocking and that voice. Don't waste time at the computer. Under the bed or inside the wardrobe. Stay there until they leave. A closed door won't stop them.
+
+When the power dies the corridor isn't empty. Those steps aren't his. If they get close: light off and stand still. Don't keep the beam on whatever is out there. It passes. Sometimes it comes back.
+
+The panel is at the end of the corridor. Four breakers. The ones I've raised stay up. I can wait between them.","Не удалять.
+
+Опять сосед. Его шаркающие шаги уже узнаю. Потом ручка. Закрытая дверь пока держит. Если оставлю открытой — есть только мгновение захлопнуть её до того, как он переступит порог. Не открывать снова, пока шаги не удалятся.
+
+Если полиция: громкий стук и этот голос. Не засиживаться у компьютера. Под кровать или в шкаф. Сидеть до их ухода. Закрытая дверь их не остановит.
+
+Когда гаснет свет, коридор не пустой. Шаги уже не соседские. Если совсем близко — погасить фонарь и замереть. Не держать луч на том, что там стоит. Оно проходит. Иногда возвращается.
+
+Щиток в конце коридора. Четыре рубильника. Поднятые держатся. Между ними можно переждать."
 CHAT_WIN,REPORT ACCEPTED,ОТЧЁТ ПРИНЯТ
 CHAT_LOSE,PLAN B,ПЛАН Б
 CHAT_RESULT,Correct answers: %d / %d,Правильных ответов: %d / %d
@@ -137,11 +165,27 @@ FUSEBOX,FUSEBOX,ЭЛЕКТРОЩИТОК
 NO_POWER,No power. Find the fusebox.,Нет питания. Найди электрощиток.
 POWER_OK,Power is on,Питание включено
 USE_FUSEBOX,E — repair fusebox,E — открыть электрощиток
-FUSEBOX_HELP,Hold LMB on a lever · Esc / WASD — step away,Удерживай ЛКМ на рубильнике · Esc / WASD — отойти
+FUSEBOX_HELP,Hold LMB on a lever · F — flashlight · Esc / WASD — step away,Удерживай ЛКМ на рубильнике · F — фонарик · Esc / WASD — отойти
 DEV_UNLIMITED,Unlimited stamina,Бесконечная выносливость
 DEV_POWER_OFF,Trigger power outage,Отключить питание
 DEV_POWER_ON,Restore power (skip repair),Восстановить питание (без ремонта)
-DEV_CLEAR_COOLDOWN,Clear outage cooldown,Обнулить защиту от отключения
-DEV_STATUS,"%s · cooldown %.1fs
-Latched: %s","%s · защита %.1f сек
+DEV_CLEAR_COOLDOWN,Enable random threats now,Разрешить угрозы прямо сейчас
+DEV_STATUS,"%s · next threat in %.1fs
+Latched: %s","%s · угроза через %.1f сек
 Зафиксированы: %s"
+DEV_DEBUG_HUD,Debug HUD,Дебаг-худ
+DEBUG_HUD_TITLE,THREAT DEBUG,ОТЛАДКА УГРОЗ
+DEBUG_HUD_THREATS,"Threat: %s / %s · %.1fs","Угроза: %s / %s · %.1fс"
+DEBUG_HUD_NEIGHBOR,Neighbor: %s,Сосед: %s
+DEBUG_HUD_POLICE,Police: %s,Полиция: %s
+DEBUG_HUD_ENTITY,"Dark figure: %s — %s","Фигура в темноте: %s — %s"
+DEBUG_HUD_DANGER,DANGER WINDOW,ОКНО ОПАСНОСТИ
+DEBUG_HUD_CHASING,PURSUING,ПРЕСЛЕДУЕТ
+DEBUG_HUD_NO_DANGER,NOT ATTACKING,НЕ АТАКУЕТ
+DEBUG_HUD_ENTITY_TIMER,"Phase / repeat: %.1fs","Фаза / пауза: %.1fс"
+DEBUG_HUD_ENTITY_ERROR,"Error budget: %.2f / %.2fs","Запас ошибки: %.2f / %.2fс"
+DEBUG_HUD_ENTITY_DISTANCE,"Distance: %.1fm","Дистанция: %.1fм"
+DEBUG_HUD_ENTITY_BEAM,"Danger beam on figure: %s","Опасный луч на фигуре: %s"
+DEBUG_HUD_YES,YES,ДА
+DEBUG_HUD_NO,NO,НЕТ
+FLASHLIGHT_HINT,F — flashlight,F — фонарик

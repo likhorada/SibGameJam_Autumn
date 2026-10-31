@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ThreatConfig" format=3 uid="uid://cxf2ry3lc5gpq"]
+
+[ext_resource type="Script" uid="uid://bn55ybh8tm72" path="res://scripts/threats/threat_config.gd" id="1"]
+[ext_resource type="Script" uid="uid://biab1x1u1o777" path="res://scripts/threats/threat_profile.gd" id="2"]
+
+[sub_resource type="Resource" id="Neighbor"]
+script = ExtResource("2")
+id = &"psych_neighbor"
+
+[sub_resource type="Resource" id="Police"]
+script = ExtResource("2")
+id = &"police_raid"
+warning_seconds = 12.0
+max_active_seconds = 20.0
+
+[sub_resource type="Resource" id="Outage"]
+script = ExtResource("2")
+id = &"power_outage"
+warning_seconds = 0.0
+max_active_seconds = 0.0
+resolved_seconds = 0.0
+
+[resource]
+script = ExtResource("1")
+profiles = Array[ExtResource("2")]([SubResource("Neighbor"), SubResource("Police"), SubResource("Outage")])

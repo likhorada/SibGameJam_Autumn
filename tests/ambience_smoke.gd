@@ -22,7 +22,6 @@ func _run() -> void:
 	root.add_child(game)
 	current_scene = game
 	game.transition_seconds = 0.04
-	game.power.random_outages_enabled = false
 	await frames()
 	var ambient: AmbientDirector = game.ambient
 	expect(ambient != null and ambient.game == game, "Ambient director bound to run")

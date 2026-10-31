@@ -1,0 +1,74 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/apartment/room_door.gd" id="1"]
+[ext_resource type="AudioStream" path="res://assets/audio/door_click.wav" id="2"]
+
+[sub_resource type="StandardMaterial3D" id="Wood"]
+albedo_color = Color(0.16, 0.115, 0.075, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Metal"]
+albedo_color = Color(0.42, 0.36, 0.25, 1)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="LeafMesh"]
+size = Vector3(0.12, 2.16, 1.32)
+material = SubResource("Wood")
+
+[sub_resource type="BoxShape3D" id="LeafShape"]
+size = Vector3(0.12, 2.16, 1.32)
+
+[sub_resource type="BoxMesh" id="HandleMesh"]
+size = Vector3(0.26, 0.045, 0.18)
+material = SubResource("Metal")
+
+[sub_resource type="BoxShape3D" id="PlateShape"]
+size = Vector3(0.3, 0.3, 0.12)
+
+[node name="RoomDoor" type="Node3D"]
+script = ExtResource("1")
+open_sound = ExtResource("2")
+close_sound = ExtResource("2")
+
+[node name="Hinge" type="Node3D" parent="."]
+position = Vector3(0, 0, 0.66)
+
+[node name="Leaf" type="StaticBody3D" parent="Hinge"]
+position = Vector3(0, 1.08, -0.66)
+metadata/interaction = &"room_door"
+
+[node name="Mesh" type="MeshInstance3D" parent="Hinge/Leaf"]
+mesh = SubResource("LeafMesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hinge/Leaf"]
+shape = SubResource("LeafShape")
+
+[node name="Handle" type="MeshInstance3D" parent="Hinge/Leaf"]
+position = Vector3(0, 0, -0.48)
+mesh = SubResource("HandleMesh")
+
+[node name="Plate" type="StaticBody3D" parent="."]
+position = Vector3(0, 1.15, 0.72)
+metadata/interaction = &"room_door"
+
+[node name="Mesh" type="MeshInstance3D" parent="Plate"]
+mesh = SubResource("HandleMesh")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Plate"]
+shape = SubResource("PlateShape")
+
+[node name="DoorAudio" type="AudioStreamPlayer3D" parent="."]
+position = Vector3(0, 1.1, 0)
+unit_size = 4.0
+max_distance = 15.0
+volume_db = -7.0
+bus = &"SFX"
+
+[node name="Approach" type="Marker3D" parent="."]
+position = Vector3(1.5, 0, 3.4)
+
+[node name="Waiting" type="Marker3D" parent="."]
+position = Vector3(0.9, 0, 0)
+
+[node name="Threshold" type="Marker3D" parent="."]
+position = Vector3(0, 0, 0)

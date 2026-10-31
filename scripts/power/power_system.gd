@@ -3,22 +3,16 @@ extends Node
 
 signal power_changed(powered: bool)
 
-@export_group("Outages")
-@export_range(0.0, 600.0) var cooldown_seconds: float = 120.0
-@export_range(0.0, 1.0) var outage_chance_per_second: float = 0.02
-@export var random_outages_enabled: bool = true
 @export_group("Emergency flashlight")
-@export_range(0.0, 4.0) var flashlight_energy: float = 0.8
+@export_range(0.0, 4.0) var flashlight_energy: float = 0.9
 @export_range(0.5, 10.0) var flashlight_range: float = 3.5
 @export_range(5.0, 70.0) var flashlight_angle: float = 35.0
 ## Short, broad spill lights nearby floor/objects instead of only a distant spot.
-@export_range(0.0, 2.0) var flashlight_spill_energy: float = 0.35
-@export_range(0.5, 4.0) var flashlight_spill_range: float = 2.2
-@export_range(35.0, 85.0) var flashlight_spill_angle: float = 70.0
+@export_range(0.0, 2.0) var flashlight_spill_energy: float = 0.48
+@export_range(0.5, 4.0) var flashlight_spill_range: float = 3.0
+@export_range(35.0, 85.0) var flashlight_spill_angle: float = 82.0
 @export_range(0.0, 0.2) var blackout_ambient_energy: float = 0.012
-@export_group("Optional audio")
-@export var outage_sound: AudioStream
-@export var restore_sound: AudioStream
+@export_group("Behind ambience")
 @export var behind_sounds: Array[AudioStream] = []
 @export_range(0.0, 1.0) var behind_chance: float = 0.5
 @export_range(0.2, 60.0) var behind_min_interval: float = 5.0
@@ -26,12 +20,11 @@ signal power_changed(powered: bool)
 @export_range(0.5, 5.0) var behind_distance: float = 1.8
 
 var powered: bool = true
-var cooldown_left: float = 120.0
+var flashlight_on: bool = false
 var flashlight: SpotLight3D
 var flashlight_spill: SpotLight3D
 var board: ApartmentFusebox
 var game: Node3D
-var _check_time: float = 0.0
 var _behind_left: float = 0.0
 var _interacting: bool = false
 var _lights: Array[Light3D] = []
@@ -42,9 +35,12 @@ var _normal_background: Color
 var _screen: MeshInstance3D
 var _screen_material: Material
 var _black_screen: StandardMaterial3D
-var _event_audio: AudioStreamPlayer3D
 var _behind_audio: AudioStreamPlayer3D
 var _rng := RandomNumberGenerator.new()
+## Optional reservation guard supplied by the run's ThreatManager.
+var outage_guard: Callable
+var outage_request: Callable
+var danger_audio_active: Callable
 
 
 func bind(value: Node3D) -> void:
@@ -81,34 +77,23 @@ func bind(value: Node3D) -> void:
 	flashlight_spill.spot_attenuation = 0.6
 	flashlight_spill.visible = false
 	game.add_child(flashlight_spill)
-	_event_audio = AudioStreamPlayer3D.new()
-	_event_audio.bus = &"SFX"
-	board.add_child(_event_audio)
 	_behind_audio = AudioStreamPlayer3D.new()
 	_behind_audio.bus = &"Ambience"
 	_behind_audio.volume_db = -16.0
 	_behind_audio.max_distance = 7.0
 	game.add_child(_behind_audio)
-	cooldown_left = cooldown_seconds
 	_schedule_behind()
 
 
 func _process(delta: float) -> void:
 	if not is_instance_valid(game):
 		return
-	advance_outage_timer(delta)
 	if not powered:
-		var camera: Camera3D = get_viewport().get_camera_3d()
-		if camera != null:
-			flashlight.global_transform = camera.global_transform
-			flashlight_spill.global_transform = camera.global_transform * Transform3D(Basis(Vector3.RIGHT, deg_to_rad(-12.0)), Vector3(0, -0.12, 0.05))
-		flashlight.light_energy = flashlight_energy
-		flashlight.spot_range = flashlight_range
-		flashlight.spot_angle = flashlight_angle
-		flashlight_spill.light_energy = flashlight_spill_energy
-		flashlight_spill.spot_range = flashlight_spill_range
-		flashlight_spill.spot_angle = flashlight_spill_angle
-	if _interacting:
+		update_flashlight()
+	var danger := danger_audio_active.is_valid() and bool(danger_audio_active.call())
+	if danger:
+		_behind_audio.stop()
+	if _interacting and not danger:
 		_behind_left -= delta
 		if _behind_left <= 0.0:
 			_schedule_behind()
@@ -124,38 +109,26 @@ func _process(delta: float) -> void:
 					_behind_audio.play()
 
 
-func advance_outage_timer(delta: float) -> void:
-	if not powered or not random_outages_enabled:
-		return
-	var eligible_delta := maxf(0.0, delta - cooldown_left)
-	cooldown_left = maxf(0.0, cooldown_left - delta)
-	_check_time += eligible_delta
-	while _check_time >= 1.0 and powered:
-		_check_time -= 1.0
-		if _rng.randf() < outage_chance_per_second:
-			trigger_outage()
+func trigger_outage() -> bool:
+	# Every external/debug request goes through the single threat scheduler.
+	return bool(outage_request.call()) if outage_request.is_valid() else false
 
 
-func clear_cooldown() -> void:
-	cooldown_left = 0.0
-	_check_time = 0.0
-
-
-func trigger_outage() -> void:
+func cut_power() -> bool:
 	if not powered or not is_instance_valid(board):
-		return
+		return false
+	if outage_guard.is_valid() and not outage_guard.call():
+		return false
 	powered = false
-	_check_time = 0.0
 	board.reset_for_outage()
 	for light: Light3D in _lights:
 		light.hide()
 	_environment.ambient_light_energy = blackout_ambient_energy
 	_environment.background_color = Color.BLACK
 	_screen.material_override = _black_screen
-	flashlight.show()
-	flashlight_spill.show()
-	_play_event(outage_sound)
+	set_flashlight_enabled(true)
 	power_changed.emit(false)
+	return true
 
 
 func restore_power() -> void:
@@ -168,13 +141,33 @@ func restore_power() -> void:
 	_environment.ambient_light_energy = _normal_ambient
 	_environment.background_color = _normal_background
 	_screen.material_override = _screen_material
-	flashlight.hide()
-	flashlight_spill.hide()
-	cooldown_left = cooldown_seconds
-	_check_time = 0.0
+	set_flashlight_enabled(false)
 	set_interacting(false)
-	_play_event(restore_sound)
 	power_changed.emit(true)
+
+
+func set_flashlight_enabled(value: bool) -> void:
+	flashlight_on = value and not powered
+	flashlight.visible = flashlight_on
+	flashlight_spill.visible = flashlight_on
+	update_flashlight()
+
+
+func toggle_flashlight() -> void:
+	set_flashlight_enabled(not flashlight_on)
+
+
+func update_flashlight() -> void:
+	var camera: Camera3D = get_viewport().get_camera_3d()
+	if camera != null:
+		flashlight.global_transform = camera.global_transform
+		flashlight_spill.global_transform = camera.global_transform * Transform3D(Basis(Vector3.RIGHT, deg_to_rad(-12.0)), Vector3(0, -0.12, 0.05))
+	flashlight.light_energy = flashlight_energy
+	flashlight.spot_range = flashlight_range
+	flashlight.spot_angle = flashlight_angle
+	flashlight_spill.light_energy = flashlight_spill_energy
+	flashlight_spill.spot_range = flashlight_spill_range
+	flashlight_spill.spot_angle = flashlight_spill_angle
 
 
 func set_interacting(value: bool) -> void:
@@ -186,9 +179,3 @@ func set_interacting(value: bool) -> void:
 
 func _schedule_behind() -> void:
 	_behind_left = _rng.randf_range(maxf(0.2, behind_min_interval), maxf(behind_min_interval, behind_max_interval))
-
-
-func _play_event(stream: AudioStream) -> void:
-	if stream != null:
-		_event_audio.stream = stream
-		_event_audio.play()

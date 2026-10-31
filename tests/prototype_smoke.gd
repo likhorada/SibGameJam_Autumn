@@ -20,7 +20,7 @@ func _run() -> void:
 	game = load("res://scenes/main.tscn").instantiate()
 	root.add_child(game)
 	current_scene = game
-	game.power.random_outages_enabled = false
+	game.threats.set_event_enabled(&"power_outage", false)
 	player = game.get_node("Player")
 	game.transition_seconds = 0.02
 	await _frames(3)
@@ -42,8 +42,10 @@ func _run() -> void:
 	_expect(player.position.z > 3.8, "Bedroom doorway traversable")
 	await _walk(Vector3(-2.3, 0.02, -0.5), 0.0, "move_left", 40)
 	_expect(player.position.x < -3.6, "Bathroom doorway traversable")
+	_expect(game.room_door.set_open(true), "Player opens the new room door before using corridor")
 	await _walk(Vector3(2.3, 0.02, 1.1), 0.0, "move_right", 35)
 	_expect(player.position.x > 3.5, "Corridor doorway traversable")
+	_expect(game.room_door.set_open(false), "Door can be closed from the corridor side")
 	await _walk(Vector3(4.2, 0.02, -5.7), 0.0, "move_forward", 60)
 	_expect(player.position.z > -6.7, "Corridor end wall blocks movement")
 	await _walk(Vector3(4.2, 0.02, 1.1), 0.0, "move_right", 40)
