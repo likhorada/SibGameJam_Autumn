@@ -11,14 +11,16 @@ const CALCULATOR_SCENE := preload("res://scenes/ui/desktop/calculator.tscn")
 const CCTV_SCENE := preload("res://scenes/ui/desktop/cctv_app.tscn")
 const CHAT_SCENE := preload("res://scenes/ui/desktop/chat.tscn")
 const INPUT_AUDIO := preload("res://scripts/ui/desktop/desktop_input_audio.gd")
+const NIGHT_NOTE := preload("res://scripts/ui/desktop/night_note_app.gd")
 const ICONS := {
 	&"hack": preload("res://assets/ui/chat.svg"),
 	&"chat": preload("res://assets/ui/chat.svg"),
 	&"notepad": preload("res://assets/ui/notepad.svg"),
 	&"calculator": preload("res://assets/ui/calculator.svg"),
 	&"cctv": preload("res://assets/ui/cctv.svg"),
+	&"night_note": preload("res://assets/ui/notepad.svg"),
 }
-const TITLES := {&"notepad": "Блокнот", &"calculator": "Калькулятор", &"cctv": "CCTV", &"chat": "RELAY", &"hack": "ALARM.sh"}
+const TITLES := {&"notepad": "Блокнот", &"calculator": "Калькулятор", &"cctv": "CCTV", &"chat": "RELAY", &"hack": "ALARM.sh", &"night_note": "night.txt"}
 const TASKBAR_HEIGHT := 44.0
 
 var windows: Dictionary = {}
@@ -29,6 +31,7 @@ var notepad: NotepadApp
 var calculator: CalculatorApp
 var cctv: CCTVApp
 var chat: ChatApp
+var night_note: NightNoteApp
 var input_audio: Node
 var _first_login: bool = true
 var exit_button: Button
@@ -69,6 +72,9 @@ func _ready() -> void:
 	windows[&"chat"].content.add_child(chat)
 	chat.finished.connect(func(won: bool, score: int): report_finished.emit(won, score))
 	_create_app(&"hack", Vector2(240, 140), Vector2(480, 220), Vector2(330, 180))
+	_create_app(&"night_note", Vector2(300, 70), Vector2(560, 490), Vector2(300, 230))
+	night_note = NIGHT_NOTE.new()
+	windows[&"night_note"].content.add_child(night_note)
 	input_audio = INPUT_AUDIO.new()
 	add_child(input_audio)
 	resized.connect(_fit_workspace)
@@ -360,7 +366,12 @@ func _fit_workspace() -> void:
 	var available := Vector2(size.x, maxf(size.y - TASKBAR_HEIGHT, 1.0))
 	var rows := maxi(1, int((available.y - 24.0) / 116.0))
 	var icon_index := 0
-	for icon: Button in desktop_icons.values():
+	for app: StringName in desktop_icons:
+		var icon: Button = desktop_icons[app]
+		if app == &"night_note":
+			# Keep the file visible beside the initial RELAY window, not underneath it.
+			icon.position = Vector2(maxf(20.0, available.x - 130.0), 24)
+			continue
 		icon.position = Vector2(20 + int(icon_index / rows) * 120, 24 + (icon_index % rows) * 116)
 		icon_index += 1
 	for window: DesktopAppWindow in windows.values():

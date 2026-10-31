@@ -1,0 +1,54 @@
+[gd_scene load_steps=7 format=3]
+
+[sub_resource type="StandardMaterial3D" id="Coat"]
+albedo_color = Color(0.12, 0.09, 0.07, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Skin"]
+albedo_color = Color(0.38, 0.36, 0.28, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="Torso"]
+size = Vector3(0.5, 0.8, 0.32)
+material = SubResource("Coat")
+
+[sub_resource type="BoxMesh" id="Head"]
+size = Vector3(0.26, 0.29, 0.25)
+material = SubResource("Skin")
+
+[sub_resource type="BoxMesh" id="Limb"]
+size = Vector3(0.14, 0.7, 0.18)
+material = SubResource("Coat")
+
+[sub_resource type="BoxMesh" id="Arm"]
+size = Vector3(0.12, 0.7, 0.15)
+material = SubResource("Coat")
+
+[node name="PsychNeighborVisual" type="Node3D"]
+visible = false
+
+[node name="Torso" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.1, 0)
+rotation = Vector3(-0.12, 0, 0.04)
+mesh = SubResource("Torso")
+
+[node name="Head" type="MeshInstance3D" parent="."]
+position = Vector3(0.035, 1.64, -0.12)
+rotation = Vector3(0.12, 0, -0.15)
+mesh = SubResource("Head")
+
+[node name="LeftLeg" type="MeshInstance3D" parent="."]
+position = Vector3(-0.14, 0.36, 0)
+mesh = SubResource("Limb")
+
+[node name="RightLeg" type="MeshInstance3D" parent="."]
+position = Vector3(0.14, 0.36, 0)
+mesh = SubResource("Limb")
+
+[node name="LeftArm" type="MeshInstance3D" parent="."]
+position = Vector3(-0.32, 1.0, -0.07)
+mesh = SubResource("Arm")
+
+[node name="RightArm" type="MeshInstance3D" parent="."]
+position = Vector3(0.32, 1.0, -0.07)
+mesh = SubResource("Arm")

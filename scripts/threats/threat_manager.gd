@@ -87,6 +87,11 @@ func set_event_enabled(id: StringName, value: bool) -> void:
 		_finish_event(&"disabled")
 
 
+func is_event_enabled(id: StringName) -> bool:
+	var profile := config.profile_for(id)
+	return profile != null and bool(_event_enabled.get(id, profile.enabled))
+
+
 func request_event(id: StringName, forced: bool = false) -> bool:
 	# Forced tests bypass timing/selection, never exclusivity or world blockers.
 	if not can_start_external_event() or not _available(id):

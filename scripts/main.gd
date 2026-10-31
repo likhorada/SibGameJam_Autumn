@@ -11,6 +11,8 @@ var pointer_was_captured: bool = false
 var pointer_retry_after_msec: int = 0
 var fusebox_hint: Label
 var _focus_active: bool = true
+var run_ended: bool = false
+var failure_reason: String = ""
 
 @onready var player: ApartmentPlayer = $Player
 @onready var terminal: Node3D = $Terminal
@@ -26,6 +28,8 @@ var _focus_active: bool = true
 @onready var threats: ThreatManager = $ThreatManager
 var ambient: AmbientDirector
 var shift: ShiftDirector
+var neighbor: PsychNeighbor
+@onready var room_door: RoomDoor = $Apartment/RoomDoor
 
 
 func _ready() -> void:
@@ -39,6 +43,9 @@ func _ready() -> void:
 	power.bind(self)
 	power.power_changed.connect(_on_power_changed)
 	power.outage_guard = threats.can_start_power_outage
+	neighbor = PsychNeighbor.new()
+	neighbor.bind(self)
+	threats.register_event(&"psych_neighbor", neighbor)
 	ambient = AmbientDirector.new()
 	add_child(ambient)
 	ambient.bind(self)
@@ -86,6 +93,8 @@ func _physics_process(_delta: float) -> void:
 		hint.text = tr("E — сесть за компьютер") if power.powered else tr("NO_POWER")
 	elif player.interaction_id == &"fusebox":
 		hint.text = tr("POWER_OK") if power.powered else tr("USE_FUSEBOX")
+	elif player.interaction_id == &"room_door":
+		hint.text = tr("DOOR_BLOCKED" if room_door.blocked_seconds_left > 0.0 else "DOOR_CLOSE" if room_door.is_open else "DOOR_OPEN")
 	else:
 		hint.text = ""
 
@@ -121,6 +130,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and player.interaction_id == &"fusebox" and not power.powered:
 			enter_fusebox()
+			get_viewport().set_input_as_handled()
+		elif Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and player.interaction_id == &"room_door":
+			room_door.toggle()
 			get_viewport().set_input_as_handled()
 
 
@@ -331,7 +343,19 @@ func disable_threats() -> void:
 	power.restore_power()
 
 
-func _finish_report(won: bool, score: int) -> void:
+func trigger_neighbor() -> bool:
+	return threats.request_event(&"psych_neighbor", true)
+
+
+func fail_from_threat(reason: String) -> void:
+	_finish_report(false, 0, reason)
+
+
+func _finish_report(won: bool, score: int, reason: String = "") -> void:
+	if run_ended:
+		return
+	run_ended = true
+	failure_reason = reason
 	threats.disable_threats()
 	if is_instance_valid(shift):
 		shift.state = ShiftDirector.State.ENDED
@@ -364,14 +388,17 @@ func _finish_report(won: bool, score: int) -> void:
 	column.theme = report_theme
 	center.add_child(column)
 	var title := Label.new()
-	title.text = tr("CHAT_WIN" if won else "CHAT_LOSE")
+	title.text = tr("THREAT_GAME_OVER" if not reason.is_empty() else "CHAT_WIN" if won else "CHAT_LOSE")
 	title.add_theme_font_size_override("font_size", 40)
 	column.add_child(title)
 	var detail := Label.new()
-	detail.text = tr("CHAT_RESULT") % [score, ChatSession.CONTENT.QUESTIONS.size()]
+	detail.text = tr(reason) if not reason.is_empty() else tr("CHAT_RESULT") % [score, ChatSession.CONTENT.QUESTIONS.size()]
+	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	detail.custom_minimum_size.x = 300
 	column.add_child(detail)
 	var reply := Label.new()
 	reply.text = tr("CHAT_SUCCESS" if won else "CHAT_FAILURE")
+	reply.visible = reason.is_empty()
 	reply.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	reply.custom_minimum_size.x = 300
 	column.add_child(reply)

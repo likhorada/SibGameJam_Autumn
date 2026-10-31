@@ -42,6 +42,9 @@ func bind(value: Node3D) -> void:
 	_rng.randomize()
 	powered = game.power.powered
 	game.power.power_changed.connect(_on_power_changed)
+	game.threats.state_changed.connect(func(state: ThreatManager.State, _id: StringName):
+		if state != ThreatManager.State.IDLE and is_instance_valid(event_audio):
+			event_audio.stop())
 	noise_audio = _make_player(NOISE)
 	near_audio = _make_player(NEAR_NOISE)
 	event_audio = AudioStreamPlayer.new()
@@ -112,6 +115,8 @@ func _fade(player: AudioStreamPlayer, target_db: float, delta: float, top_db: fl
 
 func _tick_events(delta: float) -> void:
 	if not powered or game == null or game.dev_menu.is_open:
+		return
+	if game.threats.is_busy():
 		return
 	if game.mode != game.Mode.WALKING:
 		return

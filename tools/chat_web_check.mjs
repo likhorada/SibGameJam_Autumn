@@ -3,13 +3,14 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
-const root=path.resolve(process.env.THREAT_WEB_ROOT || process.env.CHAT_WEB_ROOT || 'build/chat-web');
+const root=path.resolve(process.env.NEIGHBOR_WEB_ROOT || process.env.THREAT_WEB_ROOT || process.env.CHAT_WEB_ROOT || 'build/chat-web');
 const artifacts=path.join(process.env.LOCALAPPDATA,'Temp/opencode');
 const profile=await fs.mkdtemp(path.join(artifacts,'chat-chrome-'));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const errors=[];
 const shiftMode=process.env.SHIFT_WEB==='1';
 const threatMode=process.env.THREAT_WEB==='1';
+const neighborMode=process.env.NEIGHBOR_WEB==='1';
 const server=http.createServer(async(req,res)=>{
   try {
     const name=new URL(req.url,'http://localhost').pathname;
@@ -46,7 +47,7 @@ try {
     requests.set(n,{resolve,reject,timer});ws.send(JSON.stringify({id:n,method,params}));
   });
   const evaluate=async expression=>(await call('Runtime.evaluate',{expression,returnByValue:true})).result.value;
-  const state=()=>evaluate('window.chatTelemetry');
+  const state=()=>evaluate(neighborMode?'window.neighborTelemetry':'window.chatTelemetry');
   const expect=(value,message)=>{if(!value)throw Error(message);};
   const wait=async(predicate,message,seconds=10)=>{
     for(let i=0;i<seconds*20;i++){const s=await state();if(s&&predicate(s))return s;await sleep(50);}
@@ -56,9 +57,9 @@ try {
     await call('Input.dispatchKeyEvent',{type:'keyDown',code,key,windowsVirtualKeyCode:vkey,...(text?{text,unmodifiedText:text}:{})});
     await call('Input.dispatchKeyEvent',{type:'keyUp',code,key,windowsVirtualKeyCode:vkey});
   };
-  const click=async p=>{
+  const click=async(p,clickCount=1)=>{
     await call('Input.dispatchMouseEvent',{type:'mouseMoved',x:p[0],y:p[1]});
-    for(const type of ['mousePressed','mouseReleased'])await call('Input.dispatchMouseEvent',{type,x:p[0],y:p[1],button:'left',buttons:type==='mousePressed'?1:0,clickCount:1});
+    for(const type of ['mousePressed','mouseReleased'])await call('Input.dispatchMouseEvent',{type,x:p[0],y:p[1],button:'left',buttons:type==='mousePressed'?1:0,clickCount});
     await sleep(100);
   };
   const capture=async name=>{const d=await call('Page.captureScreenshot',{format:'png'});await fs.writeFile(path.join(artifacts,'chat_web_'+name+'.png'),Buffer.from(d.data,'base64'));};
@@ -86,7 +87,63 @@ try {
   await call('Runtime.enable');await call('Page.enable');
   await call('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
   const url='http://127.0.0.1:'+server.address().port+'/';
-  if(threatMode){
+  if(neighborMode){
+    const command=async name=>{
+      await evaluate('window.neighborTelemetry.command="";window.neighborCommand='+JSON.stringify(name));
+      await wait(s=>s.command===name,'Test command not acknowledged: '+name);
+    };
+    await call('Page.navigate',{url});
+    await wait(s=>s.mode===0&&!s.open,'Door fixture did not load',30);
+    await call('Page.bringToFront');
+    await click([640,360]);
+    await wait(s=>s.captured&&s.interaction==='room_door','Door pointer capture failed');
+    await tap('KeyE','e',69,'e');
+    await wait(s=>s.open,'Physical E did not open door');
+    await command('look_leaf');
+    await wait(s=>s.interaction==='room_door','Open leaf ray did not update');
+    await tap('KeyE','e',69,'e');
+    await wait(s=>!s.open,'Physical E did not close leaf');
+    await call('Input.dispatchKeyEvent',{type:'keyDown',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+    await wait(s=>s.dev,'F7 menu did not open');
+    await call('Input.dispatchKeyEvent',{type:'keyUp',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+    await sleep(250);
+    await click((await state()).buttons.TriggerNeighbor);
+    await wait(s=>s.state===1&&s.steps&&!s.dev,'Dev command did not start audible approach');
+    await command('active');
+    await wait(s=>s.state===2&&s.visit===2,'Closed door did not protect against neighbor');
+    await command('look_door');
+    await sleep(2200); // Browser cooldown after dev-menu pointer release.
+    await click([640,360]);
+    await wait(s=>s.captured,'Pointer recapture failed');
+    await tap('KeyE','e',69,'e');
+    await wait(s=>s.open&&s.visit===3,'Opening during visit did not start entry');
+    await capture('neighbor_entry');
+    await command('look_leaf');
+    await wait(s=>s.interaction==='room_door','Rescue ray did not update');
+    await tap('KeyE','e',69,'e');
+    await wait(s=>!s.open&&s.visit===2&&!s.ended,'Physical E did not save player');
+    await command('leave');
+    await wait(s=>s.state===0&&!s.ended,'Neighbor did not leave');
+    await command('computer');
+    await wait(s=>s.mode===2,'PC did not open after survival');
+    await sleep(300);
+    await capture('neighbor_pc_before_file');
+    await click((await state()).file);
+    await click((await state()).file,2);
+    await wait(s=>s.active==='night_note','Double-click did not open night.txt');
+    await capture('neighbor_txt');
+    await tap('Escape','Escape',27);
+    await wait(s=>s.mode===0,'Could not leave PC after reading TXT');
+    await command('look_door');
+    await sleep(2200);
+    await click([640,360]);
+    await wait(s=>s.captured&&s.interaction==='room_door','Could not return to door');
+    await tap('KeyE','e',69,'e');
+    await wait(s=>s.open,'Door did not reopen');
+    await command('trigger');await command('active');await command('die');
+    await wait(s=>s.ended&&s.reason==='NEIGHBOR_DEATH','Open door did not cause death');
+    await capture('neighbor_death');
+  }else if(threatMode){
     await call('Page.navigate',{url});
     let result;
     for(let i=0;i<600;i++){
@@ -143,5 +200,5 @@ try {
     await capture(perfect?'win':'lose');
   }
   expect(errors.length===0,'Browser errors: '+errors.join('\n'));
-  console.log(threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
+  console.log(neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
 } finally {ws?.close();browser.kill();server.close();}

@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/power/fusebox.tscn" id="Fusebox"]
+[ext_resource type="PackedScene" path="res://scenes/apartment/room_door.tscn" id="RoomDoor"]
 
 [sub_resource type="Environment" id="Environment"]
 background_mode = 1
@@ -355,6 +356,9 @@ material = SubResource("StandardMaterial3D_pxk46")
 size = Vector3(0.35, 0.07, 0.35)
 
 [node name="Apartment" type="Node3D" unique_id=1269526120]
+
+[node name="RoomDoor" parent="." instance=ExtResource("RoomDoor")]
+position = Vector3(3, 0, 1.1)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1489028802]
 environment = SubResource("Environment")
