@@ -71,8 +71,10 @@ jobs:
           # pipefail catches process failures; log checks catch those errors too.
           godot --headless --editor --path . --import 2>&1 | tee "$RUNNER_TEMP/import.log"
           if grep -F 'ERROR:' "$RUNNER_TEMP/import.log"; then exit 1; fi
-          godot --headless --path . --quit-after 10 2>&1 | tee "$RUNNER_TEMP/startup.log"
+          # Autoplay audio needs a graceful teardown, not an abrupt --quit-after.
+          godot --headless --path . --script res://tests/startup_smoke.gd 2>&1 | tee "$RUNNER_TEMP/startup.log"
           if grep -F 'ERROR:' "$RUNNER_TEMP/startup.log"; then exit 1; fi
+          grep -F 'STARTUP SMOKE: PASS' "$RUNNER_TEMP/startup.log"
           # The regular startup above only opens the menu. Exercise its Play
           # transition so scene-tree contract errors are caught before export.
           godot --headless --path . --script res://tests/menu_smoke.gd 2>&1 | tee "$RUNNER_TEMP/menu-smoke.log"
