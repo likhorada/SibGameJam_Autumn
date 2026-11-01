@@ -58,8 +58,11 @@ func bind(value: Node3D) -> void:
 	world.environment = _environment
 	_normal_ambient = _environment.ambient_light_energy
 	_normal_background = _environment.background_color
-	_screen = game.get_node("Terminal/Monitor/Screen")
-	_screen_material = _screen.material_override
+	_screen = _find_monitor_screen()
+	if _screen != null:
+		_screen_material = _screen.material_override
+	else:
+		push_warning("Monitor screen mesh was not found; power outages will not blank the monitor")
 	_black_screen = StandardMaterial3D.new()
 	_black_screen.albedo_color = Color.BLACK
 	_black_screen.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -83,6 +86,28 @@ func bind(value: Node3D) -> void:
 	_behind_audio.max_distance = 7.0
 	game.add_child(_behind_audio)
 	_schedule_behind()
+
+
+func _find_monitor_screen() -> MeshInstance3D:
+	var legacy_screen := game.get_node_or_null("Terminal/Monitor/Screen") as MeshInstance3D
+	if legacy_screen != null:
+		return legacy_screen
+
+	var laptop := game.get_node_or_null("Terminal/Monitor/Laptop")
+	if laptop == null:
+		return null
+	var named_screen := laptop.get_node_or_null("Cube.001") as MeshInstance3D
+	if named_screen != null:
+		return named_screen
+	for child: Node in laptop.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := child as MeshInstance3D
+		if mesh_instance.mesh == null:
+			continue
+		for surface_index: int in mesh_instance.mesh.get_surface_count():
+			var material := mesh_instance.get_active_material(surface_index)
+			if material != null and material.resource_name.to_lower().contains("screen"):
+				return mesh_instance
+	return null
 
 
 func _process(delta: float) -> void:
@@ -125,7 +150,8 @@ func cut_power() -> bool:
 		light.hide()
 	_environment.ambient_light_energy = blackout_ambient_energy
 	_environment.background_color = Color.BLACK
-	_screen.material_override = _black_screen
+	if _screen != null:
+		_screen.material_override = _black_screen
 	set_flashlight_enabled(true)
 	power_changed.emit(false)
 	return true
@@ -140,7 +166,8 @@ func restore_power() -> void:
 		_lights[index].visible = _light_visibility[index]
 	_environment.ambient_light_energy = _normal_ambient
 	_environment.background_color = _normal_background
-	_screen.material_override = _screen_material
+	if _screen != null:
+		_screen.material_override = _screen_material
 	set_flashlight_enabled(false)
 	set_interacting(false)
 	power_changed.emit(true)

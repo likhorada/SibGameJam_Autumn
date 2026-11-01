@@ -53,6 +53,8 @@ func _run() -> void:
 			break
 	expect(current_scene != menu, "Play transitions to game")
 	if current_scene != menu:
+		expect(current_scene.get_node_or_null("Apartment/RoomDoor") != null, "Play loads the interactive apartment door")
+		expect(current_scene.power._screen != null, "Power system resolves the laptop screen mesh")
 		expect(is_equal_approx(current_scene.player.mouse_sensitivity, 0.003), "Sensitivity applied to player")
 		expect(root.find_children("Background", "TextureRect", true, false).is_empty(), "Menu background freed")
 		await physics_frame

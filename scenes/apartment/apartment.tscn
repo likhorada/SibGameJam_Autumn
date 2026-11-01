@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://scenes/power/fusebox.tscn" id="Fusebox"]
 [ext_resource type="PackedScene" path="res://scenes/apartment/hiding_spots.tscn" id="HidingSpots"]
 [ext_resource type="PackedScene" uid="uid://bhl73kkqdkhwr" path="res://assets/models/Shitok.glb" id="Shitok"]
+[ext_resource type="PackedScene" path="res://scenes/apartment/room_door.tscn" id="RoomDoor"]
 
 [sub_resource type="Environment" id="Environment"]
 background_mode = 1
@@ -382,6 +383,9 @@ size = Vector3(0.35, 0.07, 0.35)
 size = Vector3(6.3355713, 4.5341797, 10.107971)
 
 [node name="Apartment" type="Node3D" unique_id=1269526120]
+
+[node name="RoomDoor" parent="." unique_id=1905430843 instance=ExtResource("RoomDoor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 1.1)
 
 [node name="HidingSpots" parent="." unique_id=1561367029 instance=ExtResource("HidingSpots")]
 
@@ -839,9 +843,6 @@ shape = SubResource("BoxShape3D_8fjlh")
 
 [node name="Door" parent="." unique_id=1515334798 instance=ExtResource("9_n5k1t")]
 transform = Transform3D(-3.1253638e-08, 0, -0.5199999, 0, 0.5199999, 0, 0.715, 0, -2.2729921e-08, 5.2598114, 1.1250103, -4.804799)
-
-[node name="Door3" parent="." unique_id=2101717768 instance=ExtResource("9_n5k1t")]
-transform = Transform3D(-3.3876326e-08, 0, -0.52, 0, 0.52, 0, 0.775, 0, -2.2729921e-08, 2.97238, 1.1250103, 1.1008148)
 
 [node name="Door2" parent="." unique_id=1663831180 instance=ExtResource("9_n5k1t")]
 transform = Transform3D(-3.1253638e-08, 0, -0.5199999, 0, 0.5199999, 0, 0.715, 0, -2.2729921e-08, 5.2598114, 1.1250103, 4.292701)
