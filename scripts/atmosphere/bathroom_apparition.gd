@@ -2,6 +2,7 @@ class_name BathroomApparition
 extends Node3D
 ## A decoration, not an enemy. No collision, AI, capture, proximity pulse or damage.
 signal dismissed(reason: StringName)
+signal seen
 const SEEN_HOLD_SECONDS: float = 0.5
 const SAMPLES: Array[Vector3] = [
 	Vector3(0, 1.65, 0), Vector3(0, 1.3, 0),
@@ -108,6 +109,7 @@ func _on_frame_post_draw() -> void:
 		for target: Vector3 in _visible_points:
 			if camera.is_position_in_frustum(target):
 				seen_seconds_left = SEEN_HOLD_SECONDS
+				seen.emit()
 				return
 
 

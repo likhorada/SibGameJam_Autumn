@@ -51,6 +51,13 @@ func _run() -> void:
 	manager.config.min_interval = 25.0
 	manager.config.max_interval = 25.0
 	manager.reset_run()
+	var first_seed := manager.run_seed
+	manager.reset_run()
+	expect(manager.run_seed != first_seed, "In-place reset generates a fresh seed")
+	manager.reset_run(12345)
+	var seeded_state := manager._rng.state
+	manager.reset_run(12345)
+	expect(manager._rng.state == seeded_state, "Explicit reset seed reproduces the threat stream")
 	var neighbor := ProbeEvent.new()
 	var police := ProbeEvent.new()
 	var outage := ProbeEvent.new()
@@ -156,6 +163,8 @@ func _run() -> void:
 
 func _integration() -> void:
 	var game = load("res://scenes/main.tscn").instantiate()
+	# This integration checks the empty-pool fallback, not context-dependent waits.
+	game.atmosphere_config = AtmosphereConfig.new()
 	root.add_child(game)
 	get_tree().current_scene = game
 	game.transition_seconds = 0.02

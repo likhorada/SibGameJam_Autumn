@@ -28,7 +28,7 @@ var _placement_pose := Transform3D.IDENTITY
 func bind(value: Node3D, owner_director: AtmosphereDirector) -> void:
 	game = value
 	director = owner_director
-	_rng.randomize()
+	_rng = RunRandom.generator(game.run_seed, &"residents")
 	remaining_questions.assign(DECK.KEYS)
 	question_overlay = Control.new()
 	question_overlay.name = "ResidentQuestions"
@@ -108,12 +108,15 @@ func place_figure() -> bool:
 	add_child(figure)
 	figure.global_transform = game.get_node("Apartment/BathroomApparitionPoint").global_transform
 	figure.dismissed.connect(_on_figure_dismissed)
+	figure.seen.connect(director.confirm_seen.bind(&"bathroom_apparition"))
 	director.note("Bathroom apparition placed; slot released")
 	return true
 
 
 func _on_figure_dismissed(reason: StringName) -> void:
 	figure = null
+	if reason == &"threat_started":
+		director.release_unseen(&"bathroom_apparition")
 	director.note("Bathroom apparition removed: " + String(reason))
 
 

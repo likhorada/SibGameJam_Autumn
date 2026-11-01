@@ -254,7 +254,6 @@ func _run() -> void:
 	director.start_run()
 	# Emulate a freed transition reservation so the real handler enters random selection.
 	director.reserves = [&"", &""]
-	director.random_limit = 1
 	director.clear_cooldown()
 	director.advance(0.1)
 	expect(director.active_id == &"firewall_breach" and director.random_count == 1, "Real firewall handler supports random scheduling")

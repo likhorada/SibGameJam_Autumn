@@ -25,8 +25,9 @@ func profile(id: StringName, computer: bool = true, walking: bool = true, immedi
 	return result
 
 
-func make_game(profiles: Array[AtmosphereProfile]) -> void:
+func make_game(profiles: Array[AtmosphereProfile], seed_value: int = -1) -> void:
 	game = load("res://scenes/main.tscn").instantiate()
+	game.run_seed = seed_value
 	var settings := AtmosphereConfig.new()
 	settings.events = profiles
 	game.atmosphere_config = settings
@@ -49,6 +50,50 @@ func _ready() -> void:
 
 
 func _run() -> void:
+	make_game([], 4000000001)
+	var snapshot := seed_snapshot()
+	expect(game.threats.run_seed == game.run_seed and director.debug_status().contains("4000000001"), "Run seed reaches threats and dev diagnostics")
+	await discard()
+	make_game([], 4000000001)
+	expect(seed_snapshot() == snapshot, "Explicit seed reproduces independent gameplay and audio streams")
+	await discard()
+	make_game([])
+	var previous_seed: int = game.run_seed
+	await discard()
+	make_game([])
+	expect(game.run_seed != previous_seed and director.used.is_empty() and director.seen.is_empty() and director.random_count == 0, "New game gets a fresh seed and clean scheduling state")
+	await discard()
+
+	var repeat := profile(&"repeat", true, true, true)
+	repeat.repeatable = true
+	repeat.transition_trigger = false
+	var fresh := profile(&"fresh", true, true, true)
+	fresh.transition_trigger = false
+	make_game([repeat, fresh])
+	director.start_run()
+	game.shift.state = ShiftDirector.State.ROUTE
+	director.used[&"repeat"] = true
+	expect(director._random_candidates() == [&"fresh"], "Fresh content takes priority over repeatable events")
+	for index: int in 6:
+		director.clear_cooldown()
+		director.advance(100)
+		expect(director.random_count == index + 1 and not director.is_busy(), "No total quota or catch-up burst for instant events")
+	expect(director.wait_seconds_left >= 40.0 and director.wait_seconds_left <= 70.0, "Original atmosphere intervals are preserved")
+	await discard()
+
+	make_game([profile(&"pc_a", true, false), profile(&"pc_b", true, false)])
+	director.start_run()
+	game.mode = game.Mode.WALKING
+	game.shift._finish_stage()
+	expect(director.transition_pending and not director.is_busy(), "Guaranteed PC encounter waits instead of skipping while walking")
+	game.mode = game.Mode.COMPUTER
+	director.try_transition()
+	expect(director.transition_pending and director.is_busy(), "Guaranteed encounter starts when its context becomes available")
+	director.complete_event()
+	game.shift._process(0)
+	expect(game.shift.stage == 1, "Guaranteed encounter completion advances location")
+	await discard()
+
 	make_game([])
 	game.mode = game.Mode.COMPUTER
 	game.shift._finish_stage()
@@ -65,7 +110,6 @@ func _run() -> void:
 	director.start_run()
 	expect(director.reserves[0] != &"" and director.reserves[0] != director.reserves[1], "Two distinct reservations")
 	game.shift.state = ShiftDirector.State.ROUTE
-	director.random_limit = 2
 	director.clear_cooldown()
 	director.advance(100)
 	expect(director.is_busy() and director.random_count == 1, "Long frame starts at most one random event")
@@ -172,7 +216,6 @@ func _run() -> void:
 	game.shift._process(0)
 	game.shift.stage = 2
 	game.shift.state = ShiftDirector.State.REPORT
-	director.random_limit = 2
 	director.reserves = [&"", &""]
 	director.used.clear()
 	director.clear_cooldown()
@@ -209,3 +252,10 @@ func _run() -> void:
 	else:
 		await get_tree().create_timer(0.3).timeout
 		get_tree().quit(0 if failures == 0 else 1)
+
+
+func seed_snapshot() -> Array:
+	return [game.run_seed, game.threats.wait_seconds_left, director.wait_seconds_left,
+		game.shift.code, game.shift.drink, game.shift.rng.state,
+		director._rng.state, director.residents._rng.state, game.neighbor._rng.state,
+		game.outage.entity._rng.state, game.power._rng.state, game.ambient._rng.state]

@@ -45,7 +45,7 @@ var danger_audio_active: Callable
 
 func bind(value: Node3D) -> void:
 	game = value
-	_rng.randomize()
+	_rng = RunRandom.generator(game.run_seed, &"power_audio")
 	board = game.get_node("Apartment/Fusebox/Breakers")
 	board.repaired.connect(restore_power)
 	for index: int in board.handles.size():

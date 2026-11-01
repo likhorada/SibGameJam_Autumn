@@ -46,7 +46,7 @@ func bind(value: Node3D) -> void:
 
 
 func _ready() -> void:
-	_rng.randomize()
+	_rng = RunRandom.generator(game.run_seed, &"corridor")
 	collision_layer = 0
 	collision_mask = 1
 	var capsule := CapsuleShape3D.new()

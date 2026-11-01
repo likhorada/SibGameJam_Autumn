@@ -43,7 +43,7 @@ var _event_left: float = 0.0
 
 func bind(value: Node3D) -> void:
 	game = value
-	_rng.randomize()
+	_rng = RunRandom.generator(game.run_seed, &"ambient_audio")
 	powered = game.power.powered
 	game.power.power_changed.connect(_on_power_changed)
 	game.threats.state_changed.connect(func(state: ThreatManager.State, _id: StringName):

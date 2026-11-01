@@ -24,7 +24,7 @@ var rng := RandomNumberGenerator.new()
 
 func bind(value: Node3D) -> void:
 	game = value
-	rng.randomize()
+	rng = RunRandom.generator(game.run_seed, &"observation")
 	code = "%04d" % rng.randi_range(1000, 9999)
 	drink = rng.randi_range(0, DATA.DRINKS.size() - 1)
 	game.terminal_ui.chat.session.intro_completed.connect(_begin_deadline)
@@ -178,7 +178,11 @@ func _update_status() -> void:
 
 func report_questions() -> Array:
 	var codes := [code, "%04d" % (1000 + (int(code) - 1000 + 127) % 9000), "%04d" % (1000 + (int(code) - 1000 + 513) % 9000)]
-	codes.shuffle()
+	for index: int in range(codes.size() - 1, 0, -1):
+		var other := rng.randi_range(0, index)
+		var value: String = codes[index]
+		codes[index] = codes[other]
+		codes[other] = value
 	return [
 		{"id": "code", "prompt": "OBS_Q_CODE", "answers": codes, "correct": code},
 		{"id": "drink", "prompt": "OBS_Q_DRINK", "answers": DATA.DRINKS, "correct": DATA.DRINKS[drink]},

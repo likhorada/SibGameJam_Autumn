@@ -19,7 +19,7 @@ func start(value: Node3D) -> bool:
 	game = value
 	if game.mode != game.Mode.COMPUTER or not game.terminal_ui.is_visible_in_tree() or game.terminal_ui.has_modal():
 		return false
-	round_state.begin(settings)
+	round_state.begin(settings, RunRandom.stream_seed(game.run_seed, &"firewall"))
 	overlay = ColorRect.new()
 	overlay.name = "FirewallBreachOverlay"
 	overlay.color = Color(0.015, 0.01, 0.015, 0.72)

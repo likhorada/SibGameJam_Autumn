@@ -25,7 +25,7 @@ func start(value: Node3D) -> bool:
 	game = value
 	if game.mode != game.Mode.COMPUTER or not game.terminal_ui.is_visible_in_tree():
 		return false
-	_rng.randomize()
+	_rng = RunRandom.generator(game.run_seed, &"idiot_popups")
 	overlay = Control.new()
 	overlay.name = "IdiotPopups"
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE

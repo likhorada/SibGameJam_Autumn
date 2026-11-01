@@ -30,12 +30,13 @@ var _blockers: Dictionary = {}
 var _active_event: ThreatEvent
 var _outcome: StringName = &""
 var _rng := RandomNumberGenerator.new()
+var run_seed: int = -1
 var capture_in_progress: bool = false
 var detected_audio: AudioStreamPlayer
 
 
 func _ready() -> void:
-	_rng.randomize()
+	_reseed(run_seed)
 	detected_audio = AudioStreamPlayer.new()
 	detected_audio.name = "DetectedAudio"
 	detected_audio.stream = DETECTED_SOUND
@@ -251,7 +252,7 @@ func clear_cooldown() -> void:
 	wait_seconds_left = 0.0
 
 
-func reset_run() -> void:
+func reset_run(seed_value: int = -1) -> void:
 	disable_threats()
 	capture_in_progress = false
 	_blockers.clear()
@@ -262,7 +263,13 @@ func reset_run() -> void:
 	safe_seconds_left = 0.0
 	phase_seconds_left = 0.0
 	enabled = true
+	_reseed(seed_value)
 	_schedule()
+
+
+func _reseed(seed_value: int) -> void:
+	run_seed = RunRandom.fresh_seed() if seed_value < 0 else seed_value
+	_rng = RunRandom.generator(run_seed, &"threats")
 
 
 func _schedule() -> void:

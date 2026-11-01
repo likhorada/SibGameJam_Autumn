@@ -39,7 +39,7 @@ func bind(value: Node3D) -> void:
 
 
 func _ready() -> void:
-	_rng.randomize()
+	_rng = RunRandom.generator(game.run_seed, &"neighbor_audio")
 	visual = VISUAL.instantiate()
 	add_child(visual)
 	footsteps_audio = AudioStreamPlayer3D.new()

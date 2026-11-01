@@ -11,6 +11,8 @@ enum Mode { WALKING, ENTERING, COMPUTER, LEAVING, FUSEBOX_ENTERING, FUSEBOX, FUS
 @export_range(0.02, 2.0) var transition_seconds: float = 0.7
 @export var observation_shift_enabled: bool = true
 @export var atmosphere_config: AtmosphereConfig = preload("res://data/atmosphere/default.tres")
+## Negative means a new random seed. Explicit values are for reproducible playtests.
+@export var run_seed: int = -1
 
 var mode: Mode = Mode.WALKING
 var transition: Tween
@@ -51,6 +53,13 @@ var _hide_blocked_left: float = 0.0
 	&"hide_wardrobe": $Apartment/HidingSpots/Wardrobe,
 	&"hide_bed": $Apartment/HidingSpots/Bed,
 }
+
+
+func _enter_tree() -> void:
+	if run_seed < 0:
+		run_seed = RunRandom.fresh_seed()
+	get_node("ThreatManager").run_seed = run_seed
+	print("RUN SEED: %d" % run_seed)
 
 
 func _ready() -> void:

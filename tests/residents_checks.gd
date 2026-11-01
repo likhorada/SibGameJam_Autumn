@@ -145,7 +145,6 @@ func _run() -> void:
 	await frames()
 	director.start_run()
 	director.clear_cooldown()
-	director.random_limit = 2
 	game.shift.state = ShiftDirector.State.ROUTE
 	# Keep this test's random selection focused on the repeatable question profile.
 	for profile: AtmosphereProfile in game.atmosphere_config.events:
@@ -156,11 +155,11 @@ func _run() -> void:
 	await close_question()
 	director.clear_cooldown()
 	director.advance(1)
-	expect(is_instance_valid(residents.question) and director.random_count == 2, "Repeat uses normal random budget")
+	expect(is_instance_valid(residents.question) and director.random_count == 2, "Repeat uses normal random interval")
 	director.clear_cooldown()
 	await close_question()
 	director.advance(100)
-	expect(not is_instance_valid(residents.question) and director.random_count == 2, "No quota bypass")
+	expect(is_instance_valid(residents.question) and director.random_count == 3, "Random events continue beyond two starts without a quota")
 	# Restore the world event's real availability check.
 	director.set_event_condition(&"bathroom_apparition", residents.can_place_figure)
 
@@ -213,6 +212,7 @@ func _run() -> void:
 		await get_tree().create_timer(0.35).timeout
 	await frames()
 	expect(not is_instance_valid(residents.figure), "Figure disappears half a second after glimpse, without requiring continued sight")
+	expect(director.seen.has(&"bathroom_apparition") and director.used.has(&"bathroom_apparition"), "Confirmed glimpse consumes the one-shot figure")
 	aim(Vector3(0, 1.6, 0), point + Vector3.UP * 1.3, deg_to_rad(50))
 	await capture("peripheral_empty")
 
@@ -222,8 +222,11 @@ func _run() -> void:
 	aim(Vector3(0, 1.6, 0), Vector3(0, 1.6, -10))
 	await physics()
 	expect(director.request_event(&"bathroom_apparition", true), "Hidden spawn is available again to dev")
+	# Treat this forced second placement as a fresh, unseen encounter.
+	director.seen.erase(&"bathroom_apparition")
 	expect(game.trigger_neighbor(), "Unseen resident never blocks a real threat")
 	expect(not is_instance_valid(residents.figure), "Threat warning removes decorative figure synchronously")
+	expect(not director.used.has(&"bathroom_apparition"), "Unseen interrupted figure returns to the random pool")
 	game.disable_threats()
 	game.queue_free()
 	await frames()
@@ -277,12 +280,11 @@ func _run() -> void:
 			director.set_event_condition(profile.id, func() -> bool: return false)
 	director.start_run()
 	director.clear_cooldown()
-	director.random_limit = 1
 	game.shift.state = ShiftDirector.State.ROUTE
 	director.advance(1.0)
 	await frames(2)
 	var room_popup := residents.room_camera
-	expect(is_instance_valid(room_popup) and not director.is_busy() and director.random_count == 1, "Normal random scheduling shows the room camera and spends its usual quota")
+	expect(is_instance_valid(room_popup) and not director.is_busy() and director.random_count == 1, "Normal random scheduling shows the room camera and records one start")
 	expect(residents.room_camera_seconds_left > 19.5 and residents.room_camera_seconds_left <= 20.0, "Room camera starts with a 20-second lifetime")
 	expect(game.visual_effects._room_camera_source == residents.room_camera_source, "Room camera switches the existing low-resolution apartment viewport")
 	expect(game.visual_effects.viewport.render_target_update_mode == SubViewport.UPDATE_ALWAYS, "Room feed renders only while shown at the PC")

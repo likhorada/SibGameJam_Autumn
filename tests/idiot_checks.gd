@@ -178,7 +178,6 @@ func _run() -> void:
 	director.reserves = [&"", &""]
 	director.start_run()
 	director.reserves = [&"", &""]
-	director.random_limit = 2
 	game.shift.state = ShiftDirector.State.ROUTE
 	director.clear_cooldown()
 	director.advance(1)

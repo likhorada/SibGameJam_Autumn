@@ -16,8 +16,8 @@ var active_id: StringName = &""
 var seconds_left: float = 0.0
 var wait_seconds_left: float = 0.0
 var random_count: int = 0
-var random_limit: int = 0
 var used: Dictionary = {}
+var seen: Dictionary = {}
 var reserves: Array[StringName] = [&"", &""]
 var transition_pending: bool = false
 var transition_index: int = -1
@@ -34,7 +34,7 @@ var _conditions: Dictionary = {}
 
 func bind(value: Node3D) -> void:
 	game = value
-	_rng.randomize()
+	_rng = RunRandom.generator(game.run_seed, &"atmosphere")
 	for profile: AtmosphereProfile in config.events:
 		if profile == null or profile.id == &"" or _profiles.has(profile.id) or profile.scene == null or not is_finite(profile.timeout_seconds) or profile.timeout_seconds <= 0.0:
 			note("Invalid/duplicate atmosphere profile skipped")
@@ -50,7 +50,6 @@ func start_run() -> void:
 	if armed:
 		return
 	armed = true
-	random_limit = _rng.randi_range(config.min_random_events, maxi(config.min_random_events, config.max_random_events))
 	for index: int in 2:
 		reserves[index] = _pick(_candidates(true, false, false))
 	note("Armed; reserves: %s" % str(reserves))
@@ -117,6 +116,9 @@ func try_transition() -> void:
 	if not blocked_reason().is_empty():
 		return
 	var candidates := _candidates(true, true, false, transition_index)
+	# Wait for a valid event's context rather than skipping the guaranteed encounter.
+	if _candidates(true, true, true, transition_index).is_empty() and not _candidates(true, false, true, transition_index).is_empty():
+		return
 	var selected: StringName = reserves[transition_index]
 	if selected not in candidates:
 		selected = _pick(candidates)
@@ -150,7 +152,7 @@ func request_event(id: StringName, forced: bool = false, for_transition: bool = 
 	if for_transition and not profile.transition_trigger:
 		return false
 	if not forced and not for_transition:
-		if not armed or not profile.random_trigger or wait_seconds_left > 0.0 or random_count >= random_limit:
+		if not armed or not profile.random_trigger or wait_seconds_left > 0.0:
 			return false
 		if not is_instance_valid(game.shift) or game.shift.state not in [ShiftDirector.State.ROUTE, ShiftDirector.State.REPORT]:
 			return false
@@ -177,6 +179,8 @@ func request_event(id: StringName, forced: bool = false, for_transition: bool = 
 		_finish(&"setup_failed")
 		return false
 	used[id] = true
+	if id != &"bathroom_apparition":
+		confirm_seen(id)
 	note("Started: " + String(id))
 	var immediate_outcome := _early_outcome
 	event_started.emit(id)
@@ -284,6 +288,27 @@ func clear_cooldown() -> void:
 	wait_seconds_left = 0.0
 
 
+func confirm_seen(id: StringName) -> void:
+	seen[id] = true
+	note("Presented: " + String(id))
+
+
+func release_unseen(id: StringName) -> void:
+	if not seen.has(id):
+		used.erase(id)
+		note("Unseen event returned to pool: " + String(id))
+
+
+func _random_candidates() -> Array[StringName]:
+	var candidates := _candidates(false, true, false)
+	var fresh: Array[StringName] = []
+	for id: StringName in candidates:
+		if not used.has(id):
+			fresh.append(id)
+	# Repeated questions must not displace available, never-started content.
+	return fresh if not fresh.is_empty() else candidates
+
+
 func _schedule() -> void:
 	wait_seconds_left = _rng.randf_range(maxf(1.0, config.min_interval), maxf(config.min_interval, config.max_interval))
 
@@ -312,23 +337,24 @@ func advance(delta: float) -> void:
 	if transition_pending:
 		try_transition()
 		return
-	if not armed or not blocked_reason().is_empty() or random_count >= random_limit or not is_instance_valid(game.shift):
+	if not armed or not blocked_reason().is_empty() or not is_instance_valid(game.shift):
 		return
 	if game.shift.state not in [ShiftDirector.State.ROUTE, ShiftDirector.State.REPORT]:
 		return
 	wait_seconds_left = maxf(0.0, wait_seconds_left - delta)
 	if wait_seconds_left > 0.0:
 		return
-	var id := _pick(_candidates(false, true, false))
+	var id := _pick(_random_candidates())
 	if id != &"" and request_event(id):
 		random_count += 1
 	_schedule()
 
 
 func debug_status() -> String:
-	return "Atmosphere: %s / %s (%.1fs), context: %s\nRandom: %d/%d; wait %.1fs; status: %s\nPool: %s; used: %s\nReserves: %s; transition: %s\n%s\n%s" % [
-		"ON" if enabled else "OFF", active_id, seconds_left, context(), random_count, random_limit,
-		wait_seconds_left, scheduling_reason(), str(_profiles.keys()), str(used.keys()), str(reserves),
+	return "Run seed: %d\nAtmosphere: %s / %s (%.1fs), context: %s\nRandom starts: %d (no quota); wait %.1fs; status: %s\nPool: %s; used: %s; presented: %s\nReserves: %s; transition: %s\n%s\n%s" % [
+		game.run_seed,
+		"ON" if enabled else "OFF", active_id, seconds_left, context(), random_count,
+		wait_seconds_left, scheduling_reason(), str(_profiles.keys()), str(used.keys()), str(seen.keys()), str(reserves),
 		str(transition_index), residents.debug_status(), "\n".join(history)]
 
 
@@ -344,8 +370,6 @@ func scheduling_reason() -> String:
 		return "waiting for ALARM.sh"
 	if not is_instance_valid(game.shift) or game.shift.state not in [ShiftDirector.State.ROUTE, ShiftDirector.State.REPORT]:
 		return "outside observation / return"
-	if random_count >= random_limit:
-		return "random limit reached"
 	if _candidates(false, true, false).is_empty():
 		return "no unused, unreserved candidates for context"
 	return "cooldown" if wait_seconds_left > 0.0 else "ready"
