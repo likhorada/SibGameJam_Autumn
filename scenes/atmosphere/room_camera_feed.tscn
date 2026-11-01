@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/atmosphere/room_camera_event.gd" id="1"]
+
+[node name="RoomCameraEvent" type="Node"]
+script = ExtResource("1")

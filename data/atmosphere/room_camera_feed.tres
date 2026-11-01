@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="AtmosphereProfile" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/atmosphere/atmosphere_profile.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/atmosphere/room_camera_feed.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"room_camera_feed"
+transition_trigger = false
+walking = false
+timeout_seconds = 20.0
+scene = ExtResource("2")
