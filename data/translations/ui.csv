@@ -42,6 +42,7 @@ E — сесть за компьютер,E — use computer,E — сесть з�
 WASD — ходить   ·   Shift — бег   ·   E — сесть за ПК   ·   Esc — освободить мышь,WASD — walk   ·   Shift — sprint   ·   E — computer   ·   Esc — release mouse,WASD — ходить   ·   Shift — бег   ·   E — сесть за ПК   ·   Esc — освободить мышь
 CAM-01 / ЗАЛ,CAM-01 / FLOOR,CAM-01 / ЗАЛ
 CAM-02 / КАССА,CAM-02 / CHECKOUT,CAM-02 / КАССА
+CAM-03 / ПОЛКА,CAM-03 / SHELF,CAM-03 / ПОЛКА
 CAM-03 / ДВОР,CAM-03 / YARD,CAM-03 / ДВОР
 CAM-04 / ВХОД,CAM-04 / ENTRANCE,CAM-04 / ВХОД
 01 / МАГАЗИН,01 / SHOP,01 / МАГАЗИН
@@ -152,15 +153,14 @@ OBS_RETURN,Return to the PC for your RELAY report.,Вернись к ПК для
 OBS_OFFICE,OFFICE,ОФИС
 OBS_SHOP,SHOP,МАГАЗИН
 OBS_STREET,STREET,УЛИЦА
-OBS_TEA,Tea,Чай
-OBS_COFFEE,Coffee,Кофе
-OBS_WINE,Red wine,Красное вино
-OBS_SODA,Green soda,Зелёная газировка
+OBS_WINE,Wine,Вино
+OBS_GIN,Gin,Джин
+OBS_VODKA,Vodka,Водка
 OBS_ALLEY,Side alley,Переулок
 OBS_AVENUE,Tree-lined avenue,Аллея
 OBS_PARK,Park,Парк
 OBS_Q_CODE,Which four digits were on the office screen?,Какие четыре цифры были на офисном экране?
-OBS_Q_DRINK,Which drink did the target take?,Какой напиток взяла цель?
+OBS_Q_DRINK,Which alcohol did the target buy?,Какой алкоголь купила цель?
 OBS_Q_PATH,Where did the target go after the junction?,Куда цель пошла после развилки?
 OBS_DEV_NEXT,DEV: complete current route / event,DEV: завершить маршрут / событие
 FUSEBOX,FUSEBOX,ЭЛЕКТРОЩИТОК

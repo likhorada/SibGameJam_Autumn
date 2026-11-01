@@ -74,6 +74,34 @@ try {
   await call('Emulation.setDeviceMetricsOverride', {width:1280,height:720,deviceScaleFactor:1,mobile:false});
   await call('Page.navigate', {url:`http://127.0.0.1:${server.address().port}/`});
   const seated = await wait(s => s.activity === 'work');
+  if (process.argv.includes('--shop')) {
+    const drinks = ['OBS_WINE', 'OBS_GIN', 'OBS_VODKA'];
+    for (let choice=0; choice<drinks.length; choice++) {
+      await command('shop', {choice});
+      expect((await state()).scene === 'res://scenes/cctv/locations/shop.tscn', 'Wrong shop scene');
+      await command('camera', {index:1});
+      await command('advance', {seconds:29.8});
+      await sleep(700); await capture('shop_' + choice + '_shelf');
+      await command('live', {enabled:true});
+      await wait(s => s.holding);
+      await sleep(700); await command('live', {enabled:false});
+      expect((await state()).evidence === drinks[choice], 'Wrong physical bottle taken');
+      await capture('shop_' + choice + '_held');
+      await command('advance', {seconds:5.6});
+      await command('live', {enabled:true});
+      await wait(s => s.activity === 'carry_walk');
+      await command('camera', {index:2});
+      await sleep(700); await capture('shop_' + choice + '_carry');
+      await command('live', {enabled:false});
+      await command('advance', {seconds:8});
+      const receipt = await wait(s => s.on_counter);
+      expect(!receipt.holding && receipt.correct === receipt.evidence, 'Report disagrees with the bottle on checkout');
+      expect(JSON.stringify(receipt.options) === JSON.stringify(drinks), 'Wrong alcohol answer options');
+      await sleep(700); await capture('shop_' + choice + '_checkout');
+    }
+    expect(errors.length === 0, 'Browser errors: ' + errors.join('\n'));
+    console.log('SHOP PURCHASE WEB: PASS (wine, gin, vodka)');
+  } else {
   await sleep(800); await capture('work');
   await command('alarm'); await sleep(600);
   expect((await state()).activity === 'stand', 'Alarm did not trigger getting up');
@@ -102,6 +130,7 @@ try {
   await capture('street');
   expect(errors.length === 0, 'Browser errors: ' + errors.join('\n'));
   console.log('CCTV ANIMATION WEB: PASS');
+  }
 } finally {
   ws?.close(); browser.kill(); await new Promise(resolve => server.close(resolve));
 }

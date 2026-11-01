@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/observation/shift_director.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/cctv/locations/office.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/cctv/locations/observation_shop.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/cctv/locations/shop.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/cctv/locations/street.tscn" id="4"]
 
 [node name="ShiftDirector" type="Node"]

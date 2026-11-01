@@ -24,11 +24,11 @@ func _run() -> void:
 	desktop = game.terminal_ui
 	app = desktop.cctv
 	await _frames(4)
-	_expect(system.cameras.size() == 4, "Two locations automatically register four cameras")
-	_expect(app.directory.item_count == 4, "All cameras available in app")
+	_expect(system.cameras.size() == 5, "Shop and yard automatically register five cameras")
+	_expect(app.directory.item_count == 5, "All cameras available in app")
 	_expect(not system.watching and system.viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED, "No hidden feed rendering at startup")
 	_expect(system.viewport.own_world_3d and system.viewport.size == Vector2i(480, 270), "Isolated low-resolution world")
-	var visitor: Node3D = system.viewport.get_node("Locations/Shop/Visitor")
+	var visitor: Node3D = system.viewport.get_node("Locations/Yard/Visitor")
 	var before: float = visitor.elapsed
 	await create_timer(0.15).timeout
 	_expect(visitor.elapsed > before, "Location actions advance while player is away")

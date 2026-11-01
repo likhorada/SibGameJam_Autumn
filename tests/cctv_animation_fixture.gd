@@ -29,6 +29,12 @@ func _publish() -> void:
 	if int(request.get("id", 0)) > command_id:
 		command_id = int(request.id)
 		match str(request.get("name", "")):
+			"shop":
+				shift.set_process(false)
+				shift.drink = int(request.get("choice", 0))
+				shift.stage = 1
+				shift._load_stage()
+				shift._begin_route(shift.location.route())
 			"alarm":
 				shift.state = ShiftDirector.State.DEADLINE
 				shift.start_alarm()
@@ -51,4 +57,9 @@ func _publish() -> void:
 	var data := {"command": command_id, "stage": shift.stage, "activity": actor.activity,
 		"foot": [foot.x, foot.y, foot.z], "head_y": head.y, "holding": is_instance_valid(actor.carrying),
 		"variants": variants, "position": [actor.global_position.x, actor.global_position.y, actor.global_position.z]}
+	data["scene"] = shift.location.scene_file_path
+	data["correct"] = shift.report_questions()[1].correct
+	data["options"] = shift.report_questions()[1].answers
+	data["evidence"] = shift.location.bottle.get_meta(&"evidence_id", "") if is_instance_valid(shift.location.bottle) else ""
+	data["on_counter"] = is_instance_valid(shift.location.bottle) and shift.location.bottle.get_parent() == shift.location
 	JavaScriptBridge.eval("window.animationTelemetry = " + JSON.stringify(data))

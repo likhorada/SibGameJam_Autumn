@@ -14,10 +14,14 @@
   the alarm route rolls the chair back and plays `stand`; the first 1.5 seconds
   keep the actor at the desk, then he walks via the aisle to the actual door.
   Total office route: 18.5 seconds. The notebook code stays visible.
-- Shop: turn toward the drink, reach, attach the item to `DEF-hand.R`, carry with
+- Shop (`locations/shop.tscn`, also used by the menu): turn toward wine/gin/vodka,
+  reach the actual shelf, attach the item to `DEF-hand.R`, carry with
   a separate upper-body pose, then reach/release onto the checkout counter.
   Handoffs occur 0.45 seconds into the reach, not at the start of the gesture.
-- Legacy shop/yard and menu mannequins inherit the same walking controller.
+  The wrapper follows wrist position but stays upright (top-level transform), so
+  late AnimationPlayer/BoneAttachment updates cannot rotate the bottle sideways.
+  Base-origin wrappers retain the GLB scale and sit on a real shelf ledge/KSO tray.
+- Yard and menu mannequins inherit the same walking controller.
   There are no new viewports, runtime IK solvers, external services or Blender dependency.
 
 ## Authoring / rebuild

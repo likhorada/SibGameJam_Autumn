@@ -3,7 +3,9 @@
 [ext_resource type="PackedScene" path="res://scenes/cctv/cctv_camera.tscn" id="1"]
 [ext_resource type="Texture2D" uid="uid://dnxpx0nxt4g6w" path="res://assets/textures/WallHomeNormalTex.png" id="1_o4k77"]
 [ext_resource type="Texture2D" uid="uid://c5hnwepejwbod" path="res://assets/textures/ShelfShopTex.png" id="1_xq3dm"]
-[ext_resource type="PackedScene" path="res://scenes/cctv/locations/test_mannequin.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/cctv/guy_actor.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/cctv/shop_location.gd" id="script"]
+[ext_resource type="Script" path="res://scripts/cctv/observation_waypoint.gd" id="waypoint"]
 [ext_resource type="PackedScene" uid="uid://cvsnip5isja56" path="res://assets/models/KSO.glb" id="4_oy2o1"]
 [ext_resource type="PackedScene" uid="uid://b8soj6kc28dm0" path="res://assets/models/Pumpkin.glb" id="5_tc0bc"]
 [ext_resource type="PackedScene" uid="uid://dr015viqdhp3k" path="res://assets/models/Cigarettes_final.glb" id="6_o4k77"]
@@ -60,7 +62,12 @@ albedo_color = Color(0.06, 0.2, 0.7, 1)
 material = SubResource("Blue")
 size = Vector3(0.3, 0.3, 0.3)
 
+[sub_resource type="BoxMesh" id="AlcoholLedge"]
+material = SubResource("StandardMaterial3D_cn8qd")
+size = Vector3(3, 0.06, 0.32)
+
 [node name="Shop" type="Node3D" unique_id=844437319]
+script = ExtResource("script")
 
 [node name="Floor" type="MeshInstance3D" parent="." unique_id=1739523737]
 mesh = SubResource("Floor")
@@ -95,7 +102,7 @@ mesh = SubResource("BlueBox")
 
 [node name="Price" type="Label3D" parent="." unique_id=581388204]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.85, -0.285)
-text = "RICE 42 / TEA 17"
+text = "18+"
 
 [node name="Light" type="OmniLight3D" parent="." unique_id=1845978555]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8, 0)
@@ -103,8 +110,10 @@ light_color = Color(0.95, 0.91, 0.75, 1)
 light_energy = 2.0
 omni_range = 12.0
 
-[node name="Visitor" parent="." unique_id=528488563 instance=ExtResource("2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.08, -1.8)
+[node name="Target" type="Node3D" parent="."]
+position = Vector3(-3, 0.075, 2.7)
+
+[node name="Guy" parent="Target" instance=ExtResource("2")]
 
 [node name="ShopWide" parent="." unique_id=1198699987 instance=ExtResource("1")]
 transform = Transform3D(0.8571673, 0.15058255, -0.4925334, 0, 0.9563048, 0.2923717, 0.5150381, -0.25061145, 0.8197132, -4.8, 3.2, 4.3)
@@ -113,13 +122,102 @@ display_name = "CAM-01 / ЗАЛ"
 location_label = "01 / МАГАЗИН"
 
 [node name="Checkout" parent="." unique_id=761074794 instance=ExtResource("1")]
-transform = Transform3D(0.83867055, -0.18627751, 0.5117933, 0, 0.9396926, 0.34202012, -0.54463905, -0.2868422, 0.78809255, 4.8, 2.8, 3.2)
+position = Vector3(3.6, 2.45, 1.9)
+rotation_degrees = Vector3(-23, 40, 0)
 camera_id = &"shop_checkout"
 display_name = "CAM-02 / КАССА"
 location_label = "01 / МАГАЗИН"
-list_order = 1
+list_order = 2
 monochrome = true
 has_microphone = true
+base_fov = 44.0
+
+[node name="Shelf" parent="." instance=ExtResource("1")]
+position = Vector3(5.6, 2.5, -0.8)
+rotation_degrees = Vector3(-20, 45, 0)
+camera_id = &"shop_shelf"
+display_name = "CAM-03 / ПОЛКА"
+location_label = "01 / МАГАЗИН"
+list_order = 1
+base_fov = 50.0
+
+[node name="Drinks" type="Node3D" parent="."]
+
+[node name="AlcoholLedge" type="MeshInstance3D" parent="."]
+position = Vector3(3.25, 0.9, -3.1)
+mesh = SubResource("AlcoholLedge")
+
+[node name="Wine" type="Node3D" parent="Drinks"]
+position = Vector3(2.3, 0.93, -3.1)
+
+[node name="Name" type="Label3D" parent="Drinks/Wine"]
+position = Vector3(0, 0.24, 0.12)
+pixel_size = 0.002
+text = "OBS_WINE"
+font_size = 48
+outline_size = 8
+
+[node name="Gin" type="Node3D" parent="Drinks"]
+position = Vector3(3.25, 0.93, -3.1)
+
+[node name="Name" type="Label3D" parent="Drinks/Gin"]
+position = Vector3(0, 0.24, 0.17)
+pixel_size = 0.002
+text = "OBS_GIN"
+font_size = 48
+outline_size = 8
+
+[node name="Vodka" type="Node3D" parent="Drinks"]
+position = Vector3(4.2, 0.93, -3.1)
+
+[node name="Name" type="Label3D" parent="Drinks/Vodka"]
+position = Vector3(0, 0.24, 0.12)
+pixel_size = 0.002
+text = "OBS_VODKA"
+font_size = 48
+outline_size = 8
+
+[node name="CheckoutItem" type="Marker3D" parent="."]
+position = Vector3(1.57, 0.991, -0.58)
+
+[node name="Route" type="Node3D" parent="."]
+
+[node name="Approach" type="Marker3D" parent="Route"]
+position = Vector3(2.09, 0.075, -1.6)
+script = ExtResource("waypoint")
+seconds = 8.0
+
+[node name="Browse" type="Marker3D" parent="Route"]
+position = Vector3(2.09, 0.075, -1.6)
+script = ExtResource("waypoint")
+seconds = 12.0
+
+[node name="Shelf" type="Marker3D" parent="Route"]
+position = Vector3(2.09, 0.075, -2.57)
+script = ExtResource("waypoint")
+seconds = 10.0
+event_id = "take"
+
+[node name="Pickup" type="Marker3D" parent="Route"]
+position = Vector3(2.09, 0.075, -2.57)
+script = ExtResource("waypoint")
+seconds = 6.0
+
+[node name="Checkout" type="Marker3D" parent="Route"]
+position = Vector3(1.36, 0.075, -0.05)
+script = ExtResource("waypoint")
+seconds = 8.0
+event_id = "checkout"
+
+[node name="Inspect" type="Marker3D" parent="Route"]
+position = Vector3(1.36, 0.075, -0.05)
+script = ExtResource("waypoint")
+seconds = 12.0
+
+[node name="Exit" type="Marker3D" parent="Route"]
+position = Vector3(0, 0.075, 4.8)
+script = ExtResource("waypoint")
+seconds = 6.0
 
 [node name="KSO" parent="." unique_id=1021728523 instance=ExtResource("4_oy2o1")]
 transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.9713458, 0.9055742, -0.6636803)
@@ -151,8 +249,9 @@ transform = Transform3D(-5.9010374e-09, 0, -0.135, 0, 0.135, 0, 0.135, 0, -5.901
 [node name="Cigarettes_final3" parent="." unique_id=1068847188 instance=ExtResource("6_o4k77")]
 transform = Transform3D(0.01347615, 0, -0.13432571, 0, 0.135, 0, 0.13432571, 0, 0.01347615, -3.6136158, 2.0013921, -3.6204283)
 
-[node name="Jin_final" parent="." unique_id=2124565305 instance=ExtResource("7_6lbnd")]
-transform = Transform3D(0.006735196, 0, -0.10478376, 0, 0.105, 0, 0.10478376, 0, 0.006735196, 2.1827288, 1.9875193, -3.4761324)
+[node name="Model" parent="Drinks/Gin" unique_id=2124565305 instance=ExtResource("7_6lbnd")]
+position = Vector3(0, 0.15, 0)
+scale = Vector3(0.15, 0.15, 0.15)
 
 [node name="Jin_final3" parent="." unique_id=1106263893 instance=ExtResource("7_6lbnd")]
 transform = Transform3D(0.034340076, 0, -0.09922579, 0, 0.10499999, 0, 0.09922579, 0, 0.034340076, 2.6422365, 1.9875193, -3.4761324)
@@ -184,8 +283,9 @@ transform = Transform3D(-0.04229511, 0, -0.09610475, 0, 0.10499999, 0, 0.0961047
 [node name="Jin_final12" parent="." unique_id=716024330 instance=ExtResource("7_6lbnd")]
 transform = Transform3D(0.006735196, 0, -0.10478376, 0, 0.105, 0, 0.10478376, 0, 0.006735196, 2.8774996, 1.9875193, -3.9209917)
 
-[node name="Vodka4" parent="." unique_id=1951144444 instance=ExtResource("9_ba0s3")]
-transform = Transform3D(0.029878706, 0, -0.0026949532, 0, 0.029999997, 0, 0.0026949532, 0, 0.029878706, 4.851861, 2.319177, -3.4680796)
+[node name="Model" parent="Drinks/Vodka" unique_id=1951144444 instance=ExtResource("9_ba0s3")]
+position = Vector3(0, 0.3988156, 0)
+scale = Vector3(0.027, 0.027, 0.027)
 
 [node name="Vodka8" parent="." unique_id=764202978 instance=ExtResource("9_ba0s3")]
 transform = Transform3D(0.022908635, 0, -0.01936993, 0, 0.029999997, 0, 0.01936993, 0, 0.022908635, 4.758703, 2.319177, -3.6354363)
@@ -199,8 +299,9 @@ transform = Transform3D(0.022908635, 0, -0.01936993, 0, 0.029999997, 0, 0.019369
 [node name="Vodka12" parent="." unique_id=522567359 instance=ExtResource("9_ba0s3")]
 transform = Transform3D(0.022908635, 0, -0.01936993, 0, 0.029999997, 0, 0.01936993, 0, 0.022908635, 4.8547297, 2.319177, -3.7910285)
 
-[node name="Bottle_final" parent="." unique_id=1911031887 instance=ExtResource("10_6lbnd")]
-transform = Transform3D(0.033723224, 0, 0.02151149, 0, 0.04, 0, -0.02151149, 0, 0.033723224, 3.2333195, 2.470313, -3.4754663)
+[node name="Model" parent="Drinks/Wine" unique_id=1911031887 instance=ExtResource("10_6lbnd")]
+position = Vector3(0, 0.3988156, 0)
+scale = Vector3(0.027, 0.027, 0.027)
 
 [node name="Bottle_final2" parent="." unique_id=1045137587 instance=ExtResource("10_6lbnd")]
 transform = Transform3D(0.028427593, 0, -0.028140217, 0, 0.04, 0, 0.028140217, 0, 0.028427593, 3.4944246, 2.470313, -3.4754663)

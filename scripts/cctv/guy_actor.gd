@@ -24,6 +24,7 @@ var _handoff: float = -1.0
 var _release_parent: Node3D
 var _release_point := Vector3.ZERO
 var _heading: float = 0.0
+var _grip_offset := Vector3.ZERO
 
 
 func _ready() -> void:
@@ -58,8 +59,9 @@ func start_departure() -> void:
 	_play("stand", 0.12)
 
 
-func pick_up(item: Node3D) -> void:
+func pick_up(item: Node3D, grip_offset: Vector3 = Vector3.ZERO) -> void:
 	_face(item.global_position)
+	_grip_offset = grip_offset
 	_pending_item = item
 	_release_parent = null
 	_start_reach()
@@ -96,10 +98,13 @@ func advance_motion(delta: float, displacement: Vector3) -> void:
 			if is_instance_valid(_pending_item):
 				carrying = _pending_item
 				carrying.reparent(grip)
-				carrying.position = Vector3.ZERO
+				# Follow the wrist's position, not its rotation: bottles stay upright even
+				# when AnimationPlayer updates the BoneAttachment later in the frame.
+				carrying.top_level = true
 				_pending_item = null
 			elif is_instance_valid(carrying) and is_instance_valid(_release_parent):
 				carrying.reparent(_release_parent)
+				carrying.top_level = false
 				carrying.position = _release_point
 				carrying.rotation = Vector3.ZERO
 				carrying = null
@@ -112,6 +117,8 @@ func advance_motion(delta: float, displacement: Vector3) -> void:
 		player.speed_scale = clampf(speed / 1.12, 0.18, 2.2) if speed > 0.025 else 1.0
 	if is_instance_valid(carrying):
 		carrying.global_basis = Basis.IDENTITY
+		var wrist := skeleton.get_bone_global_pose(skeleton.find_bone("DEF-hand.R"))
+		carrying.global_position = skeleton.global_transform * wrist.origin + _grip_offset
 
 
 func _play(clip: String, blend: float = 0.18) -> void:
@@ -126,5 +133,10 @@ func _play(clip: String, blend: float = 0.18) -> void:
 
 func _face(point: Vector3) -> void:
 	var direction := point - global_position
+	if Vector2(direction.x, direction.z).length_squared() > 0.0001:
+		_heading = atan2(direction.x, direction.z)
+
+
+func face_direction(direction: Vector3) -> void:
 	if Vector2(direction.x, direction.z).length_squared() > 0.0001:
 		_heading = atan2(direction.x, direction.z)

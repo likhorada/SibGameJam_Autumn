@@ -61,7 +61,7 @@ func _run() -> void:
 	shift.advance(20)
 	expect(shift.state == ShiftDirector.State.ROUTE and game.mode == game.Mode.COMPUTER, "Empty atmosphere pool never ejects player or inserts a pause")
 	expect(shift.stage == 1, "Shop starts immediately with no content")
-	expect(shift.location.scene_file_path.ends_with("observation_shop.tscn") and shift.location.route().size() == 7, "Shop scene supplies its route")
+	expect(shift.location.scene_file_path.ends_with("/shop.tscn") and shift.location.route().size() == 7, "Authored shop scene supplies its route")
 	expect(game.cctv_system.cameras.size() == 3, "Only new camera set is registered")
 	expect(game.terminal_ui.cctv.directory.item_count == 3, "PC directory follows scene replacement")
 	game.power.trigger_outage()
@@ -111,7 +111,7 @@ func _run() -> void:
 	await create_timer(0.3).timeout
 	shift._process(0)
 	expect(session.quiz_started and session.questions.size() == 3, "Report opens automatically at powered PC")
-	expect(session.questions[1].answers.size() == 4, "All four drinks offered")
+	expect(session.questions[1].answers == ["OBS_WINE", "OBS_GIN", "OBS_VODKA"], "Only wine, gin and vodka offered")
 	expect(session.history.all(func(item: Dictionary): return item.text != "CHAT_TEST_FACTS"), "Live briefing does not reveal placeholder answers")
 	for question: Dictionary in session.questions:
 		answer(session, question.correct)

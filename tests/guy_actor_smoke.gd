@@ -8,7 +8,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	for scene: String in ["office", "observation_shop", "street", "shop", "yard"]:
+	for scene: String in ["office", "street", "shop", "yard"]:
 		var location: Node3D = load("res://scenes/cctv/locations/%s.tscn" % scene).instantiate()
 		root.add_child(location)
 		location.set_process(false)
@@ -54,7 +54,7 @@ func _run() -> void:
 			location.start_route()
 			_expect(not location.working and location.get_node("Target/Guy").activity == "stand", "Alarm route triggers getting up")
 			_expect(location.route()[0].point.is_equal_approx(location.target.position), "First office segment keeps the actor at the chair")
-		if scene == "observation_shop":
+		if scene == "shop":
 			var actor: Node3D = location.get_node("Target/Guy")
 			location.event("take")
 			actor.advance_motion(0.5, Vector3.ZERO)
