@@ -180,13 +180,13 @@ func _build_panel() -> void:
 	credits = VBoxContainer.new()
 	column.add_child(credits)
 	_label(credits, "CREDITS", 28)
-	var credit_line_1 := _label(credits, "") # Текст первой строки
+	var credit_line_1 := _label(credits, "likhorada - gamedesign, lead") # Текст первой строки
 	credit_line_1.custom_minimum_size = Vector2(0, 24)
 	credit_line_1.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
-	var credit_line_2 := _label(credits, "") # Текст второй строки
+	var credit_line_2 := _label(credits, "stereodamage - coding, music") # Текст второй строки
 	credit_line_2.custom_minimum_size = Vector2(0, 24)
 	credit_line_2.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
-	var credit_line_3 := _label(credits, "") # Текст третьей строки
+	var credit_line_3 := _label(credits, "Gindru - artstyle, 3d") # Текст третьей строки
 	credit_line_3.custom_minimum_size = Vector2(0, 24)
 	credit_line_3.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	_button(column, "BACK", _close_panel)

@@ -15,9 +15,9 @@
 [node name="Main" type="Node3D" unique_id=309523320]
 script = ExtResource("1")
 
-[node name="Apartment" parent="." unique_id=137882563 instance=ExtResource("2")]
+[node name="Apartment" parent="." unique_id=1269526120 instance=ExtResource("2")]
 
-[node name="Terminal" parent="." unique_id=1528586934 instance=ExtResource("4")]
+[node name="Terminal" parent="." unique_id=1546214837 instance=ExtResource("4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.35)
 
 [node name="Player" parent="." unique_id=1755970685 instance=ExtResource("3")]
