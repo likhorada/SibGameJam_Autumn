@@ -1,10 +1,12 @@
-[gd_resource type="Resource" script_class="AtmosphereConfig" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="AtmosphereConfig" load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/atmosphere/atmosphere_config.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/atmosphere/atmosphere_profile.gd" id="2"]
 [ext_resource type="Resource" path="res://data/atmosphere/you_are_an_idiot.tres" id="3"]
 [ext_resource type="Resource" path="res://data/atmosphere/firewall_breach.tres" id="4"]
+[ext_resource type="Resource" path="res://data/atmosphere/question_popup.tres" id="5"]
+[ext_resource type="Resource" path="res://data/atmosphere/bathroom_apparition.tres" id="6"]
 
 [resource]
 script = ExtResource("1")
-events = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4")])
+events = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6")])

@@ -200,3 +200,16 @@ FW_READY,ALL PORTS CLOSED — BLOCK THE CONNECTION,ВСЕ ПОРТЫ ЗАКРЫ�
 FW_WATCH_PORTS,WATCH FOR REOPENED PORTS,СЛЕДИ ЗА ПОВТОРНО ОТКРЫТЫМИ ПОРТАМИ
 FW_ESCAPE,Esc — leave PC. The timer keeps running.,Esc — встать. Таймер продолжит идти.
 FW_RESTORED,Local access restored.,Локальный доступ восстановлен.
+AQ_TITLE,Question,Вопрос
+AQ_EXISTENCE,"If everyone forgot you existed, did you ever exist at all?","Если все забудут о твоём существовании, существовал ли ты вообще?"
+AQ_FORGOTTEN,"Are you afraid of death, or of being forgotten?","Ты боишься смерти или того, что тебя забудут?"
+AQ_DISAPPEAR,"If you disappeared tomorrow, who would notice first?","Если бы завтра ты исчез, кто заметил бы это первым?"
+AQ_DEATH,"Which is worse: knowing the date of your death, or not knowing how it will happen?","Что страшнее: знать дату своей смерти или не знать, как она произойдёт?"
+AQ_ALONE,"How do you know you're alone in the room right now?","Откуда ты знаешь, что сейчас находишься в комнате один?"
+AQ_WATCHING,"If someone were watching you right now, how would you know?","Если бы кто-то наблюдал за тобой прямо сейчас, как бы ты это понял?"
+AQ_DOOR,"When did you last check that the door was locked?","Когда ты в последний раз проверял, закрыта ли дверь?"
+AQ_SILENCE,"What if the silence means someone is listening?","Что, если тишина означает, что кто-то слушает?"
+AQ_CURSOR,"Why are you so sure you're the one controlling the cursor?","Почему ты уверен, что это ты управляешь курсором?"
+AQ_CLOSE,"If you close this window, will the one who opened it disappear?","Если ты закроешь это окно, исчезнет ли тот, кто его открыл?"
+AQ_POWER,"Have you ever wondered why you're allowed to turn the computer off?","Ты когда-нибудь задумывался, почему тебе позволяют выключать компьютер?"
+AQ_AGAIN,"How many times have you answered this question already?","Сколько раз ты уже отвечал на этот вопрос?"

@@ -28,6 +28,8 @@ var _finishing: bool = false
 var _starting: bool = false
 var _early_outcome: StringName = &""
 var _rng := RandomNumberGenerator.new()
+var residents: AtmosphereResidents
+var _conditions: Dictionary = {}
 
 
 func bind(value: Node3D) -> void:
@@ -38,6 +40,9 @@ func bind(value: Node3D) -> void:
 			note("Invalid/duplicate atmosphere profile skipped")
 			continue
 		_profiles[profile.id] = profile
+	residents = AtmosphereResidents.new()
+	add_child(residents)
+	residents.bind(game, self)
 	_schedule()
 
 
@@ -140,7 +145,7 @@ func request_event(id: StringName, forced: bool = false, for_transition: bool = 
 	if transition_pending and not for_transition:
 		return false
 	var profile: AtmosphereProfile = _profiles[id]
-	if not _matches(profile, true) or (not forced and not for_transition and (used.has(id) or id in reserves)):
+	if not _matches(profile, true) or (not forced and not for_transition and ((used.has(id) and not profile.repeatable) or id in reserves)):
 		return false
 	if for_transition and not profile.transition_trigger:
 		return false
@@ -217,6 +222,8 @@ func complete_event() -> void:
 
 func cancel(outcome: StringName = &"cancelled") -> void:
 	_finish(outcome)
+	if is_instance_valid(residents):
+		residents.clear_all(outcome)
 	if transition_pending:
 		_end_transition("Transition cancelled: " + String(outcome))
 
@@ -231,14 +238,23 @@ func _end_transition(message: String) -> void:
 
 
 func _matches(profile: AtmosphereProfile, check_context: bool) -> bool:
-	return profile.enabled and is_finite(profile.weight) and profile.weight > 0.0 and (not check_context or (profile.at_computer if context() == &"computer" else profile.walking))
+	if not profile.enabled or not is_finite(profile.weight) or profile.weight <= 0.0 or (check_context and not (profile.at_computer if context() == &"computer" else profile.walking)):
+		return false
+	return not _conditions.has(profile.id) or bool((_conditions[profile.id] as Callable).call())
+
+
+func set_event_condition(id: StringName, condition: Callable) -> void:
+	if condition.is_valid():
+		_conditions[id] = condition
+	else:
+		_conditions.erase(id)
 
 
 func _candidates(for_transition: bool, check_context: bool, allow_used: bool, reserve_slot: int = -1) -> Array[StringName]:
 	var result: Array[StringName] = []
 	for id: StringName in _profiles:
 		var profile: AtmosphereProfile = _profiles[id]
-		if not _matches(profile, check_context) or (not allow_used and used.has(id)):
+		if not _matches(profile, check_context) or (not allow_used and used.has(id) and not profile.repeatable):
 			continue
 		if not (profile.transition_trigger if for_transition else profile.random_trigger):
 			continue
@@ -310,10 +326,10 @@ func advance(delta: float) -> void:
 
 
 func debug_status() -> String:
-	return "Atmosphere: %s / %s (%.1fs), context: %s\nRandom: %d/%d; wait %.1fs; status: %s\nPool: %s; used: %s\nReserves: %s; transition: %s\n%s" % [
+	return "Atmosphere: %s / %s (%.1fs), context: %s\nRandom: %d/%d; wait %.1fs; status: %s\nPool: %s; used: %s\nReserves: %s; transition: %s\n%s\n%s" % [
 		"ON" if enabled else "OFF", active_id, seconds_left, context(), random_count, random_limit,
 		wait_seconds_left, scheduling_reason(), str(_profiles.keys()), str(used.keys()), str(reserves),
-		str(transition_index), "\n".join(history)]
+		str(transition_index), residents.debug_status(), "\n".join(history)]
 
 
 func scheduling_reason() -> String:

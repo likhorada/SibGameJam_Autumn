@@ -57,7 +57,8 @@ F7 → **DEV: завершить маршрут / событие** ускоря�
 ## Атмосферные события
 
 Заглушка удалена. `AtmosphereDirector` поддерживает случайные и межсценовые события,
-production-ивенты — You Are An Idiot и FIREWALL BREACH. Точка перехода — `_finish_stage()`; его продолжение
+На переходах доступны You Are An Idiot и FIREWALL BREACH; отдельно случайно появляются
+[вопросы и фигура в санузле](RESIDENT_EVENTS.md). Точка перехода — `_finish_stage()`; его продолжение
 ждёт завершения события. Подробнее: [ATMOSPHERE_EVENTS.md](ATMOSPHERE_EVENTS.md).
 
 ## Проверки

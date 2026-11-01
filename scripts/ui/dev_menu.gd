@@ -117,6 +117,14 @@ func bind(value: Node3D) -> void:
 		close_menu()
 		if not game.atmosphere.request_event(&"firewall_breach", true):
 			game.atmosphere.note("FirewallBreach rejected: sit at PC; " + game.atmosphere.blocked_reason()))
+	_button(column, "TriggerQuestionPopup", func():
+		close_menu()
+		if not game.atmosphere.request_event(&"question_popup", true):
+			game.atmosphere.note("Question rejected: PC / open question / empty deck; " + game.atmosphere.blocked_reason()))
+	_button(column, "TriggerBathroomApparition", func():
+		close_menu()
+		if not game.atmosphere.request_event(&"bathroom_apparition", true):
+			game.atmosphere.note("Bathroom rejected: already present / visible spawn / world blocked; " + game.atmosphere.blocked_reason()))
 	_button(column, "Atmosphere: trigger selected", func():
 		if _atmosphere_list.selected < 0:
 			game.atmosphere.note("Dev start: empty pool")

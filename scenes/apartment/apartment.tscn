@@ -545,6 +545,10 @@ shape = SubResource("BoxShape3D_vqbvf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, -0.1, -1.1)
 mesh = SubResource("BoxMesh_8kk10")
 
+[node name="BathroomApparitionPoint" type="Marker3D" parent="."]
+position = Vector3(-4.15, 0.02, -0.55)
+rotation = Vector3(0, -1.5707963, 0)
+
 [node name="@StaticBody3D@37" type="StaticBody3D" parent="BathroomFloor" unique_id=919999615]
 
 [node name="@CollisionShape3D@36" type="CollisionShape3D" parent="BathroomFloor/@StaticBody3D@37" unique_id=1242555304]

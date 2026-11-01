@@ -9,5 +9,6 @@ extends Resource
 @export var transition_trigger: bool = true
 @export var at_computer: bool = true
 @export var walking: bool = true
+@export var repeatable: bool = false
 @export_range(0.1, 300.0) var timeout_seconds: float = 20.0
 @export var scene: PackedScene

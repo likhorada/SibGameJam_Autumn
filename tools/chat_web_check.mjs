@@ -3,7 +3,7 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
-const root=path.resolve(process.env.FIREWALL_WEB_ROOT || process.env.IDIOT_WEB_ROOT || process.env.OUTAGE_WEB_ROOT || process.env.POLICE_WEB_ROOT || process.env.NEIGHBOR_WEB_ROOT || process.env.THREAT_WEB_ROOT || process.env.CHAT_WEB_ROOT || 'build/chat-web');
+const root=path.resolve(process.env.RESIDENTS_WEB_ROOT || process.env.FIREWALL_WEB_ROOT || process.env.IDIOT_WEB_ROOT || process.env.OUTAGE_WEB_ROOT || process.env.POLICE_WEB_ROOT || process.env.NEIGHBOR_WEB_ROOT || process.env.THREAT_WEB_ROOT || process.env.CHAT_WEB_ROOT || 'build/chat-web');
 const artifacts=path.join(process.env.LOCALAPPDATA,'Temp/opencode');
 const profile=await fs.mkdtemp(path.join(artifacts,'chat-chrome-'));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -15,6 +15,7 @@ const policeMode=process.env.POLICE_WEB==='1';
 const outageMode=process.env.OUTAGE_WEB==='1';
 const idiotMode=process.env.IDIOT_WEB==='1';
 const firewallMode=process.env.FIREWALL_WEB==='1';
+const residentsMode=process.env.RESIDENTS_WEB==='1';
 const server=http.createServer(async(req,res)=>{
   try {
     const name=new URL(req.url,'http://localhost').pathname;
@@ -51,7 +52,7 @@ try {
     requests.set(n,{resolve,reject,timer});ws.send(JSON.stringify({id:n,method,params}));
   });
   const evaluate=async expression=>(await call('Runtime.evaluate',{expression,returnByValue:true})).result.value;
-  const state=()=>evaluate(firewallMode?'window.firewallTelemetry':idiotMode?'window.idiotTelemetry':outageMode?'window.outageTelemetry':policeMode?'window.policeTelemetry':neighborMode?'window.neighborTelemetry':'window.chatTelemetry');
+  const state=()=>evaluate(residentsMode?'window.residentsTelemetry':firewallMode?'window.firewallTelemetry':idiotMode?'window.idiotTelemetry':outageMode?'window.outageTelemetry':policeMode?'window.policeTelemetry':neighborMode?'window.neighborTelemetry':'window.chatTelemetry');
   const expect=(value,message)=>{if(!value)throw Error(message);};
   const wait=async(predicate,message,seconds=10)=>{
     for(let i=0;i<seconds*20;i++){const s=await state();if(s&&predicate(s))return s;await sleep(50);}
@@ -91,7 +92,68 @@ try {
   await call('Runtime.enable');await call('Page.enable');
   await call('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
   const url='http://127.0.0.1:'+server.address().port+'/';
-  if(firewallMode){
+  if(residentsMode){
+    let commandID=0;
+    const command=async(name,button='')=>{
+      const id=++commandID;
+      await evaluate('window.residentsCommand='+JSON.stringify({id,name,button}));
+      return wait(s=>s.command===id,'Residents command not acknowledged: '+name);
+    };
+    const trigger=async button=>{
+      await call('Input.dispatchKeyEvent',{type:'keyDown',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+      await wait(s=>s.dev,'Dev menu did not open');
+      await call('Input.dispatchKeyEvent',{type:'keyUp',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+      await command('reveal',button);await sleep(150);
+      await click((await state()).buttons[button]);
+      await wait(s=>!s.dev,'Dev trigger did not close menu');
+    };
+    for(const lang of ['ru','en']){
+      await call('Page.navigate',{url:url+'?lang='+lang});
+      await wait(s=>s.mode===2&&s.notes==='Resident evidence','Residents fixture not ready',30);
+      await call('Page.bringToFront');
+      await trigger('TriggerQuestionPopup');
+      let s=await wait(s=>s.question&&!s.busy&&s.deck===11,'Question failed to release spawn slot');
+      const first=s.key;
+      expect(s.text.length>25&&!s.text.startsWith('AQ_'),'Missing translation');
+      const old=s.rect,at=[old[0]+100,old[1]+20];
+      await call('Input.dispatchMouseEvent',{type:'mouseMoved',x:at[0],y:at[1]});
+      await call('Input.dispatchMouseEvent',{type:'mousePressed',x:at[0],y:at[1],button:'left',buttons:1,clickCount:1});
+      await call('Input.dispatchMouseEvent',{type:'mouseMoved',x:at[0]+55,y:at[1]+25,buttons:1});
+      await call('Input.dispatchMouseEvent',{type:'mouseReleased',x:at[0]+55,y:at[1]+25,button:'left',buttons:0,clickCount:1});
+      await sleep(150);s=await state();expect(s.rect[0]>old[0]+30,'Question drag failed');
+      await tap('KeyZ','z',90,'z');await sleep(100);
+      const notes=(await state()).notes;
+      expect(notes!==s.notes&&(await state()).app==='notepad','Question blocked surrounding app keyboard');
+      await capture('residents_question_'+lang);
+      await call('Emulation.setDeviceMetricsOverride',{width:800,height:600,deviceScaleFactor:1,mobile:false});
+      await sleep(250);s=await state();
+      const [x,y,w,h]=s.rect,[ax,ay,aw,ah]=s.area;
+      expect(x>=ax-1&&y>=ay-1&&x+w<=ax+aw+1&&y+h<=ay+ah+1,'Question escaped resized workspace');
+      await call('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
+      await sleep(250);await click((await state()).close);
+      await wait(s=>!s.question,'Question cross failed');
+      await command('question');s=await wait(s=>s.question&&s.deck===10,'Repeat question failed');
+      expect(s.key!==first,'Question text repeated');
+      await trigger('TriggerFirewallBreach');
+      await wait(s=>s.busy&&s.modal&&!s.question,'Firewall did not remove persistent question');
+      await command('cancel');
+      await trigger('TriggerBathroomApparition');
+      s=await wait(s=>s.figure&&!s.busy,'Figure did not release spawn slot');
+      expect(!s.audio,'Missing sound must remain silent');
+      await tap('Escape','Escape',27);await wait(s=>s.mode===0,'Esc failed');
+      await command('wall');await sleep(250);expect((await state()).figure,'Wall counted as sight');
+      await command('away');await sleep(150);expect((await state()).figure,'Offscreen figure disappeared');
+      await command('peripheral');s=await wait(s=>!s.figure&&s.figure_reason==='seen','Rendered peripheral glimpse did not dismiss figure');
+      expect(s.projected[0]<200||s.projected[0]>1080,'Glimpse was not peripheral');
+      await command('figure');s=await state();expect(!s.request&&!s.figure,'Dev materialized figure into visible spot');
+      await command('away');await sleep(150);await command('figure');await wait(s=>s.figure,'Hidden spawn did not recover');
+      await command('threat');s=await wait(s=>!s.figure&&s.figure_reason==='threat_started','Threat did not remove decorative figure');
+      await command('disable_threats');await command('return');await wait(s=>s.mode===2,'Return failed');
+      await command('question');await command('figure');await wait(s=>s.question&&s.figure,'Residents not prepared for report');
+      await command('quiz');s=await wait(s=>s.quiz&&!s.question&&!s.figure,'Report left persistent objects');
+      expect(s.notes===notes,'Residents changed evidence');
+    }
+  }else if(firewallMode){
     let commandID=0;
     const command=async(name,seconds=0)=>{
       const id=++commandID;
@@ -429,5 +491,5 @@ try {
     await capture(perfect?'win':'lose');
   }
   expect(errors.length===0,'Browser errors: '+errors.join('\n'));
-  console.log(firewallMode?'FIREWALL WEB: PASS (RU/EN dev click, ports/BLOCK, modal input, grace, win/loss, preservation, Esc/return, resize and cancellation).':idiotMode?'IDIOT WEB: PASS (RU/EN real dev click, drag/crosses, cap, taskbar/Esc, return, resize, fades and cleanup).':outageMode?'OUTAGE INPUT WEB: PASS (RU/EN, F7 trigger, blackout eject, F flashlight, encounter, provoked chase, contact death).':policeMode?'POLICE INPUT WEB: PASS (RU/EN, F7, PC escape, E hiding/exit, clamped mouse look, blocked walking, safe departure, early-exit death).':neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
+  console.log(residentsMode?'RESIDENTS INPUT WEB: PASS (RU/EN dev buttons, question drag/close/repeat/resize, rendered peripheral sight, occlusion, threats and report cleanup).':firewallMode?'FIREWALL WEB: PASS (RU/EN dev click, ports/BLOCK, modal input, grace, win/loss, preservation, Esc/return, resize and cancellation).':idiotMode?'IDIOT WEB: PASS (RU/EN real dev click, drag/crosses, cap, taskbar/Esc, return, resize, fades and cleanup).':outageMode?'OUTAGE INPUT WEB: PASS (RU/EN, F7 trigger, blackout eject, F flashlight, encounter, provoked chase, contact death).':policeMode?'POLICE INPUT WEB: PASS (RU/EN, F7, PC escape, E hiding/exit, clamped mouse look, blocked walking, safe departure, early-exit death).':neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
 } finally {ws?.close();browser.kill();server.close();}

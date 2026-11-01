@@ -145,7 +145,7 @@ func _run() -> void:
 	test_model()
 	make_game()
 	var production: AtmosphereConfig = load("res://data/atmosphere/default.tres")
-	expect(production.events.size() == 2 and production.events[0].weight == production.events[1].weight, "Production pool has equal weights")
+	expect(production.events.has(load("res://data/atmosphere/firewall_breach.tres")) and production.events[0].weight == production.events[1].weight, "Production pool contains firewall with equal weight")
 	expect(not director.request_event(&"firewall_breach", true), "Walking cannot start PC puzzle")
 	await sit()
 	var ui: TerminalDesktop = game.terminal_ui
