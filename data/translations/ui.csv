@@ -110,7 +110,7 @@ DOOR_OPEN,E — open door,E — открыть дверь
 DOOR_CLOSE,E — close door,E — закрыть дверь
 DOOR_BLOCKED,Step away from the door leaf.,Отойди от дверного полотна.
 THREAT_GAME_OVER,THEY FOUND YOU,ТЕБЯ НАШЛИ
-NEIGHBOR_DEATH,The neighbor spotted you during his search.,Сосед заметил тебя во время обыска.
+NEIGHBOR_DEATH,The neighbor spotted you during his search.,Сосед нашел тебя.
 POLICE_DEATH,You were found during the police inspection.,Тебя обнаружили во время полицейской проверки.
 ENTITY_DEATH,The thing in the dark caught you.,Существо в темноте тебя настигло.
 HIDE_BED,E — hide under the bed,E — спрятаться под кроватью
@@ -120,23 +120,23 @@ HIDE_EXIT_BLOCKED,The way out is obstructed.,Выход из укрытия за
 DOOR_HELD,The police are holding the door open.,Полиция удерживает дверь открытой.
 THREAT_HIDE,HIDE,ПРЯЧЬСЯ
 THREAT_FREEZE,FREEZE,ЗАМРИ
-NIGHT_NOTE_TEXT,"Don't delete this.
+NIGHT_NOTE_TEXT,"Don’t delete this.
 
-The neighbor again. I know those dragging steps now. Then the handle. A shut door still keeps him out. Never get within arm's reach of him even while he is approaching. If I leave it open I only have a moment to slam it before he crosses the threshold. If he gets inside: hide before he spots me. He searches the rooms and leaves. Don't come out until his steps are gone.
+It’s the neighbor again. I can already recognize his shuffling footsteps. Then the doorknob. The closed door is holding for now. I can’t let him in — he’s already threatened to kill me, and for some reason, I believe him. If I leave the door open again, I’ll only have a split second to shut it before he snaps out of his alcohol-induced delirium and attacks me. If he gets in — just hide. He’ll walk through the rooms and leave. Don’t come out until his footsteps fade away.
 
-If it's the police: twelve seconds before they come in. That is time to hide not permission to walk up to them. Keep out of arm's reach even before they enter. Under the bed or inside the wardrobe. A closed door won't stop them and they hold it open. If they start turning towards me: break their line of sight immediately. Once they have recognised me it is too late. Stay hidden until they leave.
+If it’s the police: about ten seconds until they come in. They’re just going through the motions; they won’t even look in the closet or under the bed, even though they’re not too lazy to break into the house. All you can do is wait until they leave.
 
-When the power dies the corridor isn't empty. Those steps aren't his. If they get close: light off and stand still. FREEZE means both. Don't keep the beam on whatever is out there. It calms down if I stop provoking it. If it turns and rushes: run. A closed door can hold it back until it gives up. It passes. Sometimes it comes back.
+When the lights go out, the hallway isn’t empty. The footsteps aren’t the neighbors’ anymore, but I don’t want to know whose they are. It can’t see in the dark— just don’t shine a light on it and stand still. If that doesn’t help and it lunges at you — run home and lock yourself in. It’ll pass. Sometimes it comes back.
 
-The panel is at the end of the corridor. Four breakers. The ones I've raised stay up. I can wait between them.","Не удалять.
+The fuse box is at the end of the hallway. Four circuit breakers — each one is easy to flip.","Не удалять.
 
-Опять сосед. Его шаркающие шаги уже узнаю. Потом ручка. Закрытая дверь пока держит. На расстояние вытянутой руки не подходить даже пока он только идёт. Если оставлю открытой — есть только мгновение захлопнуть её до того, как он переступит порог. Если вошёл — спрятаться до того, как заметит. Обходит комнаты и уходит. Не выходить, пока шаги не удалятся.
+Опять сосед. Его шаркающие шаги уже узнаю. Потом ручка. Закрытая дверь пока держит. Нельзя его впускать, он уже грозился убить меня и почему-то я ему верю. Если снова оставлю дверь открытой — есть только мгновение закрыться, пока не очнулся от алкогольного делирия и не напал. Если вошёл — только прятаться. Обходит комнаты и уходит. Не выходить, пока шаги не удалятся.
 
-Если полиция: двенадцать секунд до входа. Это время спрятаться — не разрешение подходить к ним. Держаться дальше вытянутой руки даже до входа. Под кровать или в шкаф. Закрытая дверь их не остановит — откроют и будут держать. Если поворачиваются ко мне — сразу уйти из поля зрения. Когда уже узнали — поздно. Сидеть до их ухода.
+Если полиция: секунд десять до входа. Они приходят для галочки, даже не лезут в шкаф или кровать, хотя вломиться в дом им всё же не лень. Тут только ждать, пока не уйдут.
 
-Когда гаснет свет, коридор не пустой. Шаги уже не соседские. Если совсем близко — погасить фонарь и замереть. ЗАМРИ означает и то и другое. Не держать луч на том, что там стоит. Успокаивается, если перестать его злить. Если повернулось и бросилось — беги. Закрытая дверь задержит его, пока не отстанет. Оно проходит. Иногда возвращается.
+Когда гаснет свет, коридор не пустой. Шаги уже не соседские, но я не хочу знать чьи. В темноте оно не видит, просто не свети на него и стой спокойно. Если же не помогло и оно бросилось — беги домой и закройся. Оно проходит. Иногда возвращается.
 
-Щиток в конце коридора. Четыре рубильника. Поднятые держатся. Между ними можно переждать."
+Щиток в конце коридора. Четыре рубильника, каждый просто поднять."
 CHAT_WIN,REPORT ACCEPTED,ОТЧЁТ ПРИНЯТ
 CHAT_LOSE,PLAN B,ПЛАН Б
 CHAT_RESULT,Correct answers: %d / %d,Правильных ответов: %d / %d
