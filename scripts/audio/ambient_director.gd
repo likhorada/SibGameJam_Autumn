@@ -98,21 +98,28 @@ func _process(delta: float) -> void:
 	if game.threats.is_busy():
 		near_target -= 10.0
 	_fade(near_audio, near_target, delta, near_volume_db)
-	_fade(suspense_audio, suspense_volume_db if _is_hunting() else MUTE_DB, delta, suspense_volume_db)
+	var detection_in_progress: bool = is_instance_valid(game.threats.detected_audio) and game.threats.detected_audio.playing
+	_fade(
+		suspense_audio,
+		suspense_volume_db if _is_hunting() and not detection_in_progress else MUTE_DB,
+		delta,
+		suspense_volume_db,
+	)
 	_tick_events(delta)
 
 
 func _is_hunting() -> bool:
 	if game.run_ended or not game.capture_reason.is_empty():
 		return false
-	if is_instance_valid(game.neighbor) and game.neighbor.visit in [PsychNeighbor.Visit.SEARCHING, PsychNeighbor.Visit.CHASING]:
+	if is_instance_valid(game.neighbor) and game.neighbor.visit == PsychNeighbor.Visit.CHASING:
 		return true
-	if is_instance_valid(game.police) and game.police.visit in [PoliceRaid.Visit.SEARCHING, PoliceRaid.Visit.CHASING]:
+	if is_instance_valid(game.police) and game.police.visit == PoliceRaid.Visit.CHASING:
 		return true
 	return (
 		is_instance_valid(game.outage)
 		and is_instance_valid(game.outage.entity)
 		and game.outage.entity.phase == CorridorEntity.Phase.ACTIVE
+		and game.outage.entity.is_chasing
 	)
 
 

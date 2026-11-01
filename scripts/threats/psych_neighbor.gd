@@ -213,6 +213,7 @@ func _begin_entry() -> void:
 
 
 func _begin_chase() -> void:
+	game.threats.play_detected()
 	visit = Visit.CHASING
 	entry_seconds = 0.0
 	_elapsed = 0.0

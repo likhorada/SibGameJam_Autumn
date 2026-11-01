@@ -159,6 +159,11 @@ func _run() -> void:
 		expect(game.trigger_police(), "Forced raid starts before random scheduling is allowed")
 		expect(game.mode == game.Mode.WALKING and game.police.visual.visible, "Arrival is visible and ejects the PC")
 		expect(game.police.knock_audio.playing and game.threats.phase_seconds_left == 12.0, "First knock starts full 12-second warning")
+		expect(
+			game.police.ambush_audio.playing
+			and game.police.ambush_audio.stream.resource_path == "res://assets/audio/police_aimbush.wav",
+			"police_aimbush.wav plays with the first knock, before the door opens",
+		)
 		game.threats.advance(0.9)
 		expect(game.police.voice_audio.playing and game.police.voice_audio.stream.resource_path == "res://assets/audio/heavy_knock.wav", "Warning uses heavy_knock.wav")
 		if game.mode == game.Mode.COMPUTER:
@@ -173,7 +178,7 @@ func _run() -> void:
 		game.threats.advance(11.11)
 		expect(not game.run_ended and game.police.visit == PoliceRaid.Visit.SEARCHING and game.room_door.is_open, "Hidden player survives entry; police opens closed door")
 		game.ambient._process(0.1)
-		expect(game.ambient.suspense_audio.playing, "Police search starts shared pursuit suspense")
+		expect(not game.ambient.suspense_audio.playing, "Police search does not start pursuit music before detection")
 		game.shift._finish_stage()
 		expect(game.shift.state == ShiftDirector.State.WAITING_EVENT, "Event queues behind inspection")
 		game.threats.advance(game.police.settings.search_seconds + game.police.settings.pressure_seconds)
@@ -219,6 +224,13 @@ func _run() -> void:
 		for sample: int in 11:
 			game.threats.advance(0.1)
 		expect(game.capture_reason == "POLICE_DEATH" and not game.run_ended, "Confirmed sight starts visible capture before result")
+		expect(
+			game.threats.detected_audio.playing
+			and game.threats.detected_audio.stream.resource_path == "res://assets/audio/detected.wav",
+			"Police detection plays the shared detected cue",
+		)
+		game.ambient._process(0.1)
+		expect(not game.ambient.suspense_audio.playing, "Pursuit music waits until the detected cue finishes")
 		game._process(game.capture_cutscene.duration_seconds + 0.1)
 		expect(game.run_ended and game.failure_reason == "POLICE_DEATH", "Capture finishes with police result")
 		expect(game.police.visit == PoliceRaid.Visit.DORMANT and not game.police.knock_audio.playing and not game.police.voice_audio.playing and not game.police.footsteps_audio.playing, "Police death cleans all event state and audio")
@@ -253,7 +265,14 @@ func _run() -> void:
 	expect(game.is_hidden() and not game.player.controls_enabled and game.transition_camera.current, "Closing dev overlay preserves hidden view and movement lock")
 	game.trigger_police()
 	game.threats.set_event_enabled(&"police_raid", false)
-	expect(game.is_hidden() and not game.threats.is_busy() and not game.police.knock_audio.playing and not game.trigger_police(), "Per-threat disable cancels warning without leaving hiding")
+		expect(
+			game.is_hidden()
+			and not game.threats.is_busy()
+			and not game.police.knock_audio.playing
+			and not game.police.ambush_audio.playing
+			and not game.trigger_police(),
+			"Per-threat disable cancels warning sounds without leaving hiding",
+		)
 	game.threats.set_event_enabled(&"police_raid", true)
 	game.trigger_police()
 	game.threats.advance(12.0)

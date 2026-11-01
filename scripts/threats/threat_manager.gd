@@ -5,6 +5,8 @@ extends Node
 signal state_changed(state: State, event_id: StringName)
 signal event_finished(event_id: StringName, outcome: StringName)
 
+const DETECTED_SOUND := preload("res://assets/audio/detected.wav")
+
 enum State { IDLE, WARNING, ACTIVE, RESOLVED }
 
 @export var config: ThreatConfig = preload("res://data/threats/default.tres")
@@ -29,11 +31,29 @@ var _active_event: ThreatEvent
 var _outcome: StringName = &""
 var _rng := RandomNumberGenerator.new()
 var capture_in_progress: bool = false
+var detected_audio: AudioStreamPlayer
 
 
 func _ready() -> void:
 	_rng.randomize()
+	detected_audio = AudioStreamPlayer.new()
+	detected_audio.name = "DetectedAudio"
+	detected_audio.stream = DETECTED_SOUND
+	detected_audio.bus = &"SFX"
+	detected_audio.volume_db = -3.0
+	add_child(detected_audio)
 	_schedule()
+
+
+func play_detected(after_finished: Callable = Callable()) -> void:
+	if not is_instance_valid(detected_audio):
+		if after_finished.is_valid():
+			after_finished.call_deferred()
+		return
+	if after_finished.is_valid() and not detected_audio.finished.is_connected(after_finished):
+		detected_audio.finished.connect(after_finished, CONNECT_ONE_SHOT)
+	if not detected_audio.playing:
+		detected_audio.play()
 
 
 func _process(delta: float) -> void:

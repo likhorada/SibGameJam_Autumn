@@ -4,6 +4,7 @@ extends ThreatEvent
 
 enum Visit { DORMANT, WARNING, SEARCHING, DEPARTING, CHASING }
 const VISUAL := preload("res://scenes/threats/police_officer.tscn")
+const AMBUSH_SOUND := preload("res://assets/audio/police_aimbush.wav")
 @export var settings: PoliceRaidConfig = preload("res://data/threats/police_raid.tres")
 var visit: Visit = Visit.DORMANT
 var game: Node3D
@@ -12,6 +13,7 @@ var knock_audio: AudioStreamPlayer3D
 var voice_audio: AudioStreamPlayer3D
 var footsteps_audio: AudioStreamPlayer3D
 var arrival_audio: AudioStreamPlayer3D
+var ambush_audio: AudioStreamPlayer3D
 var awareness := ThreatAwareness.new()
 var pressure := VisitorPressure.new()
 var pursuit := VisitorPursuit.new()
@@ -44,6 +46,7 @@ func _ready() -> void:
 	voice_audio = _audio(settings.warning_voice if settings.warning_voice != null else settings.knock_sound, settings.warning_volume_db)
 	footsteps_audio = _audio(settings.footsteps, settings.footsteps_volume_db)
 	arrival_audio = _audio(settings.arrival_sound, settings.warning_volume_db)
+	ambush_audio = _audio(AMBUSH_SOUND, settings.warning_volume_db - 4.0)
 	awareness.confirm_seconds = settings.detection_seconds
 	awareness.recovery_seconds = settings.suspicion_recovery_seconds
 	awareness.sight_range = settings.sight_range
@@ -89,6 +92,7 @@ func warning_started() -> void:
 	if arrival_audio.stream != null:
 		arrival_audio.play()
 	footsteps_audio.play()
+	ambush_audio.play()
 	knock_audio.play()
 	_knock_left = maxf(1.0, settings.knock_interval)
 	_voice_left = maxf(0.0, settings.voice_delay)
@@ -178,6 +182,7 @@ func advance(delta: float) -> void:
 
 
 func _begin_chase() -> void:
+	game.threats.play_detected()
 	visit = Visit.CHASING
 	_entry_pending = false
 	_elapsed = 0.0
@@ -221,3 +226,5 @@ func ended(_outcome: StringName) -> void:
 		footsteps_audio.stop()
 	if is_instance_valid(arrival_audio):
 		arrival_audio.stop()
+	if is_instance_valid(ambush_audio):
+		ambush_audio.stop()

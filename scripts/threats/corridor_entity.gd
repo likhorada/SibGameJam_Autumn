@@ -159,12 +159,11 @@ func advance(delta: float) -> void:
 		error_seconds = minf(settings.error_budget_seconds, error_seconds + minf(consumed, 0.1))
 		if error_seconds + 0.000001 >= settings.error_budget_seconds:
 			error_seconds = settings.error_budget_seconds
+			game.threats.play_detected(_play_chase_audio)
 			is_chasing = true
 			chase_elapsed = 0.0
 			velocity = Vector3.ZERO
 			footsteps_audio.pitch_scale = 1.3
-			if chase_audio.stream != null:
-				chase_audio.play()
 	else:
 		error_seconds = maxf(0.0, error_seconds - consumed * settings.error_budget_seconds / maxf(0.1, settings.error_recovery_seconds))
 	if error_seconds > 0.0:
@@ -276,6 +275,17 @@ func _begin_departure() -> void:
 	near_audio.stop()
 	_near_sound_left = -1.0
 	departure_audio.play()
+
+
+func _play_chase_audio() -> void:
+	if (
+		phase == Phase.ACTIVE
+		and is_chasing
+		and not game.run_ended
+		and game.capture_reason.is_empty()
+		and chase_audio.stream != null
+	):
+		chase_audio.play()
 
 
 func _tick_near_sounds(delta: float) -> void:

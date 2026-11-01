@@ -110,9 +110,9 @@ func danger_window(settings: CorridorEntityConfig) -> void:
 	expect(entity.phase == CorridorEntity.Phase.ACTIVE, "Warning turns into the danger window")
 	game.ambient._process(0.1)
 	expect(
-		game.ambient.suspense_audio.playing
+		not game.ambient.suspense_audio.playing
 		and game.ambient.suspense_audio.stream.resource_path == "res://assets/audio/creep_suspence.wav",
-		"Monster active phase starts shared pursuit suspense",
+		"Monster active phase does not start pursuit suspense before detection",
 	)
 	expect(
 		(game.ambient.suspense_audio.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_FORWARD,
@@ -212,6 +212,19 @@ func _run() -> void:
 	for sample: int in ceili(remaining_budget / 0.1):
 		game.threats.advance(0.1)
 	expect(active.is_chasing and not game.run_ended and active.error_seconds >= settings.error_budget_seconds, "Movement and flashlight exposure together provoke a chase without instant death")
+	expect(
+		game.threats.detected_audio.playing and not active.chase_audio.playing,
+		"Monster detected cue plays before its chase sound",
+	)
+	game.ambient._process(0.1)
+	expect(not game.ambient.suspense_audio.playing, "Pursuit music waits until the detected cue finishes")
+	active.set_physics_process(false)
+	active.settings.chase_seconds = 20.0
+	await get_tree().create_timer(game.threats.detected_audio.stream.get_length() + 0.1).timeout
+	expect(not game.threats.detected_audio.playing, "Detected cue finishes before pursuit music")
+	game.ambient._process(0.1)
+	expect(game.ambient.suspense_audio.playing, "Pursuit suspense starts after detection")
+	active.set_physics_process(true)
 	game.dev_menu.set_debug_hud_enabled(true)
 	game.dev_menu._process(0.0)
 	expect(game.dev_menu._debug_hud_label.text.contains(tr("DEBUG_HUD_CHASING")), "Debug HUD reports when the creature is pursuing")
