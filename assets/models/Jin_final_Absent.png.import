@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://clrlnv2p8s3kj"
-path="res://.godot/imported/Jin_final_Absent.png-c88a93bbb211ef7b71bbbe9a4e89b457.ctex"
+path.s3tc="res://.godot/imported/Jin_final_Absent.png-c88a93bbb211ef7b71bbbe9a4e89b457.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "cde54cb6e40e0705d223c9ad3d4181da"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/Jin_final_Absent.png"
-dest_files=["res://.godot/imported/Jin_final_Absent.png-c88a93bbb211ef7b71bbbe9a4e89b457.ctex"]
+dest_files=["res://.godot/imported/Jin_final_Absent.png-c88a93bbb211ef7b71bbbe9a4e89b457.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0
