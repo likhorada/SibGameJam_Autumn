@@ -24,6 +24,11 @@ func _run() -> void:
 	hud = game.hud
 	await _frames(4)
 	_expect(player.footsteps_audio.stream.resource_path == "res://assets/audio/player_steps.wav", "Player loads the authored footstep sound")
+	_expect(
+		is_equal_approx(player.sprint_footstep_interval, 0.20)
+		and player.sprint_footstep_interval < player.walk_footstep_interval,
+		"Sprinting uses a slightly faster footstep cadence",
+	)
 	_expect(is_equal_approx(hud.visual_ratio(0.5), 0.75), "Half real stamina displays as 75 percent")
 	_expect(hud.visual_ratio(0.0) == 0.0 and hud.visual_ratio(1.0) == 1.0, "Visual curve endpoints")
 	_expect(hud.visual_ratio(0.9) - hud.visual_ratio(0.8) < hud.visual_ratio(0.2) - hud.visual_ratio(0.1), "Visual depletion accelerates near empty")

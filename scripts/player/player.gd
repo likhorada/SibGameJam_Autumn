@@ -8,7 +8,7 @@ const PLAYER_FOOTSTEPS := preload("res://assets/audio/player_steps.wav")
 @export_range(1.0, 60.0) var acceleration: float = 18.0
 @export_range(1.0, 60.0) var braking: float = 22.0
 @export_range(0.1, 1.0) var walk_footstep_interval: float = 0.34
-@export_range(0.1, 1.0) var sprint_footstep_interval: float = 0.22
+@export_range(0.1, 1.0) var sprint_footstep_interval: float = 0.20
 @export var mouse_sensitivity: float = 0.0022
 @export var interaction_distance: float = 2.2
 ## Exponential response in 1/seconds; zero gives instant mouse look.
