@@ -80,6 +80,10 @@ jobs:
           if grep -E 'SCRIPT ERROR:|ERROR:' "$RUNNER_TEMP/menu-smoke.log" | grep -Fv 'ERROR: 2 resources still in use at exit'; then exit 1; fi
           if grep -F 'MENU SMOKE: FAIL' "$RUNNER_TEMP/menu-smoke.log"; then exit 1; fi
           grep -F 'MENU SMOKE: PASS' "$RUNNER_TEMP/menu-smoke.log"
+          # Keep audio/stamina cue wiring covered in the build that gets deployed.
+          godot --headless --path . --script res://tests/stamina_smoke.gd 2>&1 | tee "$RUNNER_TEMP/stamina-smoke.log"
+          if grep -F 'STAMINA SMOKE: FAIL' "$RUNNER_TEMP/stamina-smoke.log"; then exit 1; fi
+          grep -F 'STAMINA SMOKE: PASS' "$RUNNER_TEMP/stamina-smoke.log"
           mkdir -p build/web
           godot --headless --path . --export-release "Web" build/web/index.html 2>&1 | tee "$RUNNER_TEMP/export.log"
           if grep -F 'ERROR:' "$RUNNER_TEMP/export.log"; then exit 1; fi
