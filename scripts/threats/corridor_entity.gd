@@ -7,6 +7,11 @@ const SPILL_HIT_RANGE: float = 2.2
 const SPILL_HIT_ANGLE: float = 70.0
 const COLLISION_RADIUS: float = 0.2
 const COLLISION_HEIGHT: float = 2.1
+const NEAR_SOUNDS: Array[AudioStream] = [
+	preload("res://assets/audio/creep_laugh.wav"),
+	preload("res://assets/audio/creep_ulost.wav"),
+	preload("res://assets/audio/creep_ulost_pitched.wav"),
+]
 var settings: CorridorEntityConfig
 var game: Node3D
 var phase: Phase = Phase.DORMANT
@@ -16,6 +21,7 @@ var warning_audio: AudioStreamPlayer3D
 var footsteps_audio: AudioStreamPlayer3D
 var departure_audio: AudioStreamPlayer3D
 var chase_audio: AudioStreamPlayer3D
+var near_audio: AudioStreamPlayer3D
 var error_seconds: float = 0.0
 var repeat_left: float = 0.0
 var duration: float = 0.0
@@ -30,6 +36,7 @@ var _rng := RandomNumberGenerator.new()
 var warning_duration: float = 2.0
 var chase_elapsed: float = 0.0
 var _retreat_elapsed: float = 0.0
+var _near_sound_left: float = -1.0
 
 
 func bind(value: Node3D) -> void:
@@ -57,6 +64,8 @@ func _ready() -> void:
 	footsteps_audio = _audio(settings.footsteps)
 	departure_audio = _audio(settings.departure_sound)
 	chase_audio = _audio(settings.chase_sound)
+	near_audio = _audio(null)
+	near_audio.volume_db = settings.volume_db - 5.0
 
 
 func _physics_process(delta: float) -> void:
@@ -134,6 +143,7 @@ func advance(delta: float) -> void:
 			warning_audio.stop()
 			footsteps_audio.play()
 		return
+	_tick_near_sounds(delta)
 	if is_chasing:
 		chase_elapsed += delta
 		if chase_elapsed >= settings.chase_seconds:
@@ -265,7 +275,29 @@ func _begin_departure() -> void:
 	_retreat_elapsed = 0.0
 	footsteps_audio.pitch_scale = 0.85
 	chase_audio.stop()
+	near_audio.stop()
+	_near_sound_left = -1.0
 	departure_audio.play()
+
+
+func _tick_near_sounds(delta: float) -> void:
+	if phase != Phase.ACTIVE:
+		_near_sound_left = -1.0
+		return
+	if game.player.global_position.distance_to(global_position) > settings.near_radius:
+		_near_sound_left = -1.0
+		return
+	if near_audio.playing:
+		return
+	if _near_sound_left < 0.0:
+		_near_sound_left = _rng.randf_range(0.5, 1.75)
+	_near_sound_left -= delta
+	if _near_sound_left > 0.0:
+		return
+	near_audio.stream = NEAR_SOUNDS[_rng.randi_range(0, NEAR_SOUNDS.size() - 1)]
+	near_audio.pitch_scale = _rng.randf_range(0.95, 1.05)
+	near_audio.play()
+	_near_sound_left = _rng.randf_range(2.5, 4.5)
 
 
 func _finish_departure() -> void:
@@ -317,10 +349,11 @@ func stop() -> void:
 	is_chasing = false
 	chase_elapsed = 0.0
 	velocity = Vector3.ZERO
+	_near_sound_left = -1.0
 	if is_instance_valid(visual):
 		visual.hide()
 		visual.scale = Vector3.ONE
 		visual.rotation.z = 0.0
-	for audio: AudioStreamPlayer3D in [warning_audio, footsteps_audio, departure_audio, chase_audio]:
+	for audio: AudioStreamPlayer3D in [warning_audio, footsteps_audio, departure_audio, chase_audio, near_audio]:
 		if is_instance_valid(audio):
 			audio.stop()

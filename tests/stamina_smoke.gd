@@ -45,6 +45,8 @@ func _run() -> void:
 
 func _test_model() -> void:
 	var state := PlayerStamina.new()
+	var exhaustion_events := [0]
+	state.became_exhausted.connect(func(): exhaustion_events[0] += 1)
 	state.advance(1.5, true, true)
 	_expect(is_equal_approx(state.value, 0.5), "Real consumption is linear")
 	state.advance(0.49, false, false)
@@ -57,13 +59,19 @@ func _test_model() -> void:
 	_expect(state.fatigue_amount() > 0.0 and state.fatigue_amount() < 0.22, "Gentle warning below 20 percent")
 	state.advance(0.5, true, true)
 	_expect(state.value == 0.0 and state.exhausted and not state.can_sprint(), "Three seconds fully exhaust and lock sprint")
+	_expect(exhaustion_events[0] == 1, "Exhaustion event fires once at zero stamina")
+	state.advance(0.2, true, true)
+	_expect(exhaustion_events[0] == 1, "Exhaustion event does not repeat while empty")
 	_expect(state.fatigue_amount() == 1.0, "Full fatigue on exhaustion")
-	state.advance(0.5 + 4.0 * 0.34, false, false)
+	state.advance(0.3 + 4.0 * 0.34, false, false)
 	_expect(not state.can_sprint(), "Cannot restart below 35 percent")
 	state.advance(0.041, false, false)
 	_expect(state.can_sprint() and state.fatigue_latched, "35 percent unlocks, residual fatigue remains")
 	state.advance(0.4, false, false)
 	_expect(not state.fatigue_latched and state.fatigue_amount() == 0.0, "Fatigue clears at 45 percent recovery")
+	state.reset()
+	state.advance(3.0, true, true)
+	_expect(exhaustion_events[0] == 2, "Exhaustion event can trigger again after stamina resets")
 	state.reset()
 	state.advance(3.0, true, true)
 	state.advance(4.5, false, false)
@@ -216,6 +224,11 @@ func _test_render() -> void:
 func _test_pc() -> void:
 	player.stamina.reset()
 	player.stamina.advance(3.0, true, true)
+	_expect(
+		player.exhaustion_audio.playing
+		and player.exhaustion_audio.stream.resource_path == "res://assets/audio/exausted.wav",
+		"Zero stamina plays exausted.wav",
+	)
 	game.enter_computer()
 	_expect(not hud.visible and not hud.fatigue.visible and player.stamina.value == 0.0, "PC hides all effects without resetting stamina")
 	await create_timer(0.8).timeout

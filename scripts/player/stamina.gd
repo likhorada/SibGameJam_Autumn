@@ -2,6 +2,8 @@ class_name PlayerStamina
 extends Node
 ## Normalized gameplay state. Presentation must never change this value.
 
+signal became_exhausted
+
 @export_range(0.2, 15.0) var sprint_seconds: float = 3.0
 @export_range(0.0, 5.0) var recovery_delay: float = 0.5
 @export_range(0.2, 30.0) var rest_recovery_seconds: float = 4.0
@@ -33,6 +35,7 @@ func advance(delta: float, sprinting: bool, moving: bool) -> void:
 			value = 0.0
 			exhausted = true
 			fatigue_latched = true
+			became_exhausted.emit()
 	else:
 		# Only the part of this tick AFTER the delay regenerates stamina.
 		var recovery_delta := maxf(0.0, delta - delay_left)
