@@ -10,6 +10,7 @@ enum Mode { WALKING, ENTERING, COMPUTER, LEAVING, FUSEBOX_ENTERING, FUSEBOX, FUS
 
 @export_range(0.02, 2.0) var transition_seconds: float = 0.7
 @export var observation_shift_enabled: bool = true
+@export var atmosphere_config: AtmosphereConfig = preload("res://data/atmosphere/default.tres")
 
 var mode: Mode = Mode.WALKING
 var transition: Tween
@@ -37,6 +38,7 @@ var capture_cutscene: DefeatCutscene
 @onready var threats: ThreatManager = $ThreatManager
 var ambient: AmbientDirector
 var shift: ShiftDirector
+var atmosphere: AtmosphereDirector
 var neighbor: PsychNeighbor
 var police: PoliceRaid
 var outage: PowerOutage
@@ -78,6 +80,10 @@ func _ready() -> void:
 	ambient = AmbientDirector.new()
 	add_child(ambient)
 	ambient.bind(self)
+	atmosphere = AtmosphereDirector.new()
+	atmosphere.config = atmosphere_config
+	add_child(atmosphere)
+	atmosphere.bind(self)
 	dev_menu.bind(self)
 	dev_menu.opened.connect(_on_dev_opened)
 	dev_menu.closed.connect(_on_dev_closed)
@@ -276,8 +282,6 @@ func leave_hiding(capture_pointer: bool = true) -> bool:
 
 
 func enter_computer() -> void:
-	if is_instance_valid(shift) and shift.state == ShiftDirector.State.SCARE:
-		return
 	if mode != Mode.WALKING or not power.powered or dev_menu.is_open:
 		return
 	mode = Mode.ENTERING
@@ -488,6 +492,7 @@ func _finish_report(won: bool, score: int, reason: String = "") -> void:
 	if run_ended:
 		return
 	run_ended = true
+	atmosphere.enabled = false
 	if is_instance_valid(capture_cutscene):
 		capture_cutscene.queue_free()
 	failure_reason = reason
@@ -610,6 +615,7 @@ func begin_threat_capture(reason: String, enemy: Node3D) -> bool:
 	if dev_menu.is_open:
 		dev_menu.close_menu()
 	capture_reason = reason
+	atmosphere.enabled = false
 	threats.capture_in_progress = true
 	if is_instance_valid(shift):
 		shift.set_process(false)

@@ -260,10 +260,9 @@ try {
       await click((await shiftState()).hack);
       expect((await shiftState()).state===2,'Alarm button did not start the route');
       await command('next');
-      expect((await shiftState()).state===3,'Office did not end in scare');
-      await command('scare');
+      expect((await shiftState()).state===2,'Empty atmosphere pool should continue without scare pause');
       expect((await shiftState()).stage===1&&(await shiftState()).cameras===3,'Shop camera replacement failed');
-      await command('next');await command('scare');
+      await command('next');
       expect((await shiftState()).stage===2,'Street did not start');
       await command('next');await command('return');
       await wait(s=>s.quiz&&s.mode===2,'Live report did not open');

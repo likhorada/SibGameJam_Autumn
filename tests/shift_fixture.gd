@@ -4,7 +4,7 @@ extends "res://tests/chat_fixture.gd"
 func _ready() -> void:
 	super._ready()
 	shift.set_process(false)
-	shift.outages_allowed = false
+	threats.set_event_enabled(&"power_outage", false)
 
 
 func _publish() -> void:
@@ -16,7 +16,7 @@ func _publish() -> void:
 	match str(command):
 		"hack": terminal_ui.launch_app(&"hack")
 		"next": shift.advance(300)
-		"scare": shift.complete_scare()
+		"event": shift.complete_event()
 		"return": enter_computer()
 		"cctv": terminal_ui.launch_app(&"cctv")
 	shift._process(0)

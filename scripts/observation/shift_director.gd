@@ -1,7 +1,7 @@
 class_name ShiftDirector
 extends Node
 ## A run-local timeline independent of camera rendering and desktop visibility.
-enum State { INTRO, DEADLINE, ROUTE, SCARE, REPORT, ENDED, WAITING_SCARE }
+enum State { INTRO, DEADLINE, ROUTE, EVENT, REPORT, ENDED, WAITING_EVENT }
 const DATA := preload("res://data/observation/shift.gd")
 const LOCATION := preload("res://scripts/cctv/observation_location.gd")
 var state: State = State.INTRO
@@ -58,6 +58,7 @@ func start_alarm() -> void:
 	if state != State.DEADLINE or not game.power.powered or game.mode != game.Mode.COMPUTER:
 		return
 	_begin_route(DATA.OFFICE)
+	game.atmosphere.start_run()
 	_update_status()
 
 
@@ -84,30 +85,25 @@ func _begin_route(points: Array) -> void:
 
 
 func _process(delta: float) -> void:
-	if state == State.WAITING_SCARE and not game.threats.is_busy() and game.power.powered:
-		_begin_scare()
+	if state in [State.WAITING_EVENT, State.EVENT]:
+		_poll_transition()
 	advance(delta)
 	_update_status()
 	if state == State.REPORT and game.mode == game.Mode.COMPUTER and game.power.powered and not game.dev_menu.is_open and not game.threats.is_busy():
 		var session: ChatSession = game.terminal_ui.chat.session
 		if not session.quiz_started:
+			game.atmosphere.cancel(&"quiz_started")
 			session.questions = report_questions()
 			session.start_quiz()
 			game.terminal_ui.launch_app(&"chat")
 
 
 func advance(delta: float) -> void:
-	if state == State.DEADLINE or state == State.SCARE:
+	if state == State.DEADLINE:
 		seconds_left = maxf(0, seconds_left - delta)
 		if seconds_left <= 0:
-			if state == State.DEADLINE:
-				state = State.ENDED
-				game._finish_report(false, 0)
-			else:
-				game.threats.set_blocked(&"scripted_scare", false)
-				stage += 1
-				_load_stage()
-				_begin_route(DATA.SHOP if stage == 1 else DATA.STREET_ENTRY)
+			state = State.ENDED
+			game._finish_report(false, 0)
 	elif state == State.ROUTE:
 		var remaining := delta
 		while remaining > 0 and state == State.ROUTE:
@@ -129,6 +125,8 @@ func advance(delta: float) -> void:
 				start_point = location.target.position
 				if step == route.size():
 					_finish_stage()
+					# Never spend a long frame's leftover delta on the next location.
+					return
 
 
 func _finish_stage() -> void:
@@ -137,38 +135,25 @@ func _finish_stage() -> void:
 		game.threats.random_allowed = false
 		return
 	game.threats.random_allowed = false
-	game.threats.set_blocked(&"scare_pending", true)
-	if game.threats.is_busy() or not game.power.powered:
-		state = State.WAITING_SCARE
+	state = State.WAITING_EVENT
+	game.atmosphere.request_transition(stage)
+	_poll_transition()
+
+
+func _poll_transition() -> void:
+	game.atmosphere.try_transition()
+	if game.atmosphere.transition_pending:
+		state = State.EVENT if game.atmosphere.is_busy() else State.WAITING_EVENT
 		return
-	_begin_scare()
+	stage += 1
+	_load_stage()
+	_begin_route(DATA.SHOP if stage == 1 else DATA.STREET_ENTRY)
 
 
-func _begin_scare() -> void:
-	game.threats.set_blocked(&"scare_pending", false)
-	game.threats.set_blocked(&"scripted_scare", true)
-	state = State.SCARE
-	seconds_left = 5.0
-	# A real scare will call complete_scare(); this explicit test event lasts five seconds.
-	if game.dev_menu.is_open:
-		game.dev_menu.close_menu()
-	game.power.board.set_active(false)
-	game.power.set_interacting(false)
-	game._kill_transition()
-	game.terminal_ui.suspend_desktop()
-	game.terminal_ui.hide()
-	if game.is_hidden():
-		# A queued non-enemy scare must not pull a survivor out of their hiding spot.
-		return
-	if game.mode in [game.Mode.ENTERING, game.Mode.COMPUTER, game.Mode.LEAVING]:
-		game.player.place_at(game.terminal.get_node("ExitPoint"))
-	game._resume_walking()
-	game._release_pointer()
-
-
-func complete_scare() -> void:
-	if state == State.SCARE:
-		advance(seconds_left)
+func complete_event() -> void:
+	game.atmosphere.complete_event()
+	if state in [State.WAITING_EVENT, State.EVENT]:
+		_poll_transition()
 
 
 func _update_status() -> void:
@@ -179,10 +164,9 @@ func _update_status() -> void:
 		State.INTRO: text = tr("OBS_WAIT_INTRO")
 		State.DEADLINE: text = tr("OBS_DEADLINE") % ceili(seconds_left)
 		State.ROUTE: text = tr("OBS_RUNNING")
-		State.SCARE: text = tr("OBS_SCARE") % ceili(seconds_left)
 		State.REPORT: text = tr("OBS_RETURN")
 	status.text = text
-	status.visible = state in [State.DEADLINE, State.SCARE, State.REPORT]
+	status.visible = state in [State.DEADLINE, State.REPORT]
 	if state == State.REPORT and game.mode == game.Mode.COMPUTER:
 		status.hide()
 	hack_status.text = text

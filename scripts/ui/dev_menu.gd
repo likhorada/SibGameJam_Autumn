@@ -25,6 +25,9 @@ var _outage_enabled: CheckButton
 var _entity_enabled: CheckButton
 var _trigger_outage: Button
 var _scroll: ScrollContainer
+var _atmosphere_enabled: CheckButton
+var _atmosphere_list: OptionButton
+var _atmosphere_status: Label
 
 
 func bind(value: Node3D) -> void:
@@ -98,18 +101,42 @@ func bind(value: Node3D) -> void:
 		close_menu()
 		game.trigger_power_outage())
 	_button(column, "DisableThreats", func(): game.disable_threats())
+	_atmosphere_enabled = CheckButton.new()
+	_atmosphere_enabled.text = "Atmosphere events"
+	_atmosphere_enabled.toggled.connect(func(value_enabled: bool): game.atmosphere.enabled = value_enabled)
+	column.add_child(_atmosphere_enabled)
+	_atmosphere_list = OptionButton.new()
+	for id: StringName in game.atmosphere.event_ids():
+		_atmosphere_list.add_item(String(id))
+	column.add_child(_atmosphere_list)
+	_button(column, "Atmosphere: trigger selected", func():
+		if _atmosphere_list.selected < 0:
+			game.atmosphere.note("Dev start: empty pool")
+			return
+		var id := StringName(_atmosphere_list.get_item_text(_atmosphere_list.selected))
+		close_menu()
+		if not game.atmosphere.request_event(id, true):
+			game.atmosphere.note("Dev start rejected: %s / %s" % [id, game.atmosphere.blocked_reason()]))
+	_button(column, "Atmosphere: complete", func(): game.atmosphere.complete_event())
+	_button(column, "Atmosphere: cancel", func(): game.atmosphere.cancel())
+	_button(column, "Atmosphere: clear cooldown", func(): game.atmosphere.clear_cooldown())
+	_atmosphere_status = Label.new()
+	_atmosphere_status.custom_minimum_size.x = 420
+	_atmosphere_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(_atmosphere_status)
 	_button(column, "OBS_DEV_NEXT", func():
 		close_menu()
 		if not is_instance_valid(game.shift):
 			return
 		if game.shift.state == ShiftDirector.State.ROUTE:
 			game.shift.advance(300.0)
-		elif game.shift.state == ShiftDirector.State.SCARE:
-			game.shift.complete_scare())
+		elif game.shift.state == ShiftDirector.State.EVENT:
+			game.shift.complete_event())
 	_button(column, "DEV_CHAT_REPORT", func():
 		if not game.power.powered or game.threats.is_busy() or game.mode not in [game.Mode.WALKING, game.Mode.COMPUTER]:
 			return
 		close_menu()
+		game.atmosphere.cancel(&"quiz_started")
 		if is_instance_valid(game.shift):
 			game.shift.state = ShiftDirector.State.ENDED
 		game.terminal_ui.chat.session.live_report = false
@@ -187,6 +214,7 @@ func _update_debug_hud() -> void:
 		tr("DEBUG_HUD_POLICE") % PoliceRaid.Visit.keys()[game.police.visit],
 		tr("DEBUG_HUD_ENTITY") % [entity_phase, danger_text],
 	])
+	lines.append(game.atmosphere.debug_status())
 	if entity.phase != CorridorEntity.Phase.DORMANT:
 		lines.append(tr("DEBUG_HUD_ENTITY_TIMER") % _entity_time_left(entity))
 	if entity.phase == CorridorEntity.Phase.ACTIVE:
@@ -237,6 +265,8 @@ func _process(delta: float) -> void:
 	if _debug_hud_enabled and not is_open:
 		_update_debug_hud()
 	if is_open:
+		_atmosphere_enabled.set_pressed_no_signal(game.atmosphere.enabled)
+		_atmosphere_status.text = game.atmosphere.debug_status()
 		_scroll.custom_minimum_size = Vector2(470, minf(620.0, maxf(180.0, get_viewport().get_visible_rect().size.y - 36.0)))
 		_status.text = tr("DEV_STATUS") % ["POWER_ON" if game.power.powered else "POWER_OFF", game.threats.wait_seconds_left, str(game.power.board.latched)]
 		_status.text += "\nThreats: %s / %s\nDoor: %s" % [ThreatManager.State.keys()[game.threats.state], game.threats.active_id, "OPEN" if game.room_door.is_open else "CLOSED"]

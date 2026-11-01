@@ -55,11 +55,8 @@ func _run() -> void:
 	await physics_frame
 	expect(shift.state == ShiftDirector.State.ROUTE and game.threats.random_allowed, "Alarm starts route and enables random threats")
 	shift.advance(20)
-	expect(shift.state == ShiftDirector.State.SCARE and game.mode == game.Mode.WALKING, "Office exit ejects player")
-	game.enter_computer()
-	expect(game.mode == game.Mode.WALKING, "PC blocked during scare")
-	shift.advance(5)
-	expect(shift.stage == 1 and shift.state == ShiftDirector.State.ROUTE, "Shop starts without returning to PC")
+	expect(shift.state == ShiftDirector.State.ROUTE and game.mode == game.Mode.COMPUTER, "Empty atmosphere pool never ejects player or inserts a pause")
+	expect(shift.stage == 1, "Shop starts immediately with no content")
 	expect(game.cctv_system.cameras.size() == 3, "Only new camera set is registered")
 	game.power.trigger_outage()
 	shift.advance(30)
@@ -77,12 +74,13 @@ func _run() -> void:
 	game.power.board.latched[0] = true
 	game.power.board.begin_hold(1)
 	shift.advance(30)
-	expect(shift.state == ShiftDirector.State.WAITING_SCARE and game.power.board.held == 1, "Scare waits for blackout without interrupting repair")
+	expect(shift.state == ShiftDirector.State.WAITING_EVENT and game.power.board.held == 1, "Event waits for blackout without interrupting repair")
 	expect(game.power.board.latched[0], "Scare preserves latched breakers")
 	game.power.restore_power()
+	game.power.board.set_active(false)
+	game.mode = game.Mode.WALKING
 	shift._process(0)
-	expect(shift.state == ShiftDirector.State.SCARE and game.power.board.held == -1, "Deferred scare begins only after power is repaired")
-	shift.complete_scare()
+	expect(shift.state == ShiftDirector.State.ROUTE and game.power.board.held == -1, "Empty event is skipped only after repair and stable context")
 	expect(shift.stage == 2 and shift.branch == -1, "Street starts before branch selection")
 	for index: int in game.cctv_system.cameras.size():
 		var lens: Camera3D = game.cctv_system.cameras[index].lens

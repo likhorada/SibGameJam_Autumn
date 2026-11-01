@@ -71,6 +71,13 @@ func has_blocker(reason: StringName) -> bool:
 	return _blockers.has(reason)
 
 
+func blocking_reason_except(ignored: Array[StringName]) -> StringName:
+	for reason: StringName in _blockers:
+		if reason not in ignored:
+			return reason
+	return &""
+
+
 func can_start_external_event() -> bool:
 	return enabled and not is_busy() and _blockers.is_empty()
 
