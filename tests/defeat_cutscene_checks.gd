@@ -48,6 +48,11 @@ func _run() -> void:
 		source.global_position = Vector3(1.2, 0, 1.1)
 		expect(game.begin_threat_capture(reason, source), "Capture begins: " + reason)
 		var scene: DefeatCutscene = game.capture_cutscene
+		expect(
+			scene.jumpscare_audio.playing
+			and scene.jumpscare_audio.stream.resource_path == "res://assets/audio/jumpscare.wav",
+			"Every enemy capture starts jumpscare.wav",
+		)
 		expect(scene.on_location and scene.global_position.y > -1.0, "Scene stays in the apartment")
 		expect(not scene.get_node("Floor").visible and not scene.get_node("BackWall").visible and scene.view.environment == null, "Real room replaces preview geometry and environment")
 		scene.seek(0.4)

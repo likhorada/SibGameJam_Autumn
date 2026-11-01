@@ -16,7 +16,7 @@ extends Resource
 @export_range(15.0, 90.0) var sight_half_angle: float = 65.0
 @export_range(0.2, 2.0) var close_distance: float = 1.0
 @export_range(0.05, 1.0) var close_capture_seconds: float = 0.25
-@export var departure_sound: AudioStream = preload("res://assets/audio/steps.wav")
-@export var footsteps: AudioStream = preload("res://assets/audio/steps.wav")
+@export var departure_sound: AudioStream = preload("res://assets/audio/police_steps.wav")
+@export var footsteps: AudioStream = preload("res://assets/audio/police_steps.wav")
 @export_range(-30.0, 6.0) var warning_volume_db: float = -1.0
 @export_range(-30.0, 6.0) var footsteps_volume_db: float = -4.0

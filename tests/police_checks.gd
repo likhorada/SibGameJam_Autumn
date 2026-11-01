@@ -185,7 +185,7 @@ func _run() -> void:
 		expect(game.police.visit == PoliceRaid.Visit.DEPARTING and game.is_hidden(), "Search includes one listening pause then departure begins")
 		game.ambient._process(1.0)
 		expect(not game.ambient.suspense_audio.playing, "Pursuit suspense ends when police leaves search")
-		expect(game.police.voice_audio.stream.resource_path == "res://assets/audio/steps.wav", "Departure uses steps.wav")
+		expect(game.police.voice_audio.stream.resource_path == "res://assets/audio/police_steps.wav", "Departure uses police_steps.wav")
 		await capture("inspection_" + String(id))
 		game.threats.advance(2.99)
 		expect(game.police.visit == PoliceRaid.Visit.DEPARTING and not game.run_ended, "Last part of three-second departure is still dangerous")

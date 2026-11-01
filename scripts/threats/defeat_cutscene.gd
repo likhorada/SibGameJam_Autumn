@@ -18,6 +18,7 @@ var _cues: Dictionary = {}
 var _emitted: Dictionary = {}
 var _fade: ColorRect
 var _audio: AudioStreamPlayer
+var jumpscare_audio: AudioStreamPlayer
 var on_location: bool = false
 var _capture_eye: Vector3
 var _capture_floor: Vector3
@@ -59,6 +60,13 @@ func _ready() -> void:
 	layer.add_child(_fade)
 	_fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	seek(0.0)
+	jumpscare_audio = AudioStreamPlayer.new()
+	jumpscare_audio.name = "JumpscareAudio"
+	jumpscare_audio.bus = &"SFX"
+	jumpscare_audio.volume_db = -6.0
+	jumpscare_audio.stream = preload("res://assets/audio/jumpscare.wav")
+	add_child(jumpscare_audio)
+	jumpscare_audio.play()
 
 
 func place_at_capture(camera: Camera3D, enemy: Node3D, player: CharacterBody3D) -> void:

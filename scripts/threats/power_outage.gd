@@ -6,6 +6,7 @@ var game: Node3D
 var entity: CorridorEntity
 var entity_enabled: bool = true
 var _running: bool = false
+var spark_audio: AudioStreamPlayer3D
 
 
 func bind(value: Node3D) -> void:
@@ -14,6 +15,15 @@ func bind(value: Node3D) -> void:
 
 
 func _ready() -> void:
+	spark_audio = AudioStreamPlayer3D.new()
+	spark_audio.name = "FuseboxSparkAudio"
+	spark_audio.stream = preload("res://assets/audio/spark.wav")
+	spark_audio.bus = &"SFX"
+	spark_audio.volume_db = -6.0
+	spark_audio.unit_size = 7.0
+	spark_audio.max_distance = 22.0
+	add_child(spark_audio)
+	spark_audio.global_position = game.power.board.global_position
 	entity_enabled = settings.enabled
 	entity = CorridorEntity.new()
 	entity.settings = settings
@@ -35,6 +45,7 @@ func warning_started() -> void:
 		_running = false
 		resolved.emit(&"cancelled")
 		return
+	spark_audio.play()
 	if entity_enabled:
 		entity.start()
 
@@ -64,6 +75,8 @@ func _on_power_changed(powered: bool) -> void:
 
 func ended(_outcome: StringName) -> void:
 	_running = false
+	if is_instance_valid(spark_audio):
+		spark_audio.stop()
 	if is_instance_valid(entity):
 		entity.stop()
 	if is_instance_valid(game) and game.is_inside_tree() and is_instance_valid(game.power) and game.power.is_inside_tree() and not game.run_ended:

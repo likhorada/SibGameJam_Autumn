@@ -28,6 +28,12 @@ func _run() -> void:
 
 	expect(game.trigger_police(), "Police raid starts")
 	expect(
+		game.police.footsteps_audio.playing
+		and game.police.footsteps_audio.stream.resource_path == "res://assets/audio/police_steps.wav"
+		and game.police.settings.departure_sound.resource_path == "res://assets/audio/police_steps.wav",
+		"Police approach and departure use police_steps.wav",
+	)
+	expect(
 		game.police.ambush_audio.playing
 		and game.police.ambush_audio.stream.resource_path == "res://assets/audio/police_aimbush.wav"
 		and game.police.knock_audio.playing
@@ -58,6 +64,19 @@ func _run() -> void:
 		"Neighbor discovery uses the same detected cue",
 	)
 
+	game.disable_threats()
+	game.threats.enabled = true
+	game.threats.set_event_enabled(&"power_outage", true)
+	expect(game.trigger_power_outage(), "Outage starts after police slot is released")
+	expect(
+		game.outage.spark_audio.playing
+		and game.outage.spark_audio.stream.resource_path == "res://assets/audio/spark.wav"
+		and game.outage.spark_audio.global_position.is_equal_approx(game.power.board.global_position),
+		"Fusebox failure plays spark.wav at the board",
+	)
+	game.outage.spark_audio.stop()
+	expect(not game.trigger_power_outage() and not game.outage.spark_audio.playing, "Rejected outage does not replay sparks")
+	game.disable_threats()
 	var previous_run: WeakRef = weakref(game)
 	game.queue_free()
 	# Let scene teardown and the audio server release their playback references.
