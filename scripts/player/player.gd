@@ -1,10 +1,14 @@
 class_name ApartmentPlayer
 extends CharacterBody3D
 
+const PLAYER_FOOTSTEPS := preload("res://assets/audio/player_steps.wav")
+
 @export var walk_speed: float = 2.5
 @export var sprint_speed: float = 4.3
 @export_range(1.0, 60.0) var acceleration: float = 18.0
 @export_range(1.0, 60.0) var braking: float = 22.0
+@export_range(0.1, 1.0) var walk_footstep_interval: float = 0.34
+@export_range(0.1, 1.0) var sprint_footstep_interval: float = 0.22
 @export var mouse_sensitivity: float = 0.0022
 @export var interaction_distance: float = 2.2
 ## Exponential response in 1/seconds; zero gives instant mouse look.
@@ -18,6 +22,8 @@ var _pending_look := Vector2.ZERO
 var _motion_velocity := Vector3.ZERO
 var _motion_acceleration := Vector3.ZERO
 var exhaustion_audio: AudioStreamPlayer
+var footsteps_audio: AudioStreamPlayer3D
+var _footstep_left: float = 0.0
 
 @onready var head: Node3D = $Head
 @onready var camera_motion: PlayerCameraMotion = $Head/CameraMotion
@@ -34,6 +40,15 @@ func _ready() -> void:
 	exhaustion_audio.volume_db = -6.0
 	add_child(exhaustion_audio)
 	stamina.became_exhausted.connect(_play_exhaustion_sound)
+	footsteps_audio = AudioStreamPlayer3D.new()
+	footsteps_audio.name = "FootstepsAudio"
+	footsteps_audio.bus = &"SFX"
+	footsteps_audio.stream = PLAYER_FOOTSTEPS
+	footsteps_audio.volume_db = -6.0
+	footsteps_audio.unit_size = 3.0
+	footsteps_audio.max_distance = 12.0
+	add_child(footsteps_audio)
+	footsteps_audio.position.y = 0.08
 
 
 func _play_exhaustion_sound() -> void:
@@ -113,10 +128,23 @@ func _physics_process(delta: float) -> void:
 	stamina.advance(delta, is_sprinting, moving)
 	if not stamina.can_sprint():
 		is_sprinting = false
+	_update_footsteps(delta, actual_velocity.length())
 	_motion_acceleration = ((actual_velocity - _motion_velocity) / maxf(delta, 0.0001)).limit_length(30.0)
 	_motion_velocity = actual_velocity
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		interaction_id = find_interaction()
+
+
+func _update_footsteps(delta: float, speed: float) -> void:
+	if not is_on_floor() or speed <= 0.08:
+		_footstep_left = 0.0
+		return
+	_footstep_left -= delta
+	if _footstep_left > 0.0:
+		return
+	footsteps_audio.play()
+	var sprint_ratio := clampf(speed / sprint_speed, 0.0, 1.0)
+	_footstep_left = lerpf(walk_footstep_interval, sprint_footstep_interval, sprint_ratio)
 
 
 func find_interaction() -> StringName:
@@ -144,6 +172,9 @@ func set_controls_enabled(enabled: bool) -> void:
 
 func stop_motion(reset_camera: bool = false) -> void:
 	is_sprinting = false
+	_footstep_left = 0.0
+	if is_instance_valid(footsteps_audio):
+		footsteps_audio.stop()
 	velocity = Vector3.ZERO
 	_motion_velocity = Vector3.ZERO
 	_motion_acceleration = Vector3.ZERO
