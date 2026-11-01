@@ -380,7 +380,7 @@ material = SubResource("StandardMaterial3D_pxk46")
 size = Vector3(0.35, 0.07, 0.35)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_8fjlh"]
-size = Vector3(6.3355713, 4.5341797, 10.107971)
+size = Vector3(6.1, 1.1, 9.5)
 
 [node name="Apartment" type="Node3D" unique_id=1269526120]
 
@@ -841,8 +841,11 @@ transform = Transform3D(-0.215, 0, 1.8795896e-08, 0, 0.215, 0, -1.8795896e-08, 0
 [node name="Bed" parent="Bed" unique_id=1726691196 instance=ExtResource("8_uf1nb")]
 transform = Transform3D(1, 0, 7.1054274e-15, 0, 1, 0, -7.1054274e-15, 0, 1, 0, 0, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Bed" unique_id=691580770]
-transform = Transform3D(1, 0, 2.842171e-14, 0, 1, 0, -2.842171e-14, 0, 1, 0.03643608, 1.057129, -0.013767242)
+[node name="InteractionBody" type="StaticBody3D" parent="Bed"]
+metadata/interaction = &"hide_bed"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Bed/InteractionBody" unique_id=691580770]
+position = Vector3(0, 0.79, 0)
 shape = SubResource("BoxShape3D_8fjlh")
 
 [node name="Door" parent="." unique_id=1515334798 instance=ExtResource("9_n5k1t")]

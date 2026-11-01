@@ -17,7 +17,7 @@ extends Resource
 @export_range(0.5, 8.0) var near_radius: float = 3.5
 @export_range(0.5, 8.0) var pursuit_speed: float = 3.2
 @export_range(1.0, 6.0) var min_spawn_distance: float = 2.0
-@export_range(1.0, 10.0) var max_spawn_distance: float = 4.0
+@export_range(1.0, 15.0) var max_spawn_distance: float = 13.0
 @export_range(0.01, 0.5) var movement_threshold: float = 0.08
 @export var warning_sound: AudioStream = preload("res://assets/audio/creep_coming_pitched.wav")
 @export var departure_sound: AudioStream = preload("res://assets/audio/creep_goaway_pitched.wav")

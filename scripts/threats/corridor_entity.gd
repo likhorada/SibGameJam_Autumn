@@ -121,7 +121,6 @@ func advance(delta: float) -> void:
 		return
 	if phase == Phase.RETREATING:
 		_retreat_elapsed += delta
-		visual.scale = Vector3.ONE * (1.0 - clampf(_retreat_elapsed / maxf(0.2, settings.retreat_seconds), 0.0, 1.0))
 		if _retreat_elapsed >= settings.retreat_seconds:
 			_finish_departure()
 		return
@@ -222,13 +221,10 @@ func _try_encounter() -> bool:
 	for route: Node3D in _routes.get_children():
 		var a: Vector3 = route.get_node("A").global_position
 		var b: Vector3 = route.get_node("B").global_position
-		for reversed: bool in [false, true]:
-			var origin := b if reversed else a
-			var target := a if reversed else b
-			var distance := origin.distance_to(game.player.global_position)
-			if distance >= settings.min_spawn_distance and distance <= settings.max_spawn_distance and _clear_spawn(origin) and _clear_route(origin, target) and ThreatAwareness.clear_line(game, origin + Vector3.UP * 1.2, game.player.global_position + Vector3.UP * 1.2):
-				candidates.append(origin)
-				destinations.append(target)
+		var distance := a.distance_to(game.player.global_position)
+		if distance >= settings.min_spawn_distance and distance <= settings.max_spawn_distance and _clear_spawn(a) and _clear_route(a, b) and ThreatAwareness.clear_line(game, a + Vector3.UP * 1.2, game.player.global_position + Vector3.UP * 1.2):
+			candidates.append(a)
+			destinations.append(b)
 	if candidates.is_empty():
 		return false
 	var index := _rng.randi_range(0, candidates.size() - 1)
@@ -260,7 +256,9 @@ func _clear_route(origin: Vector3, target: Vector3) -> bool:
 	# Check the complete capsule sweep against architecture, not just the spawn.
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = _collision_shape.shape
-	query.transform.origin = origin + Vector3.UP * COLLISION_HEIGHT * 0.5
+	# Leave a small floor clearance for the physics sweep; a capsule touching
+	# the floor otherwise reports the floor as a blocked horizontal route.
+	query.transform.origin = origin + Vector3.UP * (COLLISION_HEIGHT * 0.5 + 0.03)
 	query.motion = target - origin
 	query.collision_mask = 1
 	query.exclude = [get_rid(), game.player.get_rid()]

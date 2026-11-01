@@ -99,6 +99,8 @@ func start_encounter(player_point: Vector3 = Vector3(4.1, 0, -2.0)) -> void:
 	expect(entity.phase == CorridorEntity.Phase.WARNING and entity.visual.visible, "Encounter warns from a preset corridor route")
 	var distance: float = Vector2(entity._from.x - player_point.x, entity._from.z - player_point.z).length()
 	expect(distance >= entity.settings.min_spawn_distance and distance <= entity.settings.max_spawn_distance, "Spawn keeps its distance from the player")
+	expect(entity._from.z > 5.0 and entity._to.z < entity._from.z, "Monster starts at the far end and approaches the fusebox, never the reverse")
+	expect(is_equal_approx(entity.global_position.y, 0.0), "Monster spawns at corridor floor height")
 	expect(entity.warning_audio.playing and not entity.footsteps_audio.playing, "Only the warning plays at first")
 
 
@@ -143,7 +145,7 @@ func _run() -> void:
 	var entity: CorridorEntity = outage.entity
 	var settings: CorridorEntityConfig = outage.settings
 	expect(is_instance_valid(entity) and entity.get_parent() == outage, "Production outage adapter carries its entity")
-	expect(game.get_node("Apartment/CorridorEncounters/Routes").get_child_count() >= 3, "Preset corridor routes exist")
+	expect(game.get_node("Apartment/CorridorEncounters/Routes").get_child_count() == 1, "Only the far-end corridor route exists")
 	expect(entity.visual is ThreatVisual and entity.visual.skeleton != null, "Entity uses the live GuyRig skeleton")
 	# The scheduled path needs the desktop; the forced path does not.
 	expect(not outage.can_schedule(), "Random outage cannot start while walking")
@@ -249,6 +251,9 @@ func _run() -> void:
 	start_outage()
 	await start_encounter()
 	danger_window(settings)
+	# The far-end spawn is outside the flashlight's short beam from the fusebox.
+	await walk_to(Vector3(4.2, 0, 3.3))
+	game.outage.entity._last_player_position = game.player.global_position
 	game.power.set_flashlight_enabled(true)
 	aim_at_entity(game.outage.entity)
 	expect(game.outage.entity.beam_hits(), "Flashlight cone reaches the figure")
