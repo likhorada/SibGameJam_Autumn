@@ -16,6 +16,7 @@ const PLAYER_FOOTSTEPS := preload("res://assets/audio/player_steps.wav")
 @export_range(0.0, 15.0) var max_look_lag_degrees: float = 6.0
 
 var controls_enabled: bool = true
+var noclip_enabled: bool = false
 var interaction_id: StringName = &""
 var is_sprinting: bool = false
 var _pending_look := Vector2.ZERO
@@ -24,6 +25,8 @@ var _motion_acceleration := Vector3.ZERO
 var exhaustion_audio: AudioStreamPlayer
 var footsteps_audio: AudioStreamPlayer3D
 var _footstep_left: float = 0.0
+var _noclip_collision_layer: int = 1
+var _noclip_collision_mask: int = 1
 
 @onready var head: Node3D = $Head
 @onready var camera_motion: PlayerCameraMotion = $Head/CameraMotion
@@ -104,6 +107,9 @@ func _physics_process(delta: float) -> void:
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		axis = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 		direction = global_basis * Vector3(axis.x, 0.0, axis.y)
+	if noclip_enabled:
+		_physics_process_noclip(delta, direction)
+		return
 	# Forward and forward-diagonal only. Sideways/backward movement stays walking.
 	var requested_sprint := axis.y < -0.01 and Input.is_action_pressed("sprint") and stamina.can_sprint() and is_on_floor()
 	var speed := sprint_speed if requested_sprint else walk_speed
@@ -133,6 +139,23 @@ func _physics_process(delta: float) -> void:
 	_motion_velocity = actual_velocity
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		interaction_id = find_interaction()
+
+
+func _physics_process_noclip(delta: float, direction: Vector3) -> void:
+	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		direction.y = float(Input.is_physical_key_pressed(KEY_SPACE)) - float(Input.is_physical_key_pressed(KEY_C))
+	direction = direction.normalized()
+	var moving := direction.length_squared() > 0.0
+	var sprinting := moving and Input.is_action_pressed("sprint")
+	velocity = direction * (sprint_speed if sprinting else walk_speed)
+	move_and_slide()
+	is_sprinting = sprinting
+	stamina.advance(delta, false, moving)
+	_footstep_left = 0.0
+	if is_instance_valid(footsteps_audio):
+		footsteps_audio.stop()
+	_motion_acceleration = ((velocity - _motion_velocity) / maxf(delta, 0.0001)).limit_length(30.0)
+	_motion_velocity = velocity
 
 
 func _update_footsteps(delta: float, speed: float) -> void:
@@ -168,6 +191,21 @@ func set_controls_enabled(enabled: bool) -> void:
 	controls_enabled = enabled
 	if not enabled:
 		stop_motion(true)
+
+
+func set_noclip_enabled(enabled: bool) -> void:
+	if noclip_enabled == enabled:
+		return
+	noclip_enabled = enabled
+	if enabled:
+		_noclip_collision_layer = collision_layer
+		_noclip_collision_mask = collision_mask
+		collision_layer = 0
+		collision_mask = 0
+	else:
+		collision_layer = _noclip_collision_layer
+		collision_mask = _noclip_collision_mask
+	stop_motion()
 
 
 func stop_motion(reset_camera: bool = false) -> void:

@@ -23,6 +23,7 @@ func _run() -> void:
 	player = game.player
 	hud = game.hud
 	await _frames(4)
+	_test_noclip_toggle()
 	_expect(player.footsteps_audio.stream.resource_path == "res://assets/audio/player_steps.wav", "Player loads the authored footstep sound")
 	_expect(
 		is_equal_approx(player.sprint_footstep_interval, 0.20)
@@ -101,6 +102,19 @@ func _test_model() -> void:
 	state.free()
 
 
+func _test_noclip_toggle() -> void:
+	var collision_layer := player.collision_layer
+	var collision_mask := player.collision_mask
+	_expect(game.dev_menu._noclip_toggle != null, "Dev menu exposes a noclip toggle")
+	player.set_noclip_enabled(true)
+	_expect(player.noclip_enabled and player.collision_layer == 0 and player.collision_mask == 0, "Noclip disables player collisions")
+	player.set_noclip_enabled(false)
+	_expect(
+		not player.noclip_enabled and player.collision_layer == collision_layer and player.collision_mask == collision_mask,
+		"Disabling noclip restores the original collision settings",
+	)
+
+
 func _test_movement() -> void:
 	var floor_body := StaticBody3D.new()
 	var shape := CollisionShape3D.new()
@@ -169,6 +183,14 @@ func _test_movement() -> void:
 	_expect(player.camera.fov < 75.1, "No sprint FOV pushing a wall")
 	_expect(not player.footsteps_audio.playing, "No footsteps while blocked against a wall")
 	_release_actions()
+	_spawn()
+	player.set_noclip_enabled(true)
+	Input.action_press("move_forward")
+	await _frames(40)
+	_expect(player.global_position.z < wall.position.z - 0.1, "Noclip flies through a wall")
+	_release_actions()
+	player.set_noclip_enabled(false)
+	_expect(player.collision_layer == 1 and player.collision_mask == 1, "Noclip restores collisions after passing through a wall")
 	wall.queue_free()
 	await _frames(2)
 

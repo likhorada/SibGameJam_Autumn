@@ -12,6 +12,7 @@ var _held_seconds: float = 0.0
 var _overlay: ColorRect
 var _status: Label
 var _unlimited: CheckButton
+var _noclip_toggle: CheckButton
 var _debug_hud_toggle: CheckButton
 var _debug_hud_panel: PanelContainer
 var _debug_hud_label: Label
@@ -68,6 +69,10 @@ func bind(value: Node3D) -> void:
 	_unlimited.text = "DEV_UNLIMITED"
 	_unlimited.toggled.connect(func(value_enabled: bool): game.player.stamina.set_unlimited(value_enabled))
 	column.add_child(_unlimited)
+	_noclip_toggle = CheckButton.new()
+	_noclip_toggle.text = "Noclip (Space/C: fly)"
+	_noclip_toggle.toggled.connect(game.player.set_noclip_enabled)
+	column.add_child(_noclip_toggle)
 	_debug_hud_toggle = CheckButton.new()
 	_debug_hud_toggle.text = "DEV_DEBUG_HUD"
 	_debug_hud_toggle.toggled.connect(set_debug_hud_enabled)
@@ -291,6 +296,7 @@ func _process(delta: float) -> void:
 		_status.text = tr("DEV_STATUS") % ["POWER_ON" if game.power.powered else "POWER_OFF", game.threats.wait_seconds_left, str(game.power.board.latched)]
 		_status.text += "\nThreats: %s / %s\nDoor: %s" % [ThreatManager.State.keys()[game.threats.state], game.threats.active_id, "OPEN" if game.room_door.is_open else "CLOSED"]
 		_unlimited.set_pressed_no_signal(game.player.stamina.unlimited)
+		_noclip_toggle.set_pressed_no_signal(game.player.noclip_enabled)
 		_neighbor_enabled.set_pressed_no_signal(game.threats.is_event_enabled(&"psych_neighbor"))
 		_trigger_neighbor.disabled = not game.threats.can_start_external_event() or not game.threats.is_event_enabled(&"psych_neighbor")
 		_police_enabled.set_pressed_no_signal(game.threats.is_event_enabled(&"police_raid"))
