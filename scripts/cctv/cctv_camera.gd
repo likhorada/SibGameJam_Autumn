@@ -41,7 +41,7 @@ func _ready() -> void:
 
 func _get_configuration_warnings() -> PackedStringArray:
 	if camera_id.is_empty():
-		return ["Set a unique Camera ID before connecting this location to CCTVSystem."]
+		return ["An ID will be generated from this node's path at runtime. Set a unique Camera ID if it must stay stable across renames."]
 	return []
 
 

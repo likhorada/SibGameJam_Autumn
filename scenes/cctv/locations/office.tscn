@@ -1,0 +1,170 @@
+[gd_scene load_steps=21 format=3]
+
+[ext_resource type="Script" path="res://scripts/cctv/office_location.gd" id="script"]
+[ext_resource type="Script" path="res://scripts/cctv/observation_waypoint.gd" id="waypoint"]
+[ext_resource type="PackedScene" path="res://scenes/cctv/cctv_camera.tscn" id="camera"]
+
+[sub_resource type="StandardMaterial3D" id="Mat0"]
+albedo_color = Color(0.25882352941176473, 0.27450980392156865, 0.26666666666666666, 1)
+
+[sub_resource type="BoxMesh" id="Box0"]
+material = SubResource("Mat0")
+size = Vector3(36, 0.3, 38)
+
+[sub_resource type="StandardMaterial3D" id="Mat1"]
+albedo_color = Color(0.7411764705882353, 0.5294117647058824, 0.25098039215686274, 1)
+
+[sub_resource type="BoxMesh" id="Box1"]
+material = SubResource("Mat1")
+size = Vector3(0.6, 0.8, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="Mat2"]
+albedo_color = Color(0.7137254901960784, 0.6196078431372549, 0.5215686274509804, 1)
+
+[sub_resource type="BoxMesh" id="Box2"]
+material = SubResource("Mat2")
+size = Vector3(0.35, 0.4, 0.35)
+
+[sub_resource type="StandardMaterial3D" id="Mat3"]
+albedo_color = Color(0.13333333333333333, 0.17254901960784313, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="Box3"]
+material = SubResource("Mat3")
+size = Vector3(0.2, 0.6, 0.25)
+
+[sub_resource type="BoxMesh" id="Box4"]
+material = SubResource("Mat1")
+size = Vector3(0.16, 0.15, 0.7)
+
+[sub_resource type="StandardMaterial3D" id="Mat4"]
+albedo_color = Color(0.18823529411764706, 0.23137254901960785, 0.25098039215686274, 1)
+
+[sub_resource type="BoxMesh" id="Box5"]
+material = SubResource("Mat4")
+size = Vector3(0.8, 0.12, 0.8)
+
+[sub_resource type="StandardMaterial3D" id="Mat5"]
+albedo_color = Color(0.396078431372549, 0.34901960784313724, 0.2901960784313726, 1)
+
+[sub_resource type="BoxMesh" id="Box6"]
+material = SubResource("Mat5")
+size = Vector3(3, 0.15, 1.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat6"]
+albedo_color = Color(0.06274509803921569, 0.10980392156862745, 0.10196078431372549, 1)
+
+[sub_resource type="BoxMesh" id="Box7"]
+material = SubResource("Mat6")
+size = Vector3(1.7, 0.95, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="Mat7"]
+albedo_color = Color(0.3803921568627451, 0.4, 0.3568627450980392, 1)
+
+[sub_resource type="BoxMesh" id="Box8"]
+material = SubResource("Mat7")
+size = Vector3(0.2, 3, 8)
+
+[node name="ObservationLocation" type="Node3D"]
+script = ExtResource("script")
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.2, 0)
+mesh = SubResource("Box0")
+
+[node name="Target" type="Node3D" parent="."]
+position = Vector3(-0.65, -0.35, 1.2)
+
+[node name="Body" type="MeshInstance3D" parent="Target"]
+position = Vector3(0, 1, 0)
+mesh = SubResource("Box1")
+
+[node name="Head" type="MeshInstance3D" parent="Target"]
+position = Vector3(0, 1.6, 0)
+mesh = SubResource("Box2")
+
+[node name="LeftLeg" type="MeshInstance3D" parent="Target"]
+position = Vector3(-0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="RightLeg" type="MeshInstance3D" parent="Target"]
+position = Vector3(0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="LeftArm" type="MeshInstance3D" parent="Target"]
+position = Vector3(-0.35, 0.9, -0.35)
+mesh = SubResource("Box4")
+
+[node name="RightArm" type="MeshInstance3D" parent="Target"]
+position = Vector3(0.35, 0.9, -0.35)
+mesh = SubResource("Box4")
+
+[node name="Chair" type="MeshInstance3D" parent="."]
+position = Vector3(-0.65, 0.4, 1.3)
+mesh = SubResource("Box5")
+
+[node name="Desk" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.7, 0)
+mesh = SubResource("Box6")
+
+[node name="Screen" type="Node3D" parent="."]
+
+[node name="Monitor" type="MeshInstance3D" parent="Screen"]
+position = Vector3(0, 1.35, -0.25)
+mesh = SubResource("Box7")
+
+[node name="Code" type="Label3D" parent="Screen"]
+position = Vector3(0, 1.4, -0.16)
+text = "0000"
+font_size = 64
+pixel_size = 0.007
+
+[node name="ExitSign" type="Label3D" parent="."]
+position = Vector3(4, 2, -6)
+text = "OFFICE / EXIT"
+font_size = 48
+pixel_size = 0.01
+
+[node name="Divider" type="MeshInstance3D" parent="."]
+position = Vector3(-4, 1.5, -4)
+mesh = SubResource("Box8")
+
+[node name="DESK" parent="." instance=ExtResource("camera")]
+position = Vector3(1.6, 2.5, 3.5)
+rotation_degrees = Vector3(-15, 25, 0)
+camera_id = &"stage0_DESK"
+display_name = "DESK"
+location_label = "OBS_OFFICE"
+list_order = 0
+base_fov = 48.0
+
+[node name="Camera3D" parent="DESK/Head" index="2"]
+fov = 48.0
+
+[node name="EXIT" parent="." instance=ExtResource("camera")]
+position = Vector3(8, 5, 4)
+rotation_degrees = Vector3(-24, 55, 0)
+camera_id = &"stage0_EXIT"
+display_name = "EXIT"
+location_label = "OBS_OFFICE"
+list_order = 1
+base_fov = 65.0
+
+[node name="Camera3D" parent="EXIT/Head" index="2"]
+fov = 65.0
+
+[node name="Route" type="Node3D" parent="."]
+
+[node name="Point1" type="Marker3D" parent="Route"]
+position = Vector3(0, 0, 1)
+script = ExtResource("waypoint")
+seconds = 2.0
+
+[node name="Point2" type="Marker3D" parent="Route"]
+position = Vector3(4, 0, 1)
+script = ExtResource("waypoint")
+seconds = 5.0
+
+[node name="Point3" type="Marker3D" parent="Route"]
+position = Vector3(4, 0, -6)
+script = ExtResource("waypoint")
+seconds = 7.0

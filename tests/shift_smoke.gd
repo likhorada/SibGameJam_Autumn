@@ -38,6 +38,9 @@ func _run() -> void:
 	game.transition_seconds = 0.04
 	var shift: ShiftDirector = game.shift
 	shift.set_process(false)
+	expect(shift.location.scene_file_path.ends_with("office.tscn"), "Office is loaded from an editable scene")
+	expect(shift.location.route().size() == 3 and game.cctv_system.cameras.size() == 2, "Office scene supplies route and CCTV cameras")
+	expect(game.terminal_ui.cctv.directory.item_count == 2, "Scene cameras appear in PC directory")
 	expect(not game.threats.random_allowed and not game.threats.is_busy(), "Random threats blocked before alarm")
 	expect(shift.code.length() == 4 and shift.branch == -1, "Code generated; street branch not chosen early")
 	game.enter_computer()
@@ -58,7 +61,9 @@ func _run() -> void:
 	shift.advance(20)
 	expect(shift.state == ShiftDirector.State.ROUTE and game.mode == game.Mode.COMPUTER, "Empty atmosphere pool never ejects player or inserts a pause")
 	expect(shift.stage == 1, "Shop starts immediately with no content")
+	expect(shift.location.scene_file_path.ends_with("observation_shop.tscn") and shift.location.route().size() == 7, "Shop scene supplies its route")
 	expect(game.cctv_system.cameras.size() == 3, "Only new camera set is registered")
+	expect(game.terminal_ui.cctv.directory.item_count == 3, "PC directory follows scene replacement")
 	game.power.trigger_outage()
 	shift.advance(30)
 	expect(is_instance_valid(shift.location.bottle), "Timeline and purchase continue during blackout")
@@ -83,10 +88,11 @@ func _run() -> void:
 	shift._process(0)
 	expect(shift.state == ShiftDirector.State.ROUTE and game.power.board.held == -1, "Empty event is skipped only after repair and stable context")
 	expect(shift.stage == 2 and shift.branch == -1, "Street starts before branch selection")
+	expect(shift.location.scene_file_path.ends_with("street.tscn") and shift.location.route().size() == 1, "Street scene supplies its route")
 	for index: int in game.cctv_system.cameras.size():
 		var lens: Camera3D = game.cctv_system.cameras[index].lens
 		expect(not lens.is_position_in_frustum(Vector3(0, 1, 0)), "Junction remains outside branch camera")
-		expect(lens.is_position_in_frustum(ShiftDirector.DATA.EXITS[index] + Vector3(0, 1, 0)), "Branch destination is visible")
+		expect(lens.is_position_in_frustum(shift.location.exit_point(index) + Vector3(0, 1, 0)), "Branch destination is visible")
 	shift.advance(12)
 	expect(shift.branch in [0, 1, 2], "Branch chosen at junction")
 	game.power.restore_power()

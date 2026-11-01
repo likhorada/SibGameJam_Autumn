@@ -90,7 +90,7 @@ func _run() -> void:
 			expect(is_equal_approx(pressure.movement_elapsed, travel_clock) and visitor.visual.global_position.is_equal_approx(stopped), "Listening pauses travel, not the run clock")
 			expect(not visitor.visual.get_node("Head").rotation.is_equal_approx(old_head), "Head actually scans during listening")
 			expect(not visitor.footsteps_audio.playing and game.capture_reason.is_empty(), "Listening is quiet and never detects a hidden player")
-			game.shift._begin_route(ShiftDirector.DATA.OFFICE)
+			game.shift._begin_route(game.shift.location.route())
 			game.shift.advance(0.5)
 			expect(game.shift.step_time > 0.4 and pressure.holding, "Observation timeline can progress during pressure")
 			await capture(String(id) + "_" + String(spot_id))

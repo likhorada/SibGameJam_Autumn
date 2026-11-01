@@ -50,22 +50,29 @@ func _ready() -> void:
 		world.add_child(location)
 		location.position += Vector3(index * 100.0, 0, 0)
 		_collect_cameras(location)
+	_sort_cameras()
+	directory_changed.emit()
+
+
+func _sort_cameras() -> void:
 	cameras.sort_custom(func(a: CCTVCamera, b: CCTVCamera) -> bool:
 		if a.location_label != b.location_label:
 			return a.location_label < b.location_label
 		if a.list_order != b.list_order:
 			return a.list_order < b.list_order
 		return String(a.camera_id) < String(b.camera_id))
-	directory_changed.emit()
 
 
 func _collect_cameras(node: Node) -> void:
 	if node is CCTVCamera:
+		if node.camera_id.is_empty():
+			# A dropped-in camera works immediately; explicit IDs stay stable across renames.
+			node.camera_id = StringName(str(node.get_path()))
 		var duplicate := false
 		for camera: CCTVCamera in cameras:
 			duplicate = duplicate or camera.camera_id == node.camera_id
-		if node.camera_id.is_empty() or duplicate:
-			push_warning("CCTV: skipped empty/duplicate Camera ID at %s" % node.get_path())
+		if duplicate:
+			push_warning("CCTV: skipped duplicate Camera ID at %s" % node.get_path())
 		else:
 			cameras.append(node)
 	for child: Node in node.get_children():
@@ -85,6 +92,7 @@ func replace_location(location: Node3D) -> void:
 			child.queue_free()
 	world.add_child(location)
 	_collect_cameras(location)
+	_sort_cameras()
 	directory_changed.emit()
 	if not cameras.is_empty() and selected == null:
 		select_camera(0)

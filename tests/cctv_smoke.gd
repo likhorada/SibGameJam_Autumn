@@ -176,14 +176,19 @@ func _test_custom_location() -> void:
 	camera.monochrome = true
 	location.add_child(camera)
 	camera.owner = location
+	var dropped: CCTVCamera = load("res://scenes/cctv/cctv_camera.tscn").instantiate()
+	dropped.name = "DroppedCamera"
+	location.add_child(dropped)
+	dropped.owner = location
 	var packed := PackedScene.new()
 	_expect(packed.pack(location) == OK, "Custom location packs without a custom script")
 	location.free()
 	var custom := CCTVSystem.new()
 	custom.locations = [packed]
 	root.add_child(custom)
-	_expect(custom.cameras.size() == 1 and custom.cameras[0].camera_id == &"custom_camera", "New location camera auto-registers from exported scene list")
+	_expect(custom.cameras.size() == 2 and custom.cameras[0].camera_id == &"custom_camera", "New location cameras auto-register from exported scene list")
 	_expect(custom.cameras[0].has_microphone and custom.cameras[0].monochrome, "Inspector properties survive scene instantiation")
+	_expect(not custom.cameras[1].camera_id.is_empty(), "Dropped camera without an ID receives an automatic ID")
 	custom.queue_free()
 	await process_frame
 

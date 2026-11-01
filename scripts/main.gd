@@ -101,7 +101,7 @@ func _ready() -> void:
 	fusebox_hint.offset_top = -50
 	fusebox_hint.hide()
 	if observation_shift_enabled:
-		shift = ShiftDirector.new()
+		shift = preload("res://scenes/cctv/observation_shift.tscn").instantiate()
 		add_child(shift)
 		shift.bind(self)
 	visual_effects.bind(self)

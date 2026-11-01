@@ -36,13 +36,16 @@
 
 ## Где менять
 
-- `data/observation/shift.gd`: точки маршрута, длительности, события take/checkout,
-  напитки и три уличных выхода.
+- `scenes/cctv/observation_shift.tscn`: список сцен этапов смены в инспекторе.
+- `scenes/cctv/locations/office.tscn`, `observation_shop.tscn`, `street.tscn`:
+  окружение, цель, маршрутные точки и камеры редактируются в Godot. Подробнее:
+  [CCTV_SCENES.md](CCTV_SCENES.md).
+- `data/observation/shift.gd`: идентификаторы ответов для напитков и направлений.
 - `scripts/observation/shift_director.gd`: состояния INTRO → DEADLINE → ROUTE →
   WAITING_EVENT (если нужно) → EVENT → ROUTE … → REPORT → ENDED;
   выбор фактов, срок, отчёт, переходы.
-- `scripts/cctv/observation_location.gd`: временный процедурный low-poly blockout
-  офиса/магазина/улицы, цель и прохожие. Marker3D маршрута создаются директором.
+- `scripts/cctv/observation_location.gd`: общий интерфейс сцены, чтение маршрутных
+  Marker3D и маркеров выходов. Логика особых событий — в скриптах конкретных сцен.
 - `CCTVSystem.replace_location()`: освобождает предыдущую локацию и обновляет
   каталог камер в **одном** существующем SubViewport.
 - `ChatSession.questions`: вопросы текущего отчёта; `live_report` исключает

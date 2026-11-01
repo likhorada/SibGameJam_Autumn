@@ -240,7 +240,7 @@ func _run() -> void:
 		expect(not ui.has_modal() and ui.windows[&"notepad"].opened and ui.notepad.editor.text == "Preserve my evidence", "Technical cancellation never applies loss penalty")
 		await frames()
 	event = start_event()
-	game.shift._begin_route(ShiftDirector.DATA.OFFICE)
+	game.shift._begin_route(game.shift.location.route())
 	var position_before: Vector3 = game.shift.location.target.position
 	game.shift.advance(0.5)
 	expect(game.shift.location.target.position != position_before and director.is_busy(), "Observation route continues during puzzle")

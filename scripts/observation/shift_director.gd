@@ -3,7 +3,7 @@ extends Node
 ## A run-local timeline independent of camera rendering and desktop visibility.
 enum State { INTRO, DEADLINE, ROUTE, EVENT, REPORT, ENDED, WAITING_EVENT }
 const DATA := preload("res://data/observation/shift.gd")
-const LOCATION := preload("res://scripts/cctv/observation_location.gd")
+@export var stages: Array[PackedScene] = []
 var state: State = State.INTRO
 var stage: int = 0
 var seconds_left: float = 60.0
@@ -11,7 +11,7 @@ var code: String
 var drink: int
 var branch: int = -1
 var game: Node3D
-var location: Node3D
+var location: ObservationLocation
 var route: Array = []
 var step: int = 0
 var step_time: float = 0.0
@@ -57,27 +57,29 @@ func _begin_deadline() -> void:
 func start_alarm() -> void:
 	if state != State.DEADLINE or not game.power.powered or game.mode != game.Mode.COMPUTER:
 		return
-	_begin_route(DATA.OFFICE)
+	_begin_route(location.route())
 	game.atmosphere.start_run()
 	_update_status()
 
 
 func _load_stage() -> void:
-	location = LOCATION.new()
-	location.stage = stage
-	location.code = code
-	location.drink = drink
+	location = stages[stage].instantiate() as ObservationLocation
+	if location == null:
+		push_error("Shift stage %d must use ObservationLocation" % stage)
+		return
 	game.cctv_system.replace_location(location)
+	if location.has_method("set_code"):
+		location.set_code(code)
+	if location.has_method("set_drink"):
+		location.set_drink(drink)
 
 
 func _begin_route(points: Array) -> void:
 	route = points.duplicate(true)
 	location.working = false
-	for i: int in route.size():
-		var marker := Marker3D.new()
-		marker.name = "RoutePoint%d" % i
-		location.add_child(marker)
-		marker.position = route[i].point
+	if route.is_empty():
+		push_error("Observation route is empty: %s" % location.scene_file_path)
+		return
 	step = 0
 	step_time = 0
 	start_point = location.target.position
@@ -116,8 +118,9 @@ func advance(delta: float) -> void:
 				var event: String = item.get("event", "")
 				if event == "branch":
 					branch = rng.randi_range(0, 2)
-					route.append({"point": DATA.EXITS[branch], "seconds": 28.0})
-					route.append({"point": DATA.EXITS[branch] + Vector3(0, 0, -5), "seconds": 16.0})
+					var exit := location.exit_point(branch)
+					route.append({"point": exit, "seconds": 28.0})
+					route.append({"point": exit + Vector3(0, 0, -5), "seconds": 16.0})
 				else:
 					location.event(event)
 				step += 1
@@ -130,7 +133,7 @@ func advance(delta: float) -> void:
 
 
 func _finish_stage() -> void:
-	if stage == 2:
+	if stage == stages.size() - 1:
 		state = State.REPORT
 		game.threats.random_allowed = false
 		return
@@ -147,7 +150,7 @@ func _poll_transition() -> void:
 		return
 	stage += 1
 	_load_stage()
-	_begin_route(DATA.SHOP if stage == 1 else DATA.STREET_ENTRY)
+	_begin_route(location.route())
 
 
 func complete_event() -> void:
