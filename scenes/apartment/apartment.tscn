@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/power/fusebox.tscn" id="Fusebox"]
+[ext_resource type="PackedScene" path="res://assets/models/Shitok.glb" id="Shitok"]
 [ext_resource type="PackedScene" path="res://scenes/apartment/room_door.tscn" id="RoomDoor"]
 [ext_resource type="PackedScene" path="res://scenes/apartment/hiding_spots.tscn" id="HidingSpots"]
 [ext_resource type="PackedScene" path="res://scenes/apartment/corridor_encounters.tscn" id="CorridorEncounters"]
@@ -327,10 +328,6 @@ size = Vector3(0.06, 2.1, 0.95)
 [sub_resource type="BoxMesh" id="BoxMesh_45qes"]
 material = SubResource("StandardMaterial3D_n5k1t")
 size = Vector3(0.06, 2.1, 0.95)
-
-[sub_resource type="BoxMesh" id="BoxMesh_4rlm7"]
-material = SubResource("StandardMaterial3D_lwkfx")
-size = Vector3(0.65, 0.85, 0.22)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_so762"]
 size = Vector3(0.65, 0.85, 0.22)
@@ -789,9 +786,12 @@ mesh = SubResource("BoxMesh_wckwl")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.28, 1.05, 4.5)
 mesh = SubResource("BoxMesh_45qes")
 
-[node name="Fusebox" type="MeshInstance3D" parent="." unique_id=727064127]
+[node name="Fusebox" type="Node3D" parent="." unique_id=727064127]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 1.45, -6.82)
-mesh = SubResource("BoxMesh_4rlm7")
+
+[node name="Shitok" parent="Fusebox" instance=ExtResource("Shitok")]
+position = Vector3(0, 0, 0.08)
+scale = Vector3(0.25, 0.25, 0.25)
 
 [node name="@StaticBody3D@84" type="StaticBody3D" parent="Fusebox" unique_id=321207419]
 metadata/interaction = &"fusebox"
