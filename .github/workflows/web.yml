@@ -76,6 +76,8 @@ jobs:
           # The regular startup above only opens the menu. Exercise its Play
           # transition so scene-tree contract errors are caught before export.
           godot --headless --path . --script res://tests/menu_smoke.gd 2>&1 | tee "$RUNNER_TEMP/menu-smoke.log"
+          # Ignore only the known shutdown leak, not runtime/script errors.
+          if grep -E 'SCRIPT ERROR:|ERROR:' "$RUNNER_TEMP/menu-smoke.log" | grep -Fv 'ERROR: 2 resources still in use at exit'; then exit 1; fi
           if grep -F 'MENU SMOKE: FAIL' "$RUNNER_TEMP/menu-smoke.log"; then exit 1; fi
           grep -F 'MENU SMOKE: PASS' "$RUNNER_TEMP/menu-smoke.log"
           mkdir -p build/web
