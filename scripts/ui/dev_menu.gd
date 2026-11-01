@@ -125,6 +125,10 @@ func bind(value: Node3D) -> void:
 		close_menu()
 		if not game.atmosphere.request_event(&"bathroom_apparition", true):
 			game.atmosphere.note("Bathroom rejected: already present / visible spawn / world blocked; " + game.atmosphere.blocked_reason()))
+	_button(column, "TriggerRoomCamera", func():
+		close_menu()
+		if not game.atmosphere.request_event(&"room_camera_feed", true):
+			game.atmosphere.note("Room camera rejected: sit at PC / already open / modal; " + game.atmosphere.blocked_reason()))
 	_button(column, "Atmosphere: trigger selected", func():
 		if _atmosphere_list.selected < 0:
 			game.atmosphere.note("Dev start: empty pool")

@@ -97,7 +97,7 @@ func _ready() -> void:
 func _run() -> void:
 	get_tree().root.size = Vector2i(1280, 720)
 	make_game()
-	expect(director.event_ids().size() == 4 and residents.remaining_questions.size() == 12, "Production registers four events and twelve questions")
+	expect(director.event_ids().size() == 5 and residents.remaining_questions.size() == 12, "Production registers five events and twelve questions")
 	expect(not director.request_event(&"question_popup", true), "Question cannot start while walking")
 	await sit()
 	game.terminal_ui.notepad.editor.text = "evidence is preserved"
@@ -266,6 +266,55 @@ func _run() -> void:
 	game.queue_free()
 	await frames()
 	expect(audio_ref.get_ref() == null and question_ref.get_ref() == null and figure_ref.get_ref() == null, "Live teardown cleans question, figure and optional sound")
+
+	make_game()
+	expect(not director.request_event(&"room_camera_feed", true), "Room camera only starts while seated at PC")
+	await sit()
+	expect(&"room_camera_feed" in director._candidates(false, true, false), "Room camera belongs to the normal computer random pool")
+	expect(&"room_camera_feed" not in director._candidates(true, true, true), "Room camera is not a transition event")
+	for profile: AtmosphereProfile in game.atmosphere_config.events:
+		if profile.id != &"room_camera_feed":
+			director.set_event_condition(profile.id, func() -> bool: return false)
+	director.start_run()
+	director.clear_cooldown()
+	director.random_limit = 1
+	game.shift.state = ShiftDirector.State.ROUTE
+	director.advance(1.0)
+	await frames(2)
+	var room_popup := residents.room_camera
+	expect(is_instance_valid(room_popup) and not director.is_busy() and director.random_count == 1, "Normal random scheduling shows the room camera and spends its usual quota")
+	expect(residents.room_camera_seconds_left > 19.5 and residents.room_camera_seconds_left <= 20.0, "Room camera starts with a 20-second lifetime")
+	expect(game.visual_effects._room_camera_source == residents.room_camera_source, "Room camera switches the existing low-resolution apartment viewport")
+	expect(game.visual_effects.viewport.render_target_update_mode == SubViewport.UPDATE_ALWAYS, "Room feed renders only while shown at the PC")
+	expect(room_popup.feed.material is ShaderMaterial and room_popup.feed.material.shader == load("res://assets/shaders/monochrome.gdshader"), "Room camera applies monochrome shader")
+	expect(room_popup.find_children("*", "AudioStreamPlayer", true, false).is_empty() and room_popup.find_children("*", "AudioStreamPlayer3D", true, false).is_empty(), "Room camera popup has no sound")
+	expect(not residents.room_camera_source.current, "Room camera does not take over player controls")
+	var fixed_pose := residents.room_camera_source.global_transform
+	var original_window_position := room_popup.position
+	var header := room_popup.global_position + Vector2(100, 20)
+	motion(header)
+	mouse(header, true)
+	motion(header + Vector2(35, 20), Vector2(35, 20), true)
+	mouse(header + Vector2(35, 20), false)
+	await frames()
+	expect(room_popup.position.distance_to(original_window_position) > 10, "Room camera window can be moved over other apps")
+	expect(residents.room_camera_source.global_transform.is_equal_approx(fixed_pose), "Window input cannot rotate or move the fixed camera")
+	await capture("room_camera")
+	await frames(2)
+	var camera_close := room_popup.close_button.get_global_rect().get_center()
+	motion(camera_close)
+	mouse(camera_close, true)
+	mouse(camera_close, false)
+	await frames()
+	expect(not is_instance_valid(residents.room_camera) and game.visual_effects._room_camera_source == null, "Cross closes popup and restores apartment render")
+	expect(game.visual_effects.viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED, "No extra apartment render remains after close")
+	director.request_event(&"room_camera_feed", true)
+	expect(is_instance_valid(residents.room_camera), "Room camera can start again through a forced test")
+	residents.room_camera_seconds_left = 0.01
+	residents._process(0.02)
+	expect(not is_instance_valid(residents.room_camera), "Room camera auto-closes at its 20-second timeout")
+	game.queue_free()
+	await frames()
 	print("RESIDENTS SMOKE: %s (%d failures)" % ["PASS" if failures == 0 else "FAIL", failures])
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("window.threatTestResult = " + JSON.stringify({"failures": failures}))

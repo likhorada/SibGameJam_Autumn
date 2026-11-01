@@ -9,7 +9,7 @@
 маршрут наблюдаемой цели.
 
 В production-пуле `data/atmosphere/default.tres`: [You Are An Idiot](YOU_ARE_AN_IDIOT.md),
-[FIREWALL BREACH](FIREWALL_BREACH.md), [вопросы и фигура в санузле](RESIDENT_EVENTS.md).
+[FIREWALL BREACH](FIREWALL_BREACH.md), [вопросы, фигура и камера комнаты](RESIDENT_EVENTS.md).
 Окна могут перекрывать CCTV; взлом блокирует
 приложения и при проигрыше закрывает их окна, но не стирает данные и не прерывает маршрут.
 Старая `[ТЕСТ ПУГАЧКИ]`, принудительный выход из ПК и пятисекундный таймер удалены.

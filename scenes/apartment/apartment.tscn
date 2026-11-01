@@ -381,6 +381,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, 0, 4.6)
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1489028802]
 environment = SubResource("Environment")
 
+[node name="RoomCamera" type="Camera3D" parent="."]
+position = Vector3(-2.35, 2.5, 2.55)
+fov = 88.0
+
 [node name="MainFloor" type="MeshInstance3D" parent="." unique_id=1896006233]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
 mesh = SubResource("BoxMesh_p0ujn")

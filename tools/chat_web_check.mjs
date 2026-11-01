@@ -150,7 +150,26 @@ try {
       await command('threat');s=await wait(s=>!s.figure&&s.figure_reason==='threat_started','Threat did not remove decorative figure');
       await command('disable_threats');await command('return');await wait(s=>s.mode===2,'Return failed');
       await command('question');await command('figure');await wait(s=>s.question&&s.figure,'Residents not prepared for report');
-      await command('quiz');s=await wait(s=>s.quiz&&!s.question&&!s.figure,'Report left persistent objects');
+      await trigger('TriggerRoomCamera');
+      s=await wait(s=>s.room_camera&&!s.busy&&s.room_camera_rendering,'Room camera did not enter the event pool or start its live feed');
+      expect(s.room_camera_seconds>19&&s.room_camera_seconds<=20,'Room camera did not start its 20-second countdown');
+      expect(s.room_camera_override&&s.room_camera_rendering&&s.room_camera_bw&&!s.room_camera_audio,'Room camera render/BW/silent setup failed');
+      expect(s.room_camera_order>0&&s.room_camera_title!=='ROOM_CAMERA_TITLE','Room camera did not layer above existing popup or translate its title');
+      expect(s.app==='notepad'&&s.room_camera_pose.length===6,'Room camera stole app focus or has no fixed view');
+      const cameraPose=JSON.stringify(s.room_camera_pose),[cx,cy,cw,ch]=s.room_camera_rect;
+      await call('Input.dispatchMouseEvent',{type:'mouseMoved',x:cx+cw/2,y:cy+ch/2});
+      await call('Input.dispatchMouseEvent',{type:'mousePressed',x:cx+cw/2,y:cy+ch/2,button:'left',buttons:1,clickCount:1});
+      await call('Input.dispatchMouseEvent',{type:'mouseMoved',x:cx+cw/2+45,y:cy+ch/2+20,buttons:1});
+      await call('Input.dispatchMouseEvent',{type:'mouseReleased',x:cx+cw/2+45,y:cy+ch/2+20,button:'left',buttons:0,clickCount:1});
+      await sleep(100);s=await state();
+      expect(JSON.stringify(s.room_camera_pose)===cameraPose&&s.room_camera&&s.app==='notepad','Click-drag rotated the camera or intercepted the app below');
+      await capture('residents_room_camera_'+lang);
+      await click(s.room_camera_close);
+      await wait(s=>!s.room_camera&&!s.room_camera_override&&!s.room_camera_rendering,'Room camera cross failed to restore the apartment view');
+      await command('room_camera');await wait(s=>s.room_camera,'Room camera could not be triggered again');
+      await command('expire_room_camera');await wait(s=>!s.room_camera&&!s.room_camera_override&&!s.room_camera_rendering,'Room camera timeout did not clean up');
+      await command('room_camera');await wait(s=>s.room_camera,'Room camera did not reopen for report cleanup');
+      await command('quiz');s=await wait(s=>s.quiz&&!s.question&&!s.figure&&!s.room_camera,'Report left persistent objects');
       expect(s.notes===notes,'Residents changed evidence');
     }
   }else if(firewallMode){
@@ -491,5 +510,5 @@ try {
     await capture(perfect?'win':'lose');
   }
   expect(errors.length===0,'Browser errors: '+errors.join('\n'));
-  console.log(residentsMode?'RESIDENTS INPUT WEB: PASS (RU/EN dev buttons, question drag/close/repeat/resize, rendered peripheral sight, occlusion, threats and report cleanup).':firewallMode?'FIREWALL WEB: PASS (RU/EN dev click, ports/BLOCK, modal input, grace, win/loss, preservation, Esc/return, resize and cancellation).':idiotMode?'IDIOT WEB: PASS (RU/EN real dev click, drag/crosses, cap, taskbar/Esc, return, resize, fades and cleanup).':outageMode?'OUTAGE INPUT WEB: PASS (RU/EN, F7 trigger, blackout eject, F flashlight, encounter, provoked chase, contact death).':policeMode?'POLICE INPUT WEB: PASS (RU/EN, F7, PC escape, E hiding/exit, clamped mouse look, blocked walking, safe departure, early-exit death).':neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
+  console.log(residentsMode?'RESIDENTS INPUT WEB: PASS (RU/EN question popup and room-camera overlay, grayscale/silent fixed feed, close/timeout, peripheral apparition, threats and report cleanup).':firewallMode?'FIREWALL WEB: PASS (RU/EN dev click, ports/BLOCK, modal input, grace, win/loss, preservation, Esc/return, resize and cancellation).':idiotMode?'IDIOT WEB: PASS (RU/EN real dev click, drag/crosses, cap, taskbar/Esc, return, resize, fades and cleanup).':outageMode?'OUTAGE INPUT WEB: PASS (RU/EN, F7 trigger, blackout eject, F flashlight, encounter, provoked chase, contact death).':policeMode?'POLICE INPUT WEB: PASS (RU/EN, F7, PC escape, E hiding/exit, clamped mouse look, blocked walking, safe departure, early-exit death).':neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
 } finally {ws?.close();browser.kill();server.close();}

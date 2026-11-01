@@ -13,6 +13,7 @@ extends Node
 var game: Node3D
 var viewport: SubViewport
 var camera: Camera3D
+var _room_camera_source: Camera3D
 var image: TextureRect
 var crt: ColorRect
 var anxiety: float = 0.0
@@ -93,7 +94,13 @@ func _process(delta: float) -> void:
 	game.terminal_ui.cctv.set_anxiety(anxiety if presenting else 0.0)
 	crt.visible = presenting and game.mode == game.Mode.COMPUTER and game.terminal_ui.visible and crt_strength > 0.0
 	crt.material.set_shader_parameter("strength", crt_strength)
-	viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED if game.mode == game.Mode.COMPUTER else SubViewport.UPDATE_ALWAYS
+	var room_feed_visible: bool = game.mode == game.Mode.COMPUTER and game.terminal_ui.is_visible_in_tree() and not game.dev_menu.is_open and not game.terminal_ui.has_modal() and is_instance_valid(_room_camera_source)
+	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if game.mode != game.Mode.COMPUTER or room_feed_visible else SubViewport.UPDATE_DISABLED
+
+
+func set_room_camera_source(source: Camera3D) -> void:
+	_room_camera_source = source
+	_sync_camera()
 
 
 func trigger_scare(strength: float = 1.0) -> void:
@@ -124,7 +131,7 @@ func _sync_camera() -> void:
 	var target_size := Vector2i(maxi(16, roundi(render_height * size.x / maxf(size.y, 1.0))), maxi(16, render_height))
 	if viewport.size != target_size:
 		viewport.size = target_size
-	var source := _root.get_camera_3d()
+	var source := _room_camera_source if game.mode == game.Mode.COMPUTER and is_instance_valid(_room_camera_source) else _root.get_camera_3d()
 	if source == null:
 		return
 	camera.global_transform = source.global_transform
