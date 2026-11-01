@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="AtmosphereProfile" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/atmosphere/atmosphere_profile.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/atmosphere/you_are_an_idiot.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"you_are_an_idiot"
+walking = false
+timeout_seconds = 17.0
+scene = ExtResource("2")

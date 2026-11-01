@@ -32,6 +32,7 @@ func capture(name: String, camera_index: int = 0) -> void:
 
 func _run() -> void:
 	game = load("res://scenes/main.tscn").instantiate()
+	game.atmosphere_config = AtmosphereConfig.new()
 	root.add_child(game)
 	current_scene = game
 	game.transition_seconds = 0.04

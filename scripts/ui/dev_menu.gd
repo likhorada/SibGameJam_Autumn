@@ -109,6 +109,10 @@ func bind(value: Node3D) -> void:
 	for id: StringName in game.atmosphere.event_ids():
 		_atmosphere_list.add_item(String(id))
 	column.add_child(_atmosphere_list)
+	_button(column, "TriggerYouAreAnIdiot", func():
+		close_menu()
+		if not game.atmosphere.request_event(&"you_are_an_idiot", true):
+			game.atmosphere.note("YouAreAnIdiot rejected: sit at PC; " + game.atmosphere.blocked_reason()))
 	_button(column, "Atmosphere: trigger selected", func():
 		if _atmosphere_list.selected < 0:
 			game.atmosphere.note("Dev start: empty pool")

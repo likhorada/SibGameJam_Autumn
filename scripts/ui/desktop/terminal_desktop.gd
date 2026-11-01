@@ -42,6 +42,7 @@ var _boot_msec: int = 0
 var _clock_minute: int = -1
 var _windows_layer: Control
 var _task_list: HBoxContainer
+var transient_overlay: Control
 
 @onready var workspace: Control = $Workspace
 
@@ -300,6 +301,11 @@ func _input(event: InputEvent) -> void:
 		var point: Vector2 = event.position
 		if start_menu.visible and start_menu.get_global_rect().has_point(point):
 			return
+		# A fictional popup must not also activate/refocus an app underneath it.
+		if is_instance_valid(transient_overlay) and transient_overlay.is_visible_in_tree():
+			for popup: Control in transient_overlay.get_children():
+				if popup.visible and popup.get_global_rect().has_point(point):
+					return
 		if not start_button.get_global_rect().has_point(point):
 			_close_start()
 		for index: int in range(_windows_layer.get_child_count() - 1, -1, -1):

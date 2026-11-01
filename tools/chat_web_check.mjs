@@ -3,7 +3,7 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
-const root=path.resolve(process.env.OUTAGE_WEB_ROOT || process.env.POLICE_WEB_ROOT || process.env.NEIGHBOR_WEB_ROOT || process.env.THREAT_WEB_ROOT || process.env.CHAT_WEB_ROOT || 'build/chat-web');
+const root=path.resolve(process.env.IDIOT_WEB_ROOT || process.env.OUTAGE_WEB_ROOT || process.env.POLICE_WEB_ROOT || process.env.NEIGHBOR_WEB_ROOT || process.env.THREAT_WEB_ROOT || process.env.CHAT_WEB_ROOT || 'build/chat-web');
 const artifacts=path.join(process.env.LOCALAPPDATA,'Temp/opencode');
 const profile=await fs.mkdtemp(path.join(artifacts,'chat-chrome-'));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -13,6 +13,7 @@ const threatMode=process.env.THREAT_WEB==='1';
 const neighborMode=process.env.NEIGHBOR_WEB==='1';
 const policeMode=process.env.POLICE_WEB==='1';
 const outageMode=process.env.OUTAGE_WEB==='1';
+const idiotMode=process.env.IDIOT_WEB==='1';
 const server=http.createServer(async(req,res)=>{
   try {
     const name=new URL(req.url,'http://localhost').pathname;
@@ -49,7 +50,7 @@ try {
     requests.set(n,{resolve,reject,timer});ws.send(JSON.stringify({id:n,method,params}));
   });
   const evaluate=async expression=>(await call('Runtime.evaluate',{expression,returnByValue:true})).result.value;
-  const state=()=>evaluate(outageMode?'window.outageTelemetry':policeMode?'window.policeTelemetry':neighborMode?'window.neighborTelemetry':'window.chatTelemetry');
+  const state=()=>evaluate(idiotMode?'window.idiotTelemetry':outageMode?'window.outageTelemetry':policeMode?'window.policeTelemetry':neighborMode?'window.neighborTelemetry':'window.chatTelemetry');
   const expect=(value,message)=>{if(!value)throw Error(message);};
   const wait=async(predicate,message,seconds=10)=>{
     for(let i=0;i<seconds*20;i++){const s=await state();if(s&&predicate(s))return s;await sleep(50);}
@@ -89,7 +90,75 @@ try {
   await call('Runtime.enable');await call('Page.enable');
   await call('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
   const url='http://127.0.0.1:'+server.address().port+'/';
-  if(outageMode){
+  if(idiotMode){
+    let commandID=0;
+    const command=async(name,seconds=0)=>{
+      const id=++commandID;
+      await evaluate('window.idiotCommand='+JSON.stringify({id,name,seconds}));
+      return wait(s=>s.command===id,'Idiot command not acknowledged: '+name);
+    };
+    const closePopup=async count=>{
+      const s=await state();
+      await click(s.windows.at(-1).close);
+      await wait(s=>s.windows.length===count,'Cross did not produce '+count+' windows');
+    };
+    for(const lang of ['ru','en']){
+      await call('Page.navigate',{url:url+'?lang='+lang});
+      await wait(s=>s.mode===2,'Idiot fixture did not reach PC',30);
+      await call('Page.bringToFront');
+      await command('cctv');
+      await call('Input.dispatchKeyEvent',{type:'keyDown',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+      await wait(s=>s.dev,'Dev menu did not open');
+      await call('Input.dispatchKeyEvent',{type:'keyUp',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+      await command('reveal_trigger');await sleep(150);
+      await click((await state()).trigger);
+      let s=await wait(s=>s.active&&!s.dev&&s.windows.length===1,'Dedicated dev trigger failed');
+      expect(!s.chaotic&&s.audio,'First popup should be stationary with one laugh');
+      const before=s.windows[0].rect;
+      const drag=[before[0]+100,before[1]+15];
+      await call('Input.dispatchMouseEvent',{type:'mouseMoved',x:drag[0],y:drag[1]});
+      await call('Input.dispatchMouseEvent',{type:'mousePressed',x:drag[0],y:drag[1],button:'left',buttons:1,clickCount:1});
+      await call('Input.dispatchMouseEvent',{type:'mouseMoved',x:drag[0]+55,y:drag[1]+25,buttons:1});
+      await call('Input.dispatchMouseEvent',{type:'mouseReleased',x:drag[0]+55,y:drag[1]+25,button:'left',buttons:0,clickCount:1});
+      await sleep(150);s=await state();
+      expect(Math.abs(s.windows[0].rect[0]-before[0])>30,'Real browser mouse drag failed');
+      await capture('idiot_single_'+lang);
+      await closePopup(2);
+      expect((await state()).chaotic,'Cross should activate movement');
+      const stationary=(await state()).windows[0].rect;
+      await command('advance',0.4);
+      expect((await state()).windows[0].rect[0]!==stationary[0],'Popup did not move');
+      for(let count=3;count<=8;count++)await closePopup(count);
+      expect((await state()).closing,'Eight windows should latch closing mode');
+      await command('advance',0.6);
+      await capture('idiot_eight_'+lang);
+      await click((await state()).start);
+      await wait(s=>s.menu&&s.windows.length===8,'Popups blocked taskbar');
+      await tap('Escape','Escape',27);
+      await wait(s=>s.mode===0&&!s.visible,'Esc did not leave PC');
+      const elapsed=(await state()).elapsed;
+      s=await command('advance',1);
+      expect(s.audio&&s.elapsed>elapsed,'Leaving PC stopped positional sound or clock');
+      await command('return');await wait(s=>s.mode===2&&s.visible,'Return did not restore popups');
+      await call('Emulation.setDeviceMetricsOverride',{width:800,height:600,deviceScaleFactor:1,mobile:false});
+      await sleep(250);await command('advance',0.2);s=await state();
+      for(const w of s.windows){
+        const [x,y,width,height]=w.rect,[ax,ay,aw,ah]=s.workspace;
+        expect(x>=ax-1&&y>=ay-1&&x+width<=ax+aw+1&&y+height<=ay+ah+1,'Popup escaped resized workspace');
+      }
+      await call('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
+      await sleep(250);
+      for(let count=7;count>=0;count--)await closePopup(count);
+      s=await command('advance',0.1);expect(s.volume < -10,'Sound did not fade');
+      await command('advance',0.11);await wait(s=>!s.active&&!s.audio,'Early completion left event/audio');
+      await command('start');await wait(s=>s.active,'Dev replay failed');
+      s=await command('advance',14.9);
+      expect(s.windows.length===1&&!s.chaotic&&s.volume < -10,'Ignored popup should remain one and fade naturally');
+      await command('advance',0.11);await wait(s=>!s.active,'Fifteen-second expiry failed');
+      await command('start');await command('quiz');
+      await wait(s=>s.quiz&&!s.active&&!s.audio,'Quiz did not clean event');
+    }
+  }else if(outageMode){
     const command=async name=>{
       await evaluate('window.outageTelemetry.command="";window.outageCommand='+JSON.stringify(name));
       await wait(s=>s.command===name,'Outage test command not acknowledged: '+name);
@@ -293,5 +362,5 @@ try {
     await capture(perfect?'win':'lose');
   }
   expect(errors.length===0,'Browser errors: '+errors.join('\n'));
-  console.log(outageMode?'OUTAGE INPUT WEB: PASS (RU/EN, F7 trigger, blackout eject, F flashlight, encounter, provoked chase, contact death).':policeMode?'POLICE INPUT WEB: PASS (RU/EN, F7, PC escape, E hiding/exit, clamped mouse look, blocked walking, safe departure, early-exit death).':neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
+  console.log(idiotMode?'IDIOT WEB: PASS (RU/EN real dev click, drag/crosses, cap, taskbar/Esc, return, resize, fades and cleanup).':outageMode?'OUTAGE INPUT WEB: PASS (RU/EN, F7 trigger, blackout eject, F flashlight, encounter, provoked chase, contact death).':policeMode?'POLICE INPUT WEB: PASS (RU/EN, F7, PC escape, E hiding/exit, clamped mouse look, blocked walking, safe departure, early-exit death).':neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
 } finally {ws?.close();browser.kill();server.close();}

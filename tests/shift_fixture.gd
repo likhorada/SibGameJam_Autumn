@@ -2,6 +2,8 @@ extends "res://tests/chat_fixture.gd"
 ## Test-only commands accelerate the timeline, never included in production.
 
 func _ready() -> void:
+	# This harness isolates the empty-pool route flow; real content has its own tests.
+	atmosphere_config = AtmosphereConfig.new()
 	super._ready()
 	shift.set_process(false)
 	threats.set_event_enabled(&"power_outage", false)
