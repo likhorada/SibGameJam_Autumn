@@ -3,9 +3,10 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bw8lsqp8jk84p"
-path="res://.godot/imported/Vodka_Bottle_UV_Vodka.png-e26dd5aa6f6c37eac8bf3ba8c780cbc2.ctex"
+path.s3tc="res://.godot/imported/Vodka_Bottle_UV_Vodka.png-e26dd5aa6f6c37eac8bf3ba8c780cbc2.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "53826b012df2a16c29e0192e033b76a2"
@@ -14,11 +15,11 @@ generator_parameters={
 [deps]
 
 source_file="res://assets/models/Vodka_Bottle_UV_Vodka.png"
-dest_files=["res://.godot/imported/Vodka_Bottle_UV_Vodka.png-e26dd5aa6f6c37eac8bf3ba8c780cbc2.ctex"]
+dest_files=["res://.godot/imported/Vodka_Bottle_UV_Vodka.png-e26dd5aa6f6c37eac8bf3ba8c780cbc2.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -40,4 +41,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

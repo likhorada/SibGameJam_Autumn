@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://gis2moppv1gq"]
+
+[ext_resource type="PackedScene" uid="uid://4ehcj2q4sibd" path="res://assets/models/Stool.glb" id="1_tjidc"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8fjlh"]
+size = Vector3(1.6112976, 1.9490967, 1.4904785)
+
+[node name="Stool" unique_id=845977854 instance=ExtResource("1_tjidc")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." index="13" unique_id=1854949433]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.018661499, -0.37997723, 0.012084961)
+shape = SubResource("BoxShape3D_8fjlh")

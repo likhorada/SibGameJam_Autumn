@@ -1,116 +1,59 @@
 [gd_scene format=3 uid="uid://bp1xoeo2obebg"]
 
-[sub_resource type="BoxShape3D" id="DeskShape"]
-size = Vector3(2.1, 0.84, 0.8)
+[ext_resource type="PackedScene" uid="uid://cga68he4fda13" path="res://assets/models/Table.glb" id="1_0uvmq"]
+[ext_resource type="PackedScene" uid="uid://bmcce1bg846bn" path="res://assets/models/Laptop.glb" id="2_m4hbx"]
+[ext_resource type="PackedScene" uid="uid://4ehcj2q4sibd" path="res://assets/models/Stool.glb" id="3_171q7"]
 
-[sub_resource type="StandardMaterial3D" id="Wood"]
-albedo_color = Color(0.23, 0.15, 0.09, 1)
-
-[sub_resource type="BoxMesh" id="DeskMesh"]
-material = SubResource("Wood")
-size = Vector3(2.1, 0.12, 0.8)
-
-[sub_resource type="BoxMesh" id="LegMesh"]
-material = SubResource("Wood")
-size = Vector3(0.12, 0.72, 0.65)
+[sub_resource type="BoxShape3D" id="BoxShape3D_cn8qd"]
+size = Vector3(1.6298523, 1.4606323, 1.1655273)
 
 [sub_resource type="StandardMaterial3D" id="Plastic"]
 albedo_color = Color(0.25, 0.27, 0.22, 1)
-
-[sub_resource type="BoxMesh" id="MonitorMesh"]
-material = SubResource("Plastic")
-size = Vector3(1, 0.68, 0.38)
-
-[sub_resource type="BoxShape3D" id="MonitorShape"]
-size = Vector3(1, 0.68, 0.38)
-
-[sub_resource type="StandardMaterial3D" id="ScreenMaterial"]
-shading_mode = 0
-albedo_color = Color(0.06, 0.16, 0.12, 1)
-
-[sub_resource type="BoxMesh" id="ScreenMesh"]
-material = SubResource("ScreenMaterial")
-size = Vector3(0.83, 0.48, 0.015)
 
 [sub_resource type="BoxMesh" id="StandMesh"]
 material = SubResource("Plastic")
 size = Vector3(0.3, 0.13, 0.25)
 
-[sub_resource type="BoxMesh" id="KeyboardMesh"]
-material = SubResource("Plastic")
-size = Vector3(0.65, 0.04, 0.2)
-
-[sub_resource type="BoxMesh" id="ChairMesh"]
-material = SubResource("Wood")
-size = Vector3(0.6, 0.5, 0.6)
-
-[sub_resource type="BoxShape3D" id="ChairShape"]
-size = Vector3(0.6, 0.5, 0.6)
-
-[sub_resource type="BoxMesh" id="ChairBackMesh"]
-material = SubResource("Wood")
-size = Vector3(0.6, 0.55, 0.09)
+[sub_resource type="BoxShape3D" id="BoxShape3D_8fjlh"]
+size = Vector3(0.6652832, 0.79351807, 0.60668945)
 
 [node name="Terminal" type="Node3D" unique_id=1546214837]
 
 [node name="Desk" type="StaticBody3D" parent="." unique_id=371152550]
 metadata/interaction = &"computer"
 
-[node name="Collision" type="CollisionShape3D" parent="Desk" unique_id=1695522219]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.42, 0)
-shape = SubResource("DeskShape")
+[node name="Table" parent="Desk" unique_id=861559109 instance=ExtResource("1_0uvmq")]
+transform = Transform3D(0.34, 0, 0, 0, 0.34, 0, 0, 0, 0.34, -0.05624777, 0.83369976, -0.07799637)
 
-[node name="Top" type="MeshInstance3D" parent="Desk" unique_id=929576115]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.78, 0)
-mesh = SubResource("DeskMesh")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Desk" unique_id=973147871]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9, 0.36, 0)
-mesh = SubResource("LegMesh")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Desk" unique_id=1905052295]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 0.36, 0)
-mesh = SubResource("LegMesh")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Desk" unique_id=648913281]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.059127808, 0.7107849, -0.08276367)
+shape = SubResource("BoxShape3D_cn8qd")
 
 [node name="Monitor" type="StaticBody3D" parent="." unique_id=752757112]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
 metadata/interaction = &"computer"
-
-[node name="Mesh" type="MeshInstance3D" parent="Monitor" unique_id=520321584]
-mesh = SubResource("MonitorMesh")
-
-[node name="Collision" type="CollisionShape3D" parent="Monitor" unique_id=1521567637]
-shape = SubResource("MonitorShape")
-
-[node name="Screen" type="MeshInstance3D" parent="Monitor" unique_id=1659555064]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.199)
-mesh = SubResource("ScreenMesh")
 
 [node name="ScreenText" type="Label3D" parent="Monitor" unique_id=1100356091]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.211)
 pixel_size = 0.0035
 modulate = Color(0.55, 0.85, 0.65, 1)
 
+[node name="Laptop" parent="Monitor" unique_id=1950824150 instance=ExtResource("2_m4hbx")]
+transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -0.06313181, -0.21815467, -0.025436044)
+
 [node name="Stand" type="MeshInstance3D" parent="." unique_id=2076111737]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 mesh = SubResource("StandMesh")
 
-[node name="Keyboard" type="MeshInstance3D" parent="." unique_id=827537520]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.86, 0.28)
-mesh = SubResource("KeyboardMesh")
-
 [node name="Chair" type="StaticBody3D" parent="." unique_id=142859498]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 1.1)
 
-[node name="Mesh" type="MeshInstance3D" parent="Chair" unique_id=147677528]
-mesh = SubResource("ChairMesh")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Chair" unique_id=1471078740]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.10046387, 0.13461304, -0.21960449)
+shape = SubResource("BoxShape3D_8fjlh")
 
-[node name="Collision" type="CollisionShape3D" parent="Chair" unique_id=403686816]
-shape = SubResource("ChairShape")
-
-[node name="Back" type="MeshInstance3D" parent="Chair" unique_id=1523536568]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.26)
-mesh = SubResource("ChairBackMesh")
+[node name="Stool" parent="Chair" unique_id=845977854 instance=ExtResource("3_171q7")]
+transform = Transform3D(0.40500006, 0, 0, 0, 0.40500006, 0, 0, 0, 0.40500006, -0.09008765, 0.29345757, -0.22623563)
 
 [node name="SeatView" type="Marker3D" parent="." unique_id=1574100457]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 1.1)

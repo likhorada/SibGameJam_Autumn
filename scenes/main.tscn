@@ -1,16 +1,16 @@
 [gd_scene format=3 uid="uid://bu88m2er72nj5"]
 
 [ext_resource type="Script" uid="uid://6pjn4n14wy7j" path="res://scripts/main.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/apartment/apartment.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://bsp5412cgk3p7" path="res://scenes/apartment/apartment.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="3"]
 [ext_resource type="PackedScene" uid="uid://bp1xoeo2obebg" path="res://scenes/terminal/terminal.tscn" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/ui/terminal_ui.tscn" id="5"]
 [ext_resource type="PackedScene" uid="uid://c2vkdvmmj8wf0" path="res://scenes/ui/hud.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/cctv/cctv_system.tscn" id="7"]
-[ext_resource type="Script" path="res://scripts/power/power_system.gd" id="Power"]
-[ext_resource type="Script" path="res://scripts/ui/dev_menu.gd" id="Dev"]
-[ext_resource type="Script" path="res://scripts/threats/threat_manager.gd" id="Threats"]
-[ext_resource type="Script" path="res://scripts/visual_effects.gd" id="Effects"]
+[ext_resource type="Script" uid="uid://bsk4vm5r2bwgn" path="res://scripts/ui/dev_menu.gd" id="Dev"]
+[ext_resource type="Script" uid="uid://d0343pmrd0gt1" path="res://scripts/visual_effects.gd" id="Effects"]
+[ext_resource type="Script" uid="uid://celsk1d7vjyh0" path="res://scripts/power/power_system.gd" id="Power"]
+[ext_resource type="Script" uid="uid://bm21dj3gdo2d3" path="res://scripts/threats/threat_manager.gd" id="Threats"]
 
 [node name="Main" type="Node3D" unique_id=309523320]
 script = ExtResource("1")
@@ -37,14 +37,14 @@ visible = false
 
 [node name="CCTVSystem" parent="." unique_id=1557007587 instance=ExtResource("7")]
 
-[node name="PowerSystem" type="Node" parent="."]
+[node name="PowerSystem" type="Node" parent="." unique_id=86837562]
 script = ExtResource("Power")
 
-[node name="DevMenu" type="CanvasLayer" parent="."]
+[node name="DevMenu" type="CanvasLayer" parent="." unique_id=975757007]
 script = ExtResource("Dev")
 
-[node name="ThreatManager" type="Node" parent="."]
+[node name="ThreatManager" type="Node" parent="." unique_id=41680974]
 script = ExtResource("Threats")
 
-[node name="VisualEffects" type="Node" parent="."]
+[node name="VisualEffects" type="Node" parent="." unique_id=1475374138]
 script = ExtResource("Effects")
