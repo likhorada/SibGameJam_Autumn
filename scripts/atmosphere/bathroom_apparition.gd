@@ -2,6 +2,7 @@ class_name BathroomApparition
 extends Node3D
 ## A decoration, not an enemy. No collision, AI, capture, proximity pulse or damage.
 signal dismissed(reason: StringName)
+const SEEN_HOLD_SECONDS: float = 0.5
 const SAMPLES: Array[Vector3] = [
 	Vector3(0, 1.65, 0), Vector3(0, 1.3, 0),
 	Vector3(-0.22, 1.4, 0), Vector3(0.22, 1.4, 0),
@@ -16,6 +17,7 @@ var visible_in_physics: bool = false
 var _ended: bool = false
 var _visible_points: Array[Vector3] = []
 var _sample_origin := Vector3.ZERO
+var seen_seconds_left: float = -1.0
 
 
 func _ready() -> void:
@@ -71,10 +73,17 @@ static func in_frustum(camera: Camera3D, pose: Transform3D) -> bool:
 	return false
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	visible_in_physics = false
 	_visible_points.clear()
-	if _ended or not world_view_visible(game):
+	if _ended:
+		return
+	if seen_seconds_left >= 0.0:
+		seen_seconds_left = maxf(0.0, seen_seconds_left - maxf(0.0, delta))
+		if seen_seconds_left <= 0.0:
+			dismiss(&"seen")
+		return
+	if not world_view_visible(game):
 		return
 	var camera := game.get_viewport().get_camera_3d()
 	if camera == null:
@@ -89,6 +98,8 @@ func _physics_process(_delta: float) -> void:
 
 func _on_frame_post_draw() -> void:
 	# Never remove before the first real apartment frame that actually presented it.
+	if _ended or seen_seconds_left >= 0.0:
+		return
 	if visible_in_physics and world_view_visible(game) and visual.is_visible_in_tree() and game.visual_effects.viewport.render_target_update_mode != SubViewport.UPDATE_DISABLED:
 		var camera := game.get_viewport().get_camera_3d()
 		# Mouse smoothing/tweens may change the camera after the physics sample.
@@ -96,7 +107,7 @@ func _on_frame_post_draw() -> void:
 			return
 		for target: Vector3 in _visible_points:
 			if camera.is_position_in_frustum(target):
-				dismiss(&"seen")
+				seen_seconds_left = SEEN_HOLD_SECONDS
 				return
 
 

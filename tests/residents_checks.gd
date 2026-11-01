@@ -200,8 +200,20 @@ func _run() -> void:
 		expect(residents.figure == figure, "A camera turn after physics cannot confirm an off-screen render")
 		aim(Vector3(0, 1.6, 0), point + Vector3.UP * 1.3, deg_to_rad(50))
 		figure._on_frame_post_draw()
+		expect(residents.figure == figure, "First glimpse starts hold instead of removing figure")
+		figure._physics_process(0.49)
+		expect(residents.figure == figure, "Figure remains for almost half a second")
+		aim(Vector3(0, 1.6, 0), Vector3(0, 1.6, -10))
+		figure._physics_process(0.02)
+	else:
+		await frames()
+		expect(residents.figure == figure and figure.seen_seconds_left > 0, "Rendered glimpse latches half-second hold")
+		await get_tree().create_timer(0.2).timeout
+		expect(residents.figure == figure, "Rendered figure does not vanish immediately")
+		await get_tree().create_timer(0.35).timeout
 	await frames()
-	expect(not is_instance_valid(residents.figure), "First rendered peripheral glimpse removes figure")
+	expect(not is_instance_valid(residents.figure), "Figure disappears half a second after glimpse, without requiring continued sight")
+	aim(Vector3(0, 1.6, 0), point + Vector3.UP * 1.3, deg_to_rad(50))
 	await capture("peripheral_empty")
 
 	aim(Vector3(0, 1.6, 0), point + Vector3.UP * 1.3)
