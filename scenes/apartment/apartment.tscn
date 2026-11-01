@@ -1,10 +1,10 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://bsp5412cgk3p7"]
 
+[ext_resource type="PackedScene" path="res://scenes/apartment/corridor_encounters.tscn" id="CorridorEncounters"]
 [ext_resource type="PackedScene" path="res://scenes/power/fusebox.tscn" id="Fusebox"]
 [ext_resource type="PackedScene" path="res://assets/models/Shitok.glb" id="Shitok"]
-[ext_resource type="PackedScene" path="res://scenes/apartment/room_door.tscn" id="RoomDoor"]
 [ext_resource type="PackedScene" path="res://scenes/apartment/hiding_spots.tscn" id="HidingSpots"]
-[ext_resource type="PackedScene" path="res://scenes/apartment/corridor_encounters.tscn" id="CorridorEncounters"]
+[ext_resource type="PackedScene" path="res://scenes/apartment/room_door.tscn" id="RoomDoor"]
 [ext_resource type="PackedScene" path="res://scenes/apartment/wardrobe_shell.tscn" id="WardrobeShell"]
 
 [sub_resource type="Environment" id="Environment"]
@@ -226,10 +226,6 @@ size = Vector3(0.2, 2.8, 0.4)
 [sub_resource type="BoxShape3D" id="BoxShape3D_q5mj5"]
 size = Vector3(0.2, 2.8, 0.4)
 
-[sub_resource type="BoxMesh" id="BoxMesh_mg67m"]
-material = SubResource("StandardMaterial3D_n5k1t")
-size = Vector3(1.5, 2.1, 0.65)
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_fh2xi"]
 size = Vector3(1.5, 2.1, 0.65)
 
@@ -244,12 +240,12 @@ size = Vector3(0.025, 2, 0.015)
 material = SubResource("StandardMaterial3D_n5k1t")
 size = Vector3(1.4, 0.16, 2.1)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_3entc"]
-size = Vector3(1.4, 0.16, 2.1)
-
 [sub_resource type="BoxMesh" id="BedLeg"]
 material = SubResource("StandardMaterial3D_n5k1t")
 size = Vector3(0.1, 0.4, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_3entc"]
+size = Vector3(1.4, 0.16, 2.1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pxk46"]
 albedo_color = Color(0.55, 0.56, 0.47, 1)
@@ -361,26 +357,26 @@ size = Vector3(0.35, 0.07, 0.35)
 
 [node name="Apartment" type="Node3D" unique_id=1269526120]
 
-[node name="RoomDoor" parent="." instance=ExtResource("RoomDoor")]
-position = Vector3(3, 0, 1.1)
+[node name="RoomDoor" parent="." unique_id=1905430843 instance=ExtResource("RoomDoor")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 1.1)
 
-[node name="HidingSpots" parent="." instance=ExtResource("HidingSpots")]
+[node name="HidingSpots" parent="." unique_id=1561367029 instance=ExtResource("HidingSpots")]
 
-[node name="CorridorEncounters" parent="." instance=ExtResource("CorridorEncounters")]
+[node name="CorridorEncounters" parent="." unique_id=238502113 instance=ExtResource("CorridorEncounters")]
 
-[node name="PoliceRoute" type="Node3D" parent="."]
+[node name="PoliceRoute" type="Node3D" parent="." unique_id=1057855856]
 
-[node name="Entry" type="Marker3D" parent="PoliceRoute"]
-position = Vector3(3.9, 0, 1.1)
+[node name="Entry" type="Marker3D" parent="PoliceRoute" unique_id=1431341415]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9, 0, 1.1)
 
-[node name="MainRoom" type="Marker3D" parent="PoliceRoute"]
-position = Vector3(1.2, 0, 1.1)
+[node name="MainRoom" type="Marker3D" parent="PoliceRoute" unique_id=2072442760]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0, 1.1)
 
-[node name="BedroomDoor" type="Marker3D" parent="PoliceRoute"]
-position = Vector3(1.2, 0, 3.4)
+[node name="BedroomDoor" type="Marker3D" parent="PoliceRoute" unique_id=2100723045]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0, 3.4)
 
-[node name="Bedside" type="Marker3D" parent="PoliceRoute"]
-position = Vector3(-0.35, 0, 4.6)
+[node name="Bedside" type="Marker3D" parent="PoliceRoute" unique_id=459945578]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, 0, 4.6)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1489028802]
 environment = SubResource("Environment")
@@ -542,14 +538,13 @@ shape = SubResource("BoxShape3D_vqbvf")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, -0.1, -1.1)
 mesh = SubResource("BoxMesh_8kk10")
 
-[node name="BathroomApparitionPoint" type="Marker3D" parent="."]
-position = Vector3(-4.15, 0.02, -0.55)
-rotation = Vector3(0, -1.5707963, 0)
-
 [node name="@StaticBody3D@37" type="StaticBody3D" parent="BathroomFloor" unique_id=919999615]
 
 [node name="@CollisionShape3D@36" type="CollisionShape3D" parent="BathroomFloor/@StaticBody3D@37" unique_id=1242555304]
 shape = SubResource("BoxShape3D_jefm1")
+
+[node name="BathroomApparitionPoint" type="Marker3D" parent="." unique_id=1522524042]
+transform = Transform3D(7.54979e-08, 0, -1, 0, 1, 0, 1, 0, 7.54979e-08, -4.15, 0.02, -0.55)
 
 [node name="BathroomCeiling" type="MeshInstance3D" parent="." unique_id=1560385329]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.9, -1.1)
@@ -653,7 +648,7 @@ shape = SubResource("BoxShape3D_q5mj5")
 [node name="Wardrobe" type="Node3D" parent="." unique_id=118096849]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.85, 1.05, 2.55)
 
-[node name="Shell" parent="Wardrobe" instance=ExtResource("WardrobeShell")]
+[node name="Shell" parent="Wardrobe" unique_id=1937246818 instance=ExtResource("WardrobeShell")]
 
 [node name="@StaticBody3D@61" type="StaticBody3D" parent="Wardrobe" unique_id=855702285]
 metadata/interaction = &"hide_wardrobe"
@@ -670,20 +665,20 @@ mesh = SubResource("BoxMesh_rouoy")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 0.47, 5.1)
 mesh = SubResource("BoxMesh_6japt")
 
-[node name="FrontLeftLeg" type="MeshInstance3D" parent="BedFrame"]
-position = Vector3(-0.57, -0.27, -0.9)
+[node name="FrontLeftLeg" type="MeshInstance3D" parent="BedFrame" unique_id=1480286452]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.57, -0.27, -0.9)
 mesh = SubResource("BedLeg")
 
-[node name="FrontRightLeg" type="MeshInstance3D" parent="BedFrame"]
-position = Vector3(0.57, -0.27, -0.9)
+[node name="FrontRightLeg" type="MeshInstance3D" parent="BedFrame" unique_id=1804065773]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.57, -0.27, -0.9)
 mesh = SubResource("BedLeg")
 
-[node name="BackLeftLeg" type="MeshInstance3D" parent="BedFrame"]
-position = Vector3(-0.57, -0.27, 0.9)
+[node name="BackLeftLeg" type="MeshInstance3D" parent="BedFrame" unique_id=816525909]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.57, -0.27, 0.9)
 mesh = SubResource("BedLeg")
 
-[node name="BackRightLeg" type="MeshInstance3D" parent="BedFrame"]
-position = Vector3(0.57, -0.27, 0.9)
+[node name="BackRightLeg" type="MeshInstance3D" parent="BedFrame" unique_id=6757668]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.57, -0.27, 0.9)
 mesh = SubResource("BedLeg")
 
 [node name="@StaticBody3D@63" type="StaticBody3D" parent="BedFrame" unique_id=1128782826]
@@ -799,34 +794,13 @@ metadata/interaction = &"fusebox"
 [node name="@CollisionShape3D@83" type="CollisionShape3D" parent="Fusebox/@StaticBody3D@84" unique_id=1108602427]
 shape = SubResource("BoxShape3D_so762")
 
-[node name="Breakers" parent="Fusebox" instance=ExtResource("Fusebox")]
-position = Vector3(0, 0, 0.14)
+[node name="Breakers" parent="Fusebox" unique_id=109490465 instance=ExtResource("Fusebox")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.14)
 
 [node name="FuseboxStripe" type="MeshInstance3D" parent="." unique_id=818213549]
-visible = false
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 1.55, -6.695)
+visible = false
 mesh = SubResource("BoxMesh_6dsm6")
-
-[node name="FuseboxLabel" type="Label3D" parent="." unique_id=772935765]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 2.15, -6.65)
-pixel_size = 0.008
-modulate = Color(0.8, 0.8, 0.65, 1)
-text = "FUSEBOX"
-font_size = 28
-
-[node name="BathroomLabel" type="Label3D" parent="." unique_id=530287518]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -2.88, 2.35, -0.5)
-pixel_size = 0.008
-modulate = Color(0.8, 0.8, 0.65, 1)
-text = "САНУЗЕЛ"
-font_size = 28
-
-[node name="BedroomLabel" type="Label3D" parent="." unique_id=203747720]
-transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1.2, 2.35, 2.88)
-pixel_size = 0.008
-modulate = Color(0.8, 0.8, 0.65, 1)
-text = "СПАЛЬНЯ"
-font_size = 28
 
 [node name="RoomLight" type="OmniLight3D" parent="." unique_id=1404029415]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.55, 0)
