@@ -18,6 +18,14 @@ func _run() -> void:
 	root.add_child(menu)
 	current_scene = menu
 	await process_frame
+	var music: AudioStreamPlayer = menu.get_node("MenuMusic")
+	var music_ref: WeakRef = weakref(music)
+	expect(music.playing and music.stream.resource_path == "res://assets/audio/main_menu.wav", "Menu starts the authored music")
+	expect((music.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_FORWARD, "Menu music is imported as a forward loop")
+	expect(music.bus == &"Ambience", "Menu music uses the master-controlled ambience bus")
+	music.play(music.stream.get_length() - 0.05)
+	await create_timer(0.2).timeout
+	expect(music.playing, "Menu music continues beyond the loop boundary")
 	expect(menu.intro.visible and not menu.menu.visible, "Intro is shown first")
 	expect(menu.get_node("Background").viewport.get_child_count() == 1, "Only one background instantiated")
 	menu._finish_intro()
@@ -42,6 +50,7 @@ func _run() -> void:
 	menu._open_panel(false)
 	expect(menu.credits.visible and not menu.settings.visible, "Credits panel")
 	menu._close_panel()
+	expect(music.playing, "Menu music continues through settings and credits")
 	if DisplayServer.get_name() != "headless":
 		await create_timer(0.5).timeout
 		await RenderingServer.frame_post_draw
@@ -57,6 +66,7 @@ func _run() -> void:
 		expect(current_scene.power._screen != null, "Power system resolves the laptop screen mesh")
 		expect(is_equal_approx(current_scene.player.mouse_sensitivity, 0.003), "Sensitivity applied to player")
 		expect(root.find_children("Background", "TextureRect", true, false).is_empty(), "Menu background freed")
+		expect(music_ref.get_ref() == null, "Menu music player is freed when gameplay starts")
 		await physics_frame
 		expect(current_scene.hint.text == "Нажми ЛКМ, чтобы осмотреться", "Gameplay hint uses saved Russian locale")
 		expect(current_scene.terminal_ui.start_button.text == "Пуск", "Desktop start button localized")

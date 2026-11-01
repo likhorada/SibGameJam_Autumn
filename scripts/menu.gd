@@ -21,6 +21,9 @@ var loading: bool = false
 var _return_focus: Control
 var title: Label
 
+func _exit_tree() -> void:
+	$MenuMusic.stop()
+
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_build_theme()

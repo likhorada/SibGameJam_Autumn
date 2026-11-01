@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/menu.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/menu/backgrounds/shop.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/menu/backgrounds/yard.tscn" id="3"]
 [ext_resource type="Script" path="res://scripts/menu_background.gd" id="4"]
+[ext_resource type="AudioStream" path="res://assets/audio/main_menu.wav" id="5"]
 
 [node name="Menu" type="Control"]
 layout_mode = 3
@@ -13,6 +14,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
+
+[node name="MenuMusic" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5")
+volume_db = -12.0
+autoplay = true
+bus = &"Ambience"
 
 [node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
