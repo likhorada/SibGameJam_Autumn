@@ -5,6 +5,7 @@ extends Node
 
 const NOISE := preload("res://assets/audio/ambient_noise.wav")
 const NEAR_NOISE := preload("res://assets/audio/ambient_noise2.wav")
+const SUSPENSE := preload("res://assets/audio/creep_suspence.wav")
 const EVENT_STREAMS: Array[AudioStream] = [
 	preload("res://assets/audio/scratchin1.wav"),
 	preload("res://assets/audio/scratchin2.wav"),
@@ -27,12 +28,15 @@ const MUTE_DB: float = -60.0
 @export_range(0.2, 120.0) var random_min_interval: float = 10.0
 @export_range(0.2, 180.0) var random_max_interval: float = 20.0
 @export var random_volume_db: float = -10.0
+@export_group("Threat suspense")
+@export var suspense_volume_db: float = -12.0
 
 var game: Node3D
 var powered: bool = true
 var noise_audio: AudioStreamPlayer
 var near_audio: AudioStreamPlayer
 var event_audio: AudioStreamPlayer
+var suspense_audio: AudioStreamPlayer
 var _rng := RandomNumberGenerator.new()
 var _event_left: float = 0.0
 
@@ -51,6 +55,9 @@ func bind(value: Node3D) -> void:
 	event_audio.bus = &"SFX"
 	event_audio.volume_db = random_volume_db
 	add_child(event_audio)
+	suspense_audio = _make_player(SUSPENSE)
+	suspense_audio.bus = &"Ambience"
+	suspense_audio.volume_db = MUTE_DB
 	_schedule_event()
 	# Both loops start silent and are faded in by _process where appropriate.
 	noise_audio.play()
@@ -91,7 +98,22 @@ func _process(delta: float) -> void:
 	if game.threats.is_busy():
 		near_target -= 10.0
 	_fade(near_audio, near_target, delta, near_volume_db)
+	_fade(suspense_audio, suspense_volume_db if _is_hunting() else MUTE_DB, delta, suspense_volume_db)
 	_tick_events(delta)
+
+
+func _is_hunting() -> bool:
+	if game.run_ended or not game.capture_reason.is_empty():
+		return false
+	if is_instance_valid(game.neighbor) and game.neighbor.visit == PsychNeighbor.Visit.SEARCHING:
+		return true
+	if is_instance_valid(game.police) and game.police.visit == PoliceRaid.Visit.SEARCHING:
+		return true
+	return (
+		is_instance_valid(game.outage)
+		and is_instance_valid(game.outage.entity)
+		and game.outage.entity.phase == CorridorEntity.Phase.ACTIVE
+	)
 
 
 func _near_target_db() -> float:
@@ -136,6 +158,6 @@ func _tick_events(delta: float) -> void:
 
 func stop_all() -> void:
 	powered = false
-	for player: AudioStreamPlayer in [noise_audio, near_audio, event_audio]:
+	for player: AudioStreamPlayer in [noise_audio, near_audio, event_audio, suspense_audio]:
 		if player != null:
 			player.stop()

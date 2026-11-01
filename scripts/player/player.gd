@@ -17,6 +17,7 @@ var is_sprinting: bool = false
 var _pending_look := Vector2.ZERO
 var _motion_velocity := Vector3.ZERO
 var _motion_acceleration := Vector3.ZERO
+var exhaustion_audio: AudioStreamPlayer
 
 @onready var head: Node3D = $Head
 @onready var camera_motion: PlayerCameraMotion = $Head/CameraMotion
@@ -26,6 +27,18 @@ var _motion_acceleration := Vector3.ZERO
 
 func _ready() -> void:
 	mouse_sensitivity = get_node("/root/Preferences").sensitivity
+	exhaustion_audio = AudioStreamPlayer.new()
+	exhaustion_audio.name = "ExhaustionAudio"
+	exhaustion_audio.bus = &"SFX"
+	exhaustion_audio.stream = preload("res://assets/audio/exausted.wav")
+	exhaustion_audio.volume_db = -6.0
+	add_child(exhaustion_audio)
+	stamina.became_exhausted.connect(_play_exhaustion_sound)
+
+
+func _play_exhaustion_sound() -> void:
+	if is_instance_valid(exhaustion_audio):
+		exhaustion_audio.play()
 
 
 func _unhandled_input(event: InputEvent) -> void:

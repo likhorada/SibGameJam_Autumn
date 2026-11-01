@@ -185,6 +185,8 @@ func _run() -> void:
 	await capture("silhouette")
 	manager.advance(3.0)
 	expect(not game.run_ended and neighbor.visit == PsychNeighbor.Visit.SEARCHING, "Open door starts search without killing corridor player")
+	game.ambient._process(0.1)
+	expect(game.ambient.suspense_audio.playing, "Neighbor search starts shared pursuit suspense")
 	game.player.position = Vector3(0, 0.03, 1.1)
 	neighbor.visual.global_position = Vector3(1.4, 0, 1.1)
 	neighbor.visual.look_at(Vector3(0, 0, 1.1), Vector3.UP)

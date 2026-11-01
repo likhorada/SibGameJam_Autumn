@@ -106,6 +106,31 @@ func danger_window(settings: CorridorEntityConfig) -> void:
 	var entity: CorridorEntity = game.outage.entity
 	game.threats.advance(entity.warning_duration + 0.02)
 	expect(entity.phase == CorridorEntity.Phase.ACTIVE, "Warning turns into the danger window")
+	game.ambient._process(0.1)
+	expect(
+		game.ambient.suspense_audio.playing
+		and game.ambient.suspense_audio.stream.resource_path == "res://assets/audio/creep_suspence.wav",
+		"Monster active phase starts shared pursuit suspense",
+	)
+	expect(
+		(game.ambient.suspense_audio.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_FORWARD,
+		"Pursuit suspense loops while the hunt is active",
+	)
+	var player_position: Vector3 = game.player.global_position
+	game.player.global_position = entity.global_position + Vector3(0.0, 0.0, 1.0)
+	entity._near_sound_left = 0.0
+	entity._tick_near_sounds(0.01)
+	expect(
+		entity.near_audio.playing
+		and entity.near_audio.stream.resource_path in [
+			"res://assets/audio/creep_laugh.wav",
+			"res://assets/audio/creep_ulost.wav",
+			"res://assets/audio/creep_ulost_pitched.wav",
+		],
+		"Nearby monster plays a random non-suspense creep voice",
+	)
+	game.player.global_position = player_position
+	entity._last_player_position = player_position
 	expect(entity.duration >= settings.min_encounter_seconds and entity.duration <= settings.max_encounter_seconds, "Danger lasts a random 3-5 seconds")
 	expect(entity.footsteps_audio.playing and not entity.warning_audio.playing, "Footsteps replace the warning")
 
@@ -147,6 +172,8 @@ func _run() -> void:
 		game.threats.advance(0.2)
 	game.threats.advance(settings.retreat_seconds)
 	expect(entity.phase == CorridorEntity.Phase.WAITING and not game.run_ended, "Freezing without the beam survives the window")
+	game.ambient._process(1.0)
+	expect(not game.ambient.suspense_audio.playing, "Pursuit suspense stops after the monster leaves")
 	expect(entity.repeat_left >= settings.min_repeat_seconds and entity.repeat_left <= settings.max_repeat_seconds, "The next encounter waits 15-25 seconds")
 	expect(not entity.footsteps_audio.playing and entity.departure_audio.playing and not entity.visual.visible, "Departure plays and cleans the figure")
 	await capture("passed")
