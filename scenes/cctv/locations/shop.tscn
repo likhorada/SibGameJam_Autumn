@@ -1,97 +1,232 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene format=3 uid="uid://c031a6wtjr7dk"]
 
 [ext_resource type="PackedScene" path="res://scenes/cctv/cctv_camera.tscn" id="1"]
+[ext_resource type="Texture2D" uid="uid://c5hnwepejwbod" path="res://assets/textures/ShelfShopTex.png" id="1_xq3dm"]
 [ext_resource type="PackedScene" path="res://scenes/cctv/locations/test_mannequin.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://cvsnip5isja56" path="res://assets/models/KSO.glb" id="4_oy2o1"]
+[ext_resource type="PackedScene" uid="uid://b8soj6kc28dm0" path="res://assets/models/Pumpkin.glb" id="5_tc0bc"]
+[ext_resource type="PackedScene" uid="uid://dr015viqdhp3k" path="res://assets/models/Cigarettes_final.glb" id="6_o4k77"]
+[ext_resource type="PackedScene" uid="uid://xj2rxkk58mga" path="res://assets/models/Jin_final.glb" id="7_6lbnd"]
+[ext_resource type="PackedScene" uid="uid://yjnt8034rd63" path="res://assets/models/Vodka_final.glb" id="8_v4ps1"]
+[ext_resource type="PackedScene" uid="uid://cprvkx8tc70mq" path="res://assets/models/Vodka.glb" id="9_ba0s3"]
 
 [sub_resource type="StandardMaterial3D" id="FloorMat"]
 albedo_color = Color(0.33, 0.35, 0.3, 1)
+
+[sub_resource type="BoxMesh" id="Floor"]
+material = SubResource("FloorMat")
+size = Vector3(12, 0.15, 10)
+
 [sub_resource type="StandardMaterial3D" id="WallMat"]
 albedo_color = Color(0.62, 0.6, 0.43, 1)
-[sub_resource type="StandardMaterial3D" id="CounterMat"]
-albedo_color = Color(0.27, 0.34, 0.33, 1)
+
+[sub_resource type="BoxMesh" id="BackWall"]
+material = SubResource("WallMat")
+size = Vector3(12, 4, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oy2o1"]
+albedo_texture = ExtResource("1_xq3dm")
+uv1_scale = Vector3(8.87, 5.68, 1)
+uv1_offset = Vector3(0, 0.195, 0)
+texture_filter = 4
+
+[sub_resource type="BoxMesh" id="BoxMesh_lu04c"]
+material = SubResource("StandardMaterial3D_oy2o1")
+size = Vector3(3, 1.8, 0.001)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cn8qd"]
+albedo_color = Color(0, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_8fjlh"]
+material = SubResource("StandardMaterial3D_cn8qd")
+size = Vector3(2.9830322, 1.7967224, 0.6879883)
+
 [sub_resource type="StandardMaterial3D" id="Red"]
 albedo_color = Color(0.8, 0.1, 0.06, 1)
+
+[sub_resource type="BoxMesh" id="RedBox"]
+material = SubResource("Red")
+size = Vector3(0.35, 0.45, 0.3)
+
 [sub_resource type="StandardMaterial3D" id="Blue"]
 albedo_color = Color(0.06, 0.2, 0.7, 1)
-[sub_resource type="BoxMesh" id="Floor"]
-size = Vector3(12, 0.15, 10)
-material = SubResource("FloorMat")
-[sub_resource type="BoxMesh" id="BackWall"]
-size = Vector3(12, 4, 0.2)
-material = SubResource("WallMat")
-[sub_resource type="BoxMesh" id="Shelf"]
-size = Vector3(3, 1.8, 0.7)
-material = SubResource("CounterMat")
-[sub_resource type="BoxMesh" id="Counter"]
-size = Vector3(3, 1, 1)
-material = SubResource("CounterMat")
-[sub_resource type="BoxMesh" id="RedBox"]
-size = Vector3(0.35, 0.45, 0.3)
-material = SubResource("Red")
+
 [sub_resource type="BoxMesh" id="BlueBox"]
-size = Vector3(0.3, 0.3, 0.3)
 material = SubResource("Blue")
+size = Vector3(0.3, 0.3, 0.3)
 
-[node name="Shop" type="Node3D"]
+[node name="Shop" type="Node3D" unique_id=844437319]
 
-[node name="Floor" type="MeshInstance3D" parent="."]
+[node name="Floor" type="MeshInstance3D" parent="." unique_id=1739523737]
 mesh = SubResource("Floor")
-[node name="BackWall" type="MeshInstance3D" parent="."]
-position = Vector3(0, 2, -5)
+
+[node name="BackWall" type="MeshInstance3D" parent="." unique_id=334434212]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -5)
 mesh = SubResource("BackWall")
-[node name="ShelfLeft" type="MeshInstance3D" parent="."]
-position = Vector3(-3.5, 0.95, -3.7)
-mesh = SubResource("Shelf")
-[node name="ShelfRight" type="MeshInstance3D" parent="."]
-position = Vector3(3.5, 0.95, -3.7)
-mesh = SubResource("Shelf")
-[node name="Counter" type="MeshInstance3D" parent="."]
-position = Vector3(2, 0.55, -0.8)
-mesh = SubResource("Counter")
-[node name="RedPackage" type="MeshInstance3D" parent="."]
-position = Vector3(1.5, 1.28, -0.8)
+
+[node name="ShelfLeft" type="MeshInstance3D" parent="." unique_id=565794120]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0.95, -3.3505)
+mesh = SubResource("BoxMesh_lu04c")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ShelfLeft" unique_id=1448826466]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0048589706, -0.00072711706, -0.35234094)
+mesh = SubResource("BoxMesh_8fjlh")
+
+[node name="ShelfLeft" type="MeshInstance3D" parent="ShelfLeft" unique_id=1107413598]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.070011, 0.03005296, -0.007025242)
+mesh = SubResource("BoxMesh_lu04c")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ShelfLeft/ShelfLeft" unique_id=1758807649]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0048589706, -0.00072711706, -0.35234094)
+mesh = SubResource("BoxMesh_8fjlh")
+
+[node name="RedPackage" type="MeshInstance3D" parent="." unique_id=120020824]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1.28, -0.8)
 mesh = SubResource("RedBox")
-[node name="BluePackage" type="MeshInstance3D" parent="."]
-position = Vector3(2.3, 1.2, -0.8)
+
+[node name="BluePackage" type="MeshInstance3D" parent="." unique_id=552789882]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3, 1.2, -0.8)
 mesh = SubResource("BlueBox")
-[node name="RedShelfPackage" type="MeshInstance3D" parent="."]
-position = Vector3(-4, 2.08, -3.7)
-mesh = SubResource("RedBox")
-[node name="BlueShelfPackage" type="MeshInstance3D" parent="."]
-position = Vector3(3.6, 2, -3.7)
-mesh = SubResource("BlueBox")
-[node name="Sign" type="Label3D" parent="."]
-position = Vector3(0, 2.8, -4.85)
-text = "NIGHT SHOP / 24"
-font_size = 64
+
+[node name="Sign" type="Label3D" parent="." unique_id=827619891]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, -4.85)
 pixel_size = 0.012
 modulate = Color(0.85, 0.2, 0.08, 1)
-[node name="Price" type="Label3D" parent="."]
-position = Vector3(2, 0.85, -0.285)
+text = "NIGHT SHOP / 24"
+font_size = 64
+
+[node name="Price" type="Label3D" parent="." unique_id=581388204]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.85, -0.285)
 text = "RICE 42 / TEA 17"
-font_size = 32
-pixel_size = 0.005
-[node name="Light" type="OmniLight3D" parent="."]
-position = Vector3(0, 3.8, 0)
+
+[node name="Light" type="OmniLight3D" parent="." unique_id=1845978555]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8, 0)
 light_color = Color(0.95, 0.91, 0.75, 1)
 light_energy = 2.0
 omni_range = 12.0
-[node name="Visitor" parent="." instance=ExtResource("2")]
-position = Vector3(-3, 0.08, -1.8)
-travel = Vector3(4, 0, 0)
-[node name="ShopWide" parent="." instance=ExtResource("1")]
-position = Vector3(-4.8, 3.2, 4.3)
-rotation_degrees = Vector3(-17, -31, 0)
+
+[node name="Visitor" parent="." unique_id=528488563 instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.08, -1.8)
+
+[node name="ShopWide" parent="." unique_id=1198699987 instance=ExtResource("1")]
+transform = Transform3D(0.8571673, 0.15058255, -0.4925334, 0, 0.9563048, 0.2923717, 0.5150381, -0.25061145, 0.8197132, -4.8, 3.2, 4.3)
 camera_id = &"shop_wide"
 display_name = "CAM-01 / ЗАЛ"
 location_label = "01 / МАГАЗИН"
-list_order = 0
-[node name="Checkout" parent="." instance=ExtResource("1")]
-position = Vector3(4.8, 2.8, 3.2)
-rotation_degrees = Vector3(-20, 33, 0)
+
+[node name="Checkout" parent="." unique_id=761074794 instance=ExtResource("1")]
+transform = Transform3D(0.83867055, -0.18627751, 0.5117933, 0, 0.9396926, 0.34202012, -0.54463905, -0.2868422, 0.78809255, 4.8, 2.8, 3.2)
 camera_id = &"shop_checkout"
 display_name = "CAM-02 / КАССА"
 location_label = "01 / МАГАЗИН"
 list_order = 1
 monochrome = true
 has_microphone = true
+
+[node name="KSO" parent="." unique_id=495361399 instance=ExtResource("4_oy2o1")]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 1.9713458, 0.9055742, -0.6636803)
+
+[node name="Pumpkin" parent="." unique_id=1403772582 instance=ExtResource("5_tc0bc")]
+transform = Transform3D(0.09411831, 0, 0.10364238, 0, 0.14, 0, -0.10364238, 0, 0.09411831, -4.6826816, 1.986593, -3.666466)
+
+[node name="Pumpkin2" parent="." unique_id=818833163 instance=ExtResource("5_tc0bc")]
+transform = Transform3D(0.05992364, 0, 0.1265273, 0, 0.14, 0, -0.1265273, 0, 0.05992364, -4.4106646, 1.986593, -3.555237)
+
+[node name="Pumpkin3" parent="." unique_id=1458219561 instance=ExtResource("5_tc0bc")]
+transform = Transform3D(0.016324315, 0, 0.139045, 0, 0.13999999, 0, -0.139045, 0, 0.016324315, -4.4709005, 1.986593, -3.7860014)
+
+[node name="Pumpkin4" parent="." unique_id=1128970598 instance=ExtResource("5_tc0bc")]
+transform = Transform3D(-0.030543916, 0, 0.13662748, 0, 0.14, 0, -0.13662748, 0, -0.030543916, -2.594251, 1.986593, -3.535791)
+
+[node name="Pumpkin5" parent="." unique_id=1981774103 instance=ExtResource("5_tc0bc")]
+transform = Transform3D(-0.068943664, 0, 0.1218473, 0, 0.13999999, 0, -0.1218473, 0, -0.068943664, -2.346684, 1.986593, -3.694144)
+
+[node name="Pumpkin6" parent="." unique_id=1765586646 instance=ExtResource("5_tc0bc")]
+transform = Transform3D(-0.10428248, 0, 0.093408555, 0, 0.13999997, 0, -0.093408555, 0, -0.10428248, -2.5700388, 1.986593, -3.7777696)
+
+[node name="Cigarettes_final" parent="." unique_id=1617639572 instance=ExtResource("6_o4k77")]
+transform = Transform3D(-5.9010374e-09, 0, -0.135, 0, 0.135, 0, 0.135, 0, -5.9010374e-09, -3.4923625, 2.0013921, -3.9038377)
+
+[node name="Cigarettes_final2" parent="." unique_id=1895128764 instance=ExtResource("6_o4k77")]
+transform = Transform3D(-5.9010374e-09, 0, -0.135, 0, 0.135, 0, 0.135, 0, -5.9010374e-09, -3.41556, 2.0013921, -3.7753847)
+
+[node name="Cigarettes_final3" parent="." unique_id=1119837515 instance=ExtResource("6_o4k77")]
+transform = Transform3D(0.01347615, 0, -0.13432571, 0, 0.135, 0, 0.13432571, 0, 0.01347615, -3.6136158, 2.0013921, -3.6204283)
+
+[node name="Jin_final" parent="." unique_id=124695218 instance=ExtResource("7_6lbnd")]
+transform = Transform3D(0.006735196, 0, -0.10478376, 0, 0.105, 0, 0.10478376, 0, 0.006735196, 2.1827288, 1.9875193, -3.4761324)
+
+[node name="Jin_final3" parent="." unique_id=1940464785 instance=ExtResource("7_6lbnd")]
+transform = Transform3D(0.034340076, 0, -0.09922579, 0, 0.10499999, 0, 0.09922579, 0, 0.034340076, 2.6422365, 1.9875193, -3.4761324)
+
+[node name="Jin_final4" parent="." unique_id=2102507892 instance=ExtResource("7_6lbnd")]
+transform = Transform3D(0.035002194, 0, -0.098994166, 0, 0.10499999, 0, 0.098994166, 0, 0.035002194, 2.8774996, 1.9875193, -3.4761324)
+
+[node name="Jin_final5" parent="." unique_id=1216159303 instance=ExtResource("7_6lbnd")]
+transform = Transform3D(-0.060906496, 0, -0.0855301, 0, 0.10499999, 0, 0.0855301, 0, -0.060906496, 2.1827288, 1.9875193, -3.6878924)
+
+[node name="Jin_final6" parent="." unique_id=1827206280 instance=ExtResource("7_6lbnd")]
+transform = Transform3D(0.006735196, 0, -0.10478376, 0, 0.105, 0, 0.10478376, 0, 0.006735196, 2.4179919, 1.9875193, -3.6878924)
+
+[node name="Jin_final7" parent="." unique_id=1556072628 instance=ExtResource("7_6lbnd")]
+transform = Transform3D(0.006735196, 0, -0.10478376, 0, 0.105, 0, 0.10478376, 0, 0.006735196, 2.6422365, 1.9875193, -3.6698005)
+
+[node name="Jin_final8" parent="." unique_id=1801264987 instance=ExtResource("7_6lbnd")]
+transform = Transform3D(0.006735196, 0, -0.10478376, 0, 0.105, 0, 0.10478376, 0, 0.006735196, 2.925494, 1.9875193, -3.6878924)
+
+[node name="Jin_final9" parent="." unique_id=600124949 instance=ExtResource("7_6lbnd")]
+transform = Transform3D(0.06916207, 0, -0.07900385, 0, 0.10499999, 0, 0.07900385, 0, 0.06916207, 2.1827288, 1.9875193, -3.8928306)
+
+[node name="Jin_final10" parent="." unique_id=1948005104 instance=ExtResource("7_6lbnd")]
+transform = Transform3D(-0.039031524, 0, -0.097475834, 0, 0.10499999, 0, 0.097475834, 0, -0.039031524, 2.4179919, 1.9875193, -3.8928306)
+
+[node name="Jin_final11" parent="." unique_id=1127334377 instance=ExtResource("7_6lbnd")]
+transform = Transform3D(-0.04229511, 0, -0.09610475, 0, 0.10499999, 0, 0.09610475, 0, -0.04229511, 2.6422365, 1.9875193, -3.8928306)
+
+[node name="Jin_final12" parent="." unique_id=341268071 instance=ExtResource("7_6lbnd")]
+transform = Transform3D(0.006735196, 0, -0.10478376, 0, 0.105, 0, 0.10478376, 0, 0.006735196, 2.8774996, 1.9875193, -3.9209917)
+
+[node name="Vodka_final" parent="." unique_id=1883143794 instance=ExtResource("8_v4ps1")]
+transform = Transform3D(0.026101653, 0, 0.023317456, 0, 0.035, 0, -0.023317456, 0, 0.026101653, 3.222276, 2.3857532, -3.464138)
+
+[node name="Vodka_final2" parent="." unique_id=1668388828 instance=ExtResource("8_v4ps1")]
+transform = Transform3D(0.032943267, 0, -0.011821219, 0, 0.035, 0, 0.011821219, 0, 0.032943267, 3.4610267, 2.3857532, -3.4503906)
+
+[node name="Vodka_final5" parent="." unique_id=534527328 instance=ExtResource("8_v4ps1")]
+transform = Transform3D(0.026101653, 0, 0.023317456, 0, 0.035, 0, -0.023317456, 0, 0.026101653, 3.1919985, 2.3857532, -3.6359344)
+
+[node name="Vodka_final6" parent="." unique_id=1927134596 instance=ExtResource("8_v4ps1")]
+transform = Transform3D(0.032943267, 0, -0.011821219, 0, 0.035, 0, 0.011821219, 0, 0.032943267, 3.4409182, 2.3857532, -3.6359344)
+
+[node name="Vodka_final7" parent="." unique_id=483602091 instance=ExtResource("8_v4ps1")]
+transform = Transform3D(0.032052685, 0, 0.0140579315, 0, 0.035000004, 0, -0.0140579315, 0, 0.032052685, 3.6372344, 2.3857532, -3.61276)
+
+[node name="Vodka_final8" parent="." unique_id=350708120 instance=ExtResource("8_v4ps1")]
+transform = Transform3D(0.03290434, 0, -0.011929134, 0, 0.035000004, 0, 0.011929134, 0, 0.03290434, 3.9152591, 2.3857532, -3.6359344)
+
+[node name="Vodka_final9" parent="." unique_id=303646505 instance=ExtResource("8_v4ps1")]
+transform = Transform3D(0.026101653, 0, 0.023317456, 0, 0.035, 0, -0.023317456, 0, 0.026101653, 3.222276, 2.3857532, -3.8166654)
+
+[node name="Vodka_final10" parent="." unique_id=1122756857 instance=ExtResource("8_v4ps1")]
+transform = Transform3D(0.032943267, 0, -0.011821219, 0, 0.035, 0, 0.011821219, 0, 0.032943267, 3.4409182, 2.3857532, -3.8166654)
+
+[node name="Vodka_final11" parent="." unique_id=1989931912 instance=ExtResource("8_v4ps1")]
+transform = Transform3D(0.032052685, 0, 0.0140579315, 0, 0.035000004, 0, -0.0140579315, 0, 0.032052685, 3.6372344, 2.3857532, -3.8166654)
+
+[node name="Vodka_final12" parent="." unique_id=1082825274 instance=ExtResource("8_v4ps1")]
+transform = Transform3D(0.03290434, 0, -0.011929134, 0, 0.035000004, 0, 0.011929134, 0, 0.03290434, 3.8747594, 2.3857532, -3.8166654)
+
+[node name="Vodka4" parent="." unique_id=716360213 instance=ExtResource("9_ba0s3")]
+transform = Transform3D(0.029878706, 0, -0.0026949532, 0, 0.029999997, 0, 0.0026949532, 0, 0.029878706, 4.851861, 2.319177, -3.4680796)
+
+[node name="Vodka8" parent="." unique_id=1924367404 instance=ExtResource("9_ba0s3")]
+transform = Transform3D(0.022908635, 0, -0.01936993, 0, 0.029999997, 0, 0.01936993, 0, 0.022908635, 4.758703, 2.319177, -3.6354363)
+
+[node name="Vodka9" parent="." unique_id=1556753165 instance=ExtResource("9_ba0s3")]
+transform = Transform3D(0.029627701, 0, 0.00471159, 0, 0.029999997, 0, -0.00471159, 0, 0.029627701, 4.307578, 2.319177, -3.7355506)
+
+[node name="Vodka11" parent="." unique_id=1331874698 instance=ExtResource("9_ba0s3")]
+transform = Transform3D(0.022908635, 0, -0.01936993, 0, 0.029999997, 0, 0.01936993, 0, 0.022908635, 4.58833, 2.319177, -3.7910285)
+
+[node name="Vodka12" parent="." unique_id=1903710841 instance=ExtResource("9_ba0s3")]
+transform = Transform3D(0.022908635, 0, -0.01936993, 0, 0.029999997, 0, 0.01936993, 0, 0.022908635, 4.8547297, 2.319177, -3.7910285)

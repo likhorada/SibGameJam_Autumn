@@ -1,359 +1,339 @@
-[gd_scene load_steps=26 format=3]
+[gd_scene format=3 uid="uid://c7u2yx85ktp5"]
 
-[ext_resource type="Script" path="res://scripts/cctv/street_location.gd" id="script"]
-[ext_resource type="Script" path="res://scripts/cctv/observation_waypoint.gd" id="waypoint"]
 [ext_resource type="PackedScene" path="res://scenes/cctv/cctv_camera.tscn" id="camera"]
+[ext_resource type="Script" uid="uid://cwoau2otl6qek" path="res://scripts/cctv/street_location.gd" id="script"]
+[ext_resource type="Script" uid="uid://uvxn40cqfjdj" path="res://scripts/cctv/observation_waypoint.gd" id="waypoint"]
 
 [sub_resource type="StandardMaterial3D" id="Mat0"]
-albedo_color = Color(0.25882352941176473, 0.27450980392156865, 0.26666666666666666, 1)
+albedo_color = Color(0.25882354, 0.27450982, 0.26666668, 1)
 
 [sub_resource type="BoxMesh" id="Box0"]
 material = SubResource("Mat0")
 size = Vector3(36, 0.3, 38)
 
 [sub_resource type="StandardMaterial3D" id="Mat1"]
-albedo_color = Color(0.7411764705882353, 0.5294117647058824, 0.25098039215686274, 1)
+albedo_color = Color(0.7411765, 0.5294118, 0.2509804, 1)
 
 [sub_resource type="BoxMesh" id="Box1"]
 material = SubResource("Mat1")
 size = Vector3(0.6, 0.8, 0.4)
 
 [sub_resource type="StandardMaterial3D" id="Mat2"]
-albedo_color = Color(0.7137254901960784, 0.6196078431372549, 0.5215686274509804, 1)
+albedo_color = Color(0.7137255, 0.61960787, 0.52156866, 1)
 
 [sub_resource type="BoxMesh" id="Box2"]
 material = SubResource("Mat2")
 size = Vector3(0.35, 0.4, 0.35)
 
 [sub_resource type="StandardMaterial3D" id="Mat3"]
-albedo_color = Color(0.13333333333333333, 0.17254901960784313, 0.2, 1)
+albedo_color = Color(0.13333334, 0.17254902, 0.2, 1)
 
 [sub_resource type="BoxMesh" id="Box3"]
 material = SubResource("Mat3")
 size = Vector3(0.2, 0.6, 0.25)
 
-[sub_resource type="StandardMaterial3D" id="Mat4"]
-albedo_color = Color(0.3843137254901961, 0.38823529411764707, 0.3607843137254902, 1)
-
-[sub_resource type="BoxMesh" id="Box4"]
-material = SubResource("Mat4")
-size = Vector3(5, 0.1, 14)
-
-[sub_resource type="StandardMaterial3D" id="Mat5"]
-albedo_color = Color(0.3764705882352941, 0.3176470588235294, 0.29411764705882354, 1)
-
-[sub_resource type="BoxMesh" id="Box5"]
-material = SubResource("Mat5")
-size = Vector3(0.3, 2, 7)
-
 [sub_resource type="StandardMaterial3D" id="Mat6"]
-albedo_color = Color(0.3254901960784314, 0.40784313725490196, 0.47843137254901963, 1)
+albedo_color = Color(0.3254902, 0.40784314, 0.47843137, 1)
 
 [sub_resource type="BoxMesh" id="Box6"]
 material = SubResource("Mat6")
 size = Vector3(0.6, 0.8, 0.4)
 
 [sub_resource type="StandardMaterial3D" id="Mat7"]
-albedo_color = Color(0.47058823529411764, 0.403921568627451, 0.48627450980392156, 1)
+albedo_color = Color(0.47058824, 0.40392157, 0.4862745, 1)
 
 [sub_resource type="BoxMesh" id="Box7"]
 material = SubResource("Mat7")
 size = Vector3(0.6, 0.8, 0.4)
 
+[sub_resource type="StandardMaterial3D" id="Mat4"]
+albedo_color = Color(0.38431373, 0.3882353, 0.36078432, 1)
+
+[sub_resource type="BoxMesh" id="Box4"]
+material = SubResource("Mat4")
+size = Vector3(5, 0.1, 14)
+
+[sub_resource type="StandardMaterial3D" id="Mat5"]
+albedo_color = Color(0.3764706, 0.31764707, 0.29411766, 1)
+
+[sub_resource type="BoxMesh" id="Box5"]
+material = SubResource("Mat5")
+size = Vector3(0.3, 2, 7)
+
 [sub_resource type="StandardMaterial3D" id="Mat8"]
-albedo_color = Color(0.3254901960784314, 0.27450980392156865, 0.19607843137254902, 1)
+albedo_color = Color(0.3254902, 0.27450982, 0.19607843, 1)
 
 [sub_resource type="BoxMesh" id="Box8"]
 material = SubResource("Mat8")
 size = Vector3(0.25, 2, 0.25)
 
 [sub_resource type="StandardMaterial3D" id="Mat9"]
-albedo_color = Color(0.25882352941176473, 0.33725490196078434, 0.22745098039215686, 1)
+albedo_color = Color(0.25882354, 0.3372549, 0.22745098, 1)
 
 [sub_resource type="BoxMesh" id="Box9"]
 material = SubResource("Mat9")
 size = Vector3(1.5, 1.5, 1.5)
 
 [sub_resource type="StandardMaterial3D" id="Mat10"]
-albedo_color = Color(0.49019607843137253, 0.3843137254901961, 0.2823529411764706, 1)
+albedo_color = Color(0.49019608, 0.38431373, 0.28235295, 1)
 
 [sub_resource type="BoxMesh" id="Box10"]
 material = SubResource("Mat10")
 size = Vector3(1.5, 0.15, 0.6)
 
-[node name="ObservationLocation" type="Node3D"]
+[node name="ObservationLocation" type="Node3D" unique_id=276620716]
 script = ExtResource("script")
 
-[node name="Floor" type="MeshInstance3D" parent="."]
-position = Vector3(0, -0.2, 0)
+[node name="Floor" type="MeshInstance3D" parent="." unique_id=1015605539]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
 mesh = SubResource("Box0")
 
-[node name="Target" type="Node3D" parent="."]
-position = Vector3(0, 0, 6)
+[node name="Target" type="Node3D" parent="." unique_id=662775761]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
 
-[node name="Body" type="MeshInstance3D" parent="Target"]
-position = Vector3(0, 1, 0)
+[node name="Body" type="MeshInstance3D" parent="Target" unique_id=1091326522]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 mesh = SubResource("Box1")
 
-[node name="Head" type="MeshInstance3D" parent="Target"]
-position = Vector3(0, 1.6, 0)
+[node name="Head" type="MeshInstance3D" parent="Target" unique_id=1280993758]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 mesh = SubResource("Box2")
 
-[node name="LeftLeg" type="MeshInstance3D" parent="Target"]
-position = Vector3(-0.18, 0.3, 0)
+[node name="LeftLeg" type="MeshInstance3D" parent="Target" unique_id=727687183]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
 mesh = SubResource("Box3")
 
-[node name="RightLeg" type="MeshInstance3D" parent="Target"]
-position = Vector3(0.18, 0.3, 0)
+[node name="RightLeg" type="MeshInstance3D" parent="Target" unique_id=714431007]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
 mesh = SubResource("Box3")
 
-[node name="Exits" type="Node3D" parent="."]
+[node name="Exits" type="Node3D" parent="." unique_id=1363148753]
 
-[node name="Pedestrians" type="Node3D" parent="."]
+[node name="Alley" type="Marker3D" parent="Exits" unique_id=1787151881]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 0, -5)
 
-[node name="Alley" type="Marker3D" parent="Exits"]
-position = Vector3(-12, 0, -5)
+[node name="Avenue" type="Marker3D" parent="Exits" unique_id=500766973]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -16)
 
-[node name="AlleyPath" type="MeshInstance3D" parent="."]
-position = Vector3(-7.199999999999999, -0.01, -3.0)
+[node name="Park" type="Marker3D" parent="Exits" unique_id=1129377920]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -5)
+
+[node name="Pedestrians" type="Node3D" parent="." unique_id=1868452391]
+
+[node name="AlleyWalker0" type="Node3D" parent="Pedestrians" unique_id=795151967]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, -4)
+
+[node name="Body" type="MeshInstance3D" parent="Pedestrians/AlleyWalker0" unique_id=1577336272]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("Box6")
+
+[node name="Head" type="MeshInstance3D" parent="Pedestrians/AlleyWalker0" unique_id=228324128]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("Box2")
+
+[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/AlleyWalker0" unique_id=1354587507]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/AlleyWalker0" unique_id=828392452]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="AlleyWalker1" type="Node3D" parent="Pedestrians" unique_id=55395585]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0, -4)
+
+[node name="Body" type="MeshInstance3D" parent="Pedestrians/AlleyWalker1" unique_id=1738698811]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("Box7")
+
+[node name="Head" type="MeshInstance3D" parent="Pedestrians/AlleyWalker1" unique_id=544938871]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("Box2")
+
+[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/AlleyWalker1" unique_id=1861642663]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/AlleyWalker1" unique_id=1902073693]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="AvenueWalker0" type="Node3D" parent="Pedestrians" unique_id=1546012713]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -15)
+
+[node name="Body" type="MeshInstance3D" parent="Pedestrians/AvenueWalker0" unique_id=1768706202]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("Box6")
+
+[node name="Head" type="MeshInstance3D" parent="Pedestrians/AvenueWalker0" unique_id=1159188725]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("Box2")
+
+[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/AvenueWalker0" unique_id=1401408859]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/AvenueWalker0" unique_id=1914952958]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="AvenueWalker1" type="Node3D" parent="Pedestrians" unique_id=1124268832]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -15)
+
+[node name="Body" type="MeshInstance3D" parent="Pedestrians/AvenueWalker1" unique_id=961599313]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("Box7")
+
+[node name="Head" type="MeshInstance3D" parent="Pedestrians/AvenueWalker1" unique_id=368564637]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("Box2")
+
+[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/AvenueWalker1" unique_id=778306244]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/AvenueWalker1" unique_id=1966675480]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="ParkWalker0" type="Node3D" parent="Pedestrians" unique_id=1068915499]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -4)
+
+[node name="Body" type="MeshInstance3D" parent="Pedestrians/ParkWalker0" unique_id=28214684]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("Box6")
+
+[node name="Head" type="MeshInstance3D" parent="Pedestrians/ParkWalker0" unique_id=94881081]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("Box2")
+
+[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/ParkWalker0" unique_id=1418461074]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/ParkWalker0" unique_id=196811677]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="ParkWalker1" type="Node3D" parent="Pedestrians" unique_id=1165197231]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -4)
+
+[node name="Body" type="MeshInstance3D" parent="Pedestrians/ParkWalker1" unique_id=1281764537]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("Box7")
+
+[node name="Head" type="MeshInstance3D" parent="Pedestrians/ParkWalker1" unique_id=1451850984]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("Box2")
+
+[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/ParkWalker1" unique_id=1441161177]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/ParkWalker1" unique_id=681721229]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
+mesh = SubResource("Box3")
+
+[node name="AlleyPath" type="MeshInstance3D" parent="." unique_id=1087666921]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.2, -0.01, -3)
 mesh = SubResource("Box4")
 
-[node name="AlleyWall0" type="MeshInstance3D" parent="."]
-position = Vector3(-14.8, 1, -5)
+[node name="AlleyWall0" type="MeshInstance3D" parent="." unique_id=851479448]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.8, 1, -5)
 mesh = SubResource("Box5")
 
-[node name="AlleyWall1" type="MeshInstance3D" parent="."]
-position = Vector3(-9.2, 1, -5)
+[node name="AlleyWall1" type="MeshInstance3D" parent="." unique_id=84456835]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.2, 1, -5)
 mesh = SubResource("Box5")
 
-[node name="AlleySign" type="Label3D" parent="."]
-position = Vector3(-12, 2.4, -6)
-text = "OBS_ALLEY"
-font_size = 32
+[node name="AlleySign" type="Label3D" parent="." unique_id=279140059]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2.4, -6)
 pixel_size = 0.01
+text = "OBS_ALLEY"
 
-[node name="ALLEY" parent="." instance=ExtResource("camera")]
-position = Vector3(-12, 4, -1)
-rotation_degrees = Vector3(-37, 0, 0)
+[node name="ALLEY" parent="." unique_id=238316807 instance=ExtResource("camera")]
+transform = Transform3D(1, 0, 0, 0, 0.79863554, 0.601815, 0, -0.601815, 0.79863554, -12, 4, -1)
 camera_id = &"stage2_OBS_ALLEY"
 display_name = "ALLEY"
 location_label = "OBS_STREET"
-list_order = 0
-base_fov = 48.0
 pan_limit_degrees = 8.0
+base_fov = 48.0
 
-[node name="Camera3D" parent="ALLEY/Head" index="2"]
-far = 9.0
-fov = 48.0
-
-[node name="AlleyWalker0" type="Node3D" parent="Pedestrians"]
-position = Vector3(-13, 0, -4)
-
-[node name="Body" type="MeshInstance3D" parent="Pedestrians/AlleyWalker0"]
-position = Vector3(0, 1, 0)
-mesh = SubResource("Box6")
-
-[node name="Head" type="MeshInstance3D" parent="Pedestrians/AlleyWalker0"]
-position = Vector3(0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/AlleyWalker0"]
-position = Vector3(-0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/AlleyWalker0"]
-position = Vector3(0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="AlleyWalker1" type="Node3D" parent="Pedestrians"]
-position = Vector3(-11, 0, -4)
-
-[node name="Body" type="MeshInstance3D" parent="Pedestrians/AlleyWalker1"]
-position = Vector3(0, 1, 0)
-mesh = SubResource("Box7")
-
-[node name="Head" type="MeshInstance3D" parent="Pedestrians/AlleyWalker1"]
-position = Vector3(0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/AlleyWalker1"]
-position = Vector3(-0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/AlleyWalker1"]
-position = Vector3(0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="Avenue" type="Marker3D" parent="Exits"]
-position = Vector3(0, 0, -16)
-
-[node name="AvenuePath" type="MeshInstance3D" parent="."]
-position = Vector3(0.0, -0.01, -9.6)
+[node name="AvenuePath" type="MeshInstance3D" parent="." unique_id=1311787617]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.01, -9.6)
 mesh = SubResource("Box4")
 
-[node name="AvenuePost0" type="MeshInstance3D" parent="."]
-position = Vector3(-2.5, 1, -17)
+[node name="AvenuePost0" type="MeshInstance3D" parent="." unique_id=1071464221]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 1, -17)
 mesh = SubResource("Box8")
 
-[node name="AvenueTree0" type="MeshInstance3D" parent="."]
-position = Vector3(-2.5, 2.2, -17)
+[node name="AvenueTree0" type="MeshInstance3D" parent="." unique_id=1005328211]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2.2, -17)
 mesh = SubResource("Box9")
 
-[node name="AvenuePost1" type="MeshInstance3D" parent="."]
-position = Vector3(2.5, 1, -17)
+[node name="AvenuePost1" type="MeshInstance3D" parent="." unique_id=1844555122]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1, -17)
 mesh = SubResource("Box8")
 
-[node name="AvenueTree1" type="MeshInstance3D" parent="."]
-position = Vector3(2.5, 2.2, -17)
+[node name="AvenueTree1" type="MeshInstance3D" parent="." unique_id=625545782]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 2.2, -17)
 mesh = SubResource("Box9")
 
-[node name="AvenueSign" type="Label3D" parent="."]
-position = Vector3(0, 2.4, -17)
-text = "OBS_AVENUE"
-font_size = 32
+[node name="AvenueSign" type="Label3D" parent="." unique_id=901775084]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -17)
 pixel_size = 0.01
+text = "OBS_AVENUE"
 
-[node name="AVENUE" parent="." instance=ExtResource("camera")]
-position = Vector3(0, 4, -12)
-rotation_degrees = Vector3(-37, 0, 0)
+[node name="AVENUE" parent="." unique_id=740269956 instance=ExtResource("camera")]
+transform = Transform3D(1, 0, 0, 0, 0.79863554, 0.601815, 0, -0.601815, 0.79863554, 0, 4, -12)
 camera_id = &"stage2_OBS_AVENUE"
 display_name = "AVENUE"
 location_label = "OBS_STREET"
 list_order = 1
-base_fov = 48.0
 pan_limit_degrees = 8.0
+base_fov = 48.0
 
-[node name="Camera3D" parent="AVENUE/Head" index="2"]
-far = 9.0
-fov = 48.0
-
-[node name="AvenueWalker0" type="Node3D" parent="Pedestrians"]
-position = Vector3(-1, 0, -15)
-
-[node name="Body" type="MeshInstance3D" parent="Pedestrians/AvenueWalker0"]
-position = Vector3(0, 1, 0)
-mesh = SubResource("Box6")
-
-[node name="Head" type="MeshInstance3D" parent="Pedestrians/AvenueWalker0"]
-position = Vector3(0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/AvenueWalker0"]
-position = Vector3(-0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/AvenueWalker0"]
-position = Vector3(0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="AvenueWalker1" type="Node3D" parent="Pedestrians"]
-position = Vector3(1, 0, -15)
-
-[node name="Body" type="MeshInstance3D" parent="Pedestrians/AvenueWalker1"]
-position = Vector3(0, 1, 0)
-mesh = SubResource("Box7")
-
-[node name="Head" type="MeshInstance3D" parent="Pedestrians/AvenueWalker1"]
-position = Vector3(0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/AvenueWalker1"]
-position = Vector3(-0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/AvenueWalker1"]
-position = Vector3(0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="Park" type="Marker3D" parent="Exits"]
-position = Vector3(12, 0, -5)
-
-[node name="ParkPath" type="MeshInstance3D" parent="."]
-position = Vector3(7.199999999999999, -0.01, -3.0)
+[node name="ParkPath" type="MeshInstance3D" parent="." unique_id=2127463496]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.2, -0.01, -3)
 mesh = SubResource("Box4")
 
-[node name="ParkPost0" type="MeshInstance3D" parent="."]
-position = Vector3(9.5, 1, -6)
+[node name="ParkPost0" type="MeshInstance3D" parent="." unique_id=797943985]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 1, -6)
 mesh = SubResource("Box8")
 
-[node name="ParkTree0" type="MeshInstance3D" parent="."]
-position = Vector3(9.5, 2.2, -6)
+[node name="ParkTree0" type="MeshInstance3D" parent="." unique_id=1815516084]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 2.2, -6)
 mesh = SubResource("Box9")
 
-[node name="ParkPost1" type="MeshInstance3D" parent="."]
-position = Vector3(14.5, 1, -6)
+[node name="ParkPost1" type="MeshInstance3D" parent="." unique_id=1647298169]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 1, -6)
 mesh = SubResource("Box8")
 
-[node name="ParkTree1" type="MeshInstance3D" parent="."]
-position = Vector3(14.5, 2.2, -6)
+[node name="ParkTree1" type="MeshInstance3D" parent="." unique_id=399954081]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 2.2, -6)
 mesh = SubResource("Box9")
 
-[node name="ParkBench" type="MeshInstance3D" parent="."]
-position = Vector3(13.7, 0.5, -4)
+[node name="ParkBench" type="MeshInstance3D" parent="." unique_id=1656447397]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7, 0.5, -4)
 mesh = SubResource("Box10")
 
-[node name="ParkSign" type="Label3D" parent="."]
-position = Vector3(12, 2.4, -6)
-text = "OBS_PARK"
-font_size = 32
+[node name="ParkSign" type="Label3D" parent="." unique_id=1453755397]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 2.4, -6)
 pixel_size = 0.01
+text = "OBS_PARK"
 
-[node name="PARK" parent="." instance=ExtResource("camera")]
-position = Vector3(12, 4, -1)
-rotation_degrees = Vector3(-37, 0, 0)
+[node name="PARK" parent="." unique_id=1464670930 instance=ExtResource("camera")]
+transform = Transform3D(1, 0, 0, 0, 0.79863554, 0.601815, 0, -0.601815, 0.79863554, 12, 4, -1)
 camera_id = &"stage2_OBS_PARK"
 display_name = "PARK"
 location_label = "OBS_STREET"
 list_order = 2
-base_fov = 48.0
 pan_limit_degrees = 8.0
+base_fov = 48.0
 
-[node name="Camera3D" parent="PARK/Head" index="2"]
-far = 9.0
-fov = 48.0
+[node name="Route" type="Node3D" parent="." unique_id=110166422]
 
-[node name="ParkWalker0" type="Node3D" parent="Pedestrians"]
-position = Vector3(11, 0, -4)
-
-[node name="Body" type="MeshInstance3D" parent="Pedestrians/ParkWalker0"]
-position = Vector3(0, 1, 0)
-mesh = SubResource("Box6")
-
-[node name="Head" type="MeshInstance3D" parent="Pedestrians/ParkWalker0"]
-position = Vector3(0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/ParkWalker0"]
-position = Vector3(-0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/ParkWalker0"]
-position = Vector3(0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="ParkWalker1" type="Node3D" parent="Pedestrians"]
-position = Vector3(13, 0, -4)
-
-[node name="Body" type="MeshInstance3D" parent="Pedestrians/ParkWalker1"]
-position = Vector3(0, 1, 0)
-mesh = SubResource("Box7")
-
-[node name="Head" type="MeshInstance3D" parent="Pedestrians/ParkWalker1"]
-position = Vector3(0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/ParkWalker1"]
-position = Vector3(-0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/ParkWalker1"]
-position = Vector3(0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="Route" type="Node3D" parent="."]
-
-[node name="Point1" type="Marker3D" parent="Route"]
-position = Vector3(0, 0, 0)
+[node name="Point1" type="Marker3D" parent="Route" unique_id=1833319345]
 script = ExtResource("waypoint")
 seconds = 12.0
 event_id = "branch"
