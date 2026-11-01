@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://c7u2yx85ktp5"]
 
 [ext_resource type="Texture2D" uid="uid://bm6kqf5aouskd" path="res://assets/textures/AsphaltTex.png" id="2_8i4tb"]
+[ext_resource type="Texture2D" uid="uid://bi5ctvgiy1m6r" path="res://assets/textures/MetalTex.png" id="4_1f1ip"]
 [ext_resource type="Texture2D" uid="uid://brpharcoeh8pe" path="res://assets/textures/LowResWood.png" id="4_k0y0i"]
 [ext_resource type="PackedScene" uid="uid://dmxsji6jd1dm1" path="res://assets/models/Tree1.glb" id="6_1f1ip"]
 [ext_resource type="PackedScene" uid="uid://ft2krvlu3bbl" path="res://assets/models/Tree2.glb" id="7_n7w4m"]
@@ -73,6 +74,23 @@ albedo_color = Color(0.3254902, 0.27450982, 0.19607843, 1)
 [sub_resource type="BoxMesh" id="Box8"]
 material = SubResource("Mat8")
 size = Vector3(0.25, 2, 0.25)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n7w4m"]
+albedo_texture = ExtResource("4_1f1ip")
+uv1_scale = Vector3(2.995, 1, 1)
+texture_filter = 4
+
+[sub_resource type="BoxMesh" id="BoxMesh_cn8qd"]
+material = SubResource("StandardMaterial3D_n7w4m")
+size = Vector3(0.053222656, 0.51171875, 1.9570313)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ukn2q"]
+albedo_texture = ExtResource("4_1f1ip")
+texture_filter = 4
+
+[sub_resource type="BoxMesh" id="BoxMesh_klnqh"]
+material = SubResource("StandardMaterial3D_ukn2q")
+size = Vector3(0.047851563, 1.1916504, 0.15234375)
 
 [sub_resource type="StandardMaterial3D" id="Mat9"]
 albedo_color = Color(0.25882354, 0.3372549, 0.22745098, 1)
@@ -263,9 +281,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.2, 1, -5)
 mesh = SubResource("Box5")
 
 [node name="AlleySign" type="Label3D" parent="." unique_id=279140059]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2.4, -6)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -14.62205, 1.3905327, -5.79478)
 pixel_size = 0.01
-text = "OBS_ALLEY"
+text = "ALLEY"
 
 [node name="ALLEY" parent="." unique_id=238316807 instance=ExtResource("camera")]
 transform = Transform3D(1, 0, 0, 0, 0.79863554, 0.601815, 0, -0.601815, 0.79863554, -12, 4, -1)
@@ -284,6 +302,22 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 1, -17)
 visible = false
 mesh = SubResource("Box8")
 
+[node name="Sign" type="MeshInstance3D" parent="." unique_id=916874238]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.651326, 1.3855151, -5.7896457)
+mesh = SubResource("BoxMesh_cn8qd")
+
+[node name="Sign3" type="MeshInstance3D" parent="." unique_id=1080846911]
+transform = Transform3D(-4.2243027e-08, -0.25701353, -0.96640784, -1.1234418e-08, 0.96640784, -0.25701353, 1, 0, -4.371139e-08, 15.310563, 1.5268619, -6.1910295)
+mesh = SubResource("BoxMesh_cn8qd")
+
+[node name="Sign2" type="MeshInstance3D" parent="." unique_id=1713479155]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.2475963, 1.3855151, -16.93716)
+mesh = SubResource("BoxMesh_cn8qd")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Sign2" unique_id=1441320839]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.83994985, 0)
+mesh = SubResource("BoxMesh_klnqh")
+
 [node name="AvenueTree0" type="MeshInstance3D" parent="." unique_id=1005328211]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2.2, -17)
 visible = false
@@ -300,9 +334,9 @@ visible = false
 mesh = SubResource("Box9")
 
 [node name="AvenueSign" type="Label3D" parent="." unique_id=901775084]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -17)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.238236, 1.3904598, -16.908775)
 pixel_size = 0.01
-text = "OBS_AVENUE"
+text = "AVENUE"
 
 [node name="AVENUE" parent="." unique_id=740269956 instance=ExtResource("camera")]
 transform = Transform3D(1, 0, 0, 0, 0.79863554, 0.601815, 0, -0.601815, 0.79863554, 0, 4, -12)
@@ -386,9 +420,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5798979, -0.3101654, 0.000
 mesh = SubResource("BoxMesh_8fjlh")
 
 [node name="ParkSign" type="Label3D" parent="." unique_id=1453755397]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 2.4, -6)
+transform = Transform3D(0.96640784, -0.25701353, 0, 0.25701353, 0.96640784, 0, 0, 0, 1, 15.344236, 1.5437611, -6.160999)
 pixel_size = 0.01
-text = "OBS_PARK"
+text = "PARK"
 
 [node name="PARK" parent="." unique_id=1464670930 instance=ExtResource("camera")]
 transform = Transform3D(1, 0, 0, 0, 0.79863554, 0.601815, 0, -0.601815, 0.79863554, 12, 4, -1)
