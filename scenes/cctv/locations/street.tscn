@@ -1,5 +1,10 @@
 [gd_scene format=3 uid="uid://c7u2yx85ktp5"]
 
+[ext_resource type="Texture2D" uid="uid://bm6kqf5aouskd" path="res://assets/textures/AsphaltTex.png" id="2_8i4tb"]
+[ext_resource type="Texture2D" uid="uid://brpharcoeh8pe" path="res://assets/textures/LowResWood.png" id="4_k0y0i"]
+[ext_resource type="PackedScene" uid="uid://dmxsji6jd1dm1" path="res://assets/models/Tree1.glb" id="6_1f1ip"]
+[ext_resource type="PackedScene" uid="uid://ft2krvlu3bbl" path="res://assets/models/Tree2.glb" id="7_n7w4m"]
+[ext_resource type="PackedScene" uid="uid://ncuny0hgpaqo" path="res://assets/models/Tree3.glb" id="8_ukn2q"]
 [ext_resource type="PackedScene" path="res://scenes/cctv/cctv_camera.tscn" id="camera"]
 [ext_resource type="Script" uid="uid://cwoau2otl6qek" path="res://scripts/cctv/street_location.gd" id="script"]
 [ext_resource type="Script" uid="uid://uvxn40cqfjdj" path="res://scripts/cctv/observation_waypoint.gd" id="waypoint"]
@@ -46,11 +51,13 @@ albedo_color = Color(0.47058824, 0.40392157, 0.4862745, 1)
 material = SubResource("Mat7")
 size = Vector3(0.6, 0.8, 0.4)
 
-[sub_resource type="StandardMaterial3D" id="Mat4"]
-albedo_color = Color(0.38431373, 0.3882353, 0.36078432, 1)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fvpn7"]
+albedo_texture = ExtResource("2_8i4tb")
+uv1_scale = Vector3(4.015, 8.02, 4.015)
+texture_filter = 4
 
 [sub_resource type="BoxMesh" id="Box4"]
-material = SubResource("Mat4")
+material = SubResource("StandardMaterial3D_fvpn7")
 size = Vector3(5, 0.1, 14)
 
 [sub_resource type="StandardMaterial3D" id="Mat5"]
@@ -74,12 +81,21 @@ albedo_color = Color(0.25882354, 0.3372549, 0.22745098, 1)
 material = SubResource("Mat9")
 size = Vector3(1.5, 1.5, 1.5)
 
-[sub_resource type="StandardMaterial3D" id="Mat10"]
-albedo_color = Color(0.49019608, 0.38431373, 0.28235295, 1)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vmnxw"]
+albedo_texture = ExtResource("4_k0y0i")
+texture_filter = 4
 
 [sub_resource type="BoxMesh" id="Box10"]
-material = SubResource("Mat10")
+material = SubResource("StandardMaterial3D_vmnxw")
 size = Vector3(1.5, 0.15, 0.6)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cb0l2"]
+albedo_texture = ExtResource("4_k0y0i")
+texture_filter = 4
+
+[sub_resource type="BoxMesh" id="BoxMesh_8fjlh"]
+material = SubResource("StandardMaterial3D_cb0l2")
+size = Vector3(0.12878418, 0.48135376, 0.140625)
 
 [node name="ObservationLocation" type="Node3D" unique_id=276620716]
 script = ExtResource("script")
@@ -265,18 +281,22 @@ mesh = SubResource("Box4")
 
 [node name="AvenuePost0" type="MeshInstance3D" parent="." unique_id=1071464221]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 1, -17)
+visible = false
 mesh = SubResource("Box8")
 
 [node name="AvenueTree0" type="MeshInstance3D" parent="." unique_id=1005328211]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2.2, -17)
+visible = false
 mesh = SubResource("Box9")
 
 [node name="AvenuePost1" type="MeshInstance3D" parent="." unique_id=1844555122]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 1, -17)
+visible = false
 mesh = SubResource("Box8")
 
 [node name="AvenueTree1" type="MeshInstance3D" parent="." unique_id=625545782]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 2.2, -17)
+visible = false
 mesh = SubResource("Box9")
 
 [node name="AvenueSign" type="Label3D" parent="." unique_id=901775084]
@@ -299,23 +319,71 @@ mesh = SubResource("Box4")
 
 [node name="ParkPost0" type="MeshInstance3D" parent="." unique_id=797943985]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 1, -6)
+visible = false
 mesh = SubResource("Box8")
 
 [node name="ParkTree0" type="MeshInstance3D" parent="." unique_id=1815516084]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.5, 2.2, -6)
+visible = false
+mesh = SubResource("Box9")
+
+[node name="ParkTree2" type="MeshInstance3D" parent="." unique_id=1062749422]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9494781, 4.2914014, -5.734427)
+mesh = SubResource("Box9")
+
+[node name="ParkTree3" type="MeshInstance3D" parent="." unique_id=605756691]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9494781, 4.77763, -4.2750545)
+mesh = SubResource("Box9")
+
+[node name="ParkTree4" type="MeshInstance3D" parent="." unique_id=729513156]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9494781, 3.9977527, -7.0869055)
+mesh = SubResource("Box9")
+
+[node name="ParkTree5" type="MeshInstance3D" parent="." unique_id=201141946]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9494781, 4.5421877, -8.518053)
+mesh = SubResource("Box9")
+
+[node name="ParkTree6" type="MeshInstance3D" parent="." unique_id=1639251364]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9494781, 4.0093865, -9.925081)
+mesh = SubResource("Box9")
+
+[node name="ParkTree7" type="MeshInstance3D" parent="." unique_id=907285117]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9494781, 3.7105913, -11.385624)
+mesh = SubResource("Box9")
+
+[node name="ParkTree8" type="MeshInstance3D" parent="." unique_id=812243348]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9494781, 4.102807, -12.791328)
+mesh = SubResource("Box9")
+
+[node name="ParkTree9" type="MeshInstance3D" parent="." unique_id=1015451441]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9494781, 3.761529, -14.299193)
+mesh = SubResource("Box9")
+
+[node name="ParkTree10" type="MeshInstance3D" parent="." unique_id=1697023779]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.9494781, 4.13235, -16.098297)
 mesh = SubResource("Box9")
 
 [node name="ParkPost1" type="MeshInstance3D" parent="." unique_id=1647298169]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 1, -6)
+visible = false
 mesh = SubResource("Box8")
 
 [node name="ParkTree1" type="MeshInstance3D" parent="." unique_id=399954081]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.5, 2.2, -6)
+visible = false
 mesh = SubResource("Box9")
 
 [node name="ParkBench" type="MeshInstance3D" parent="." unique_id=1656447397]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.7, 0.5, -4)
 mesh = SubResource("Box10")
+
+[node name="BenchLeg" type="MeshInstance3D" parent="ParkBench" unique_id=50533804]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5948181, -0.3101654, 0.0006415844)
+mesh = SubResource("BoxMesh_8fjlh")
+
+[node name="BenchLeg2" type="MeshInstance3D" parent="ParkBench" unique_id=708714124]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5798979, -0.3101654, 0.0006415844)
+mesh = SubResource("BoxMesh_8fjlh")
 
 [node name="ParkSign" type="Label3D" parent="." unique_id=1453755397]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 2.4, -6)
@@ -337,3 +405,113 @@ base_fov = 48.0
 script = ExtResource("waypoint")
 seconds = 12.0
 event_id = "branch"
+
+[node name="Tree1" parent="." unique_id=515010970 instance=ExtResource("6_1f1ip")]
+transform = Transform3D(0.39, 0, 0, 0, 0.39, 0, 0, 0, 0.39, -2.656268, 0, -16.739204)
+
+[node name="Tree2" parent="." unique_id=1253663562 instance=ExtResource("6_1f1ip")]
+transform = Transform3D(0.17756075, 0, 0.34723505, 0, 0.39, 0, -0.34723505, 0, 0.17756075, -2.8240378, 0, -10.029749)
+
+[node name="Tree3" parent="." unique_id=474778677 instance=ExtResource("6_1f1ip")]
+transform = Transform3D(0.17196113, 0, -0.35004196, 0, 0.39, 0, 0.35004196, 0, 0.17196113, -2.656268, 0, -5.786499)
+
+[node name="Tree9" parent="." unique_id=517583112 instance=ExtResource("6_1f1ip")]
+transform = Transform3D(0.21457686, 0, 0.3256636, 0, 0.39, 0, -0.3256636, 0, 0.21457686, -2.656268, 0, -13.331604)
+
+[node name="Tree10" parent="." unique_id=1029736638 instance=ExtResource("6_1f1ip")]
+transform = Transform3D(0.21457686, 0, 0.3256636, 0, 0.39, 0, -0.3256636, 0, 0.21457686, -2.656268, 0, -11.632968)
+
+[node name="Tree4" parent="." unique_id=2030390416 instance=ExtResource("7_n7w4m")]
+transform = Transform3D(0.39, 0, 0, 0, 0.39, 0, 0, 0, 0.39, -6.4216795, -0.101513386, -16.00644)
+
+[node name="Tree6" parent="." unique_id=1637030555 instance=ExtResource("7_n7w4m")]
+transform = Transform3D(0.39, 0, 0, 0, 0.39, 0, 0, 0, 0.39, -6.4216795, -0.101513386, -4.1413536)
+
+[node name="Tree5" parent="." unique_id=1380572356 instance=ExtResource("7_n7w4m")]
+transform = Transform3D(-0.39, 0, 3.409488e-08, 0, 0.39, 0, -3.409488e-08, 0, -0.39, 0.7733331, -0.101513386, -8.681553)
+
+[node name="Tree7" parent="." unique_id=1077718957 instance=ExtResource("8_ukn2q")]
+transform = Transform3D(0.39, 0, 0, 0, 0.39, 0, 0, 0, 0.39, -9.745958, -0.069523335, -14.839684)
+
+[node name="Tree8" parent="." unique_id=772562673 instance=ExtResource("8_ukn2q")]
+transform = Transform3D(0.39, 0, 0, 0, 0.39, 0, 0, 0, 0.39, -9.745958, -0.069523335, -7.451049)
+
+[node name="ParkTree11" type="MeshInstance3D" parent="." unique_id=17101213]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.1189709, 4.2914014, -15.187054)
+mesh = SubResource("Box9")
+
+[node name="ParkTree12" type="MeshInstance3D" parent="." unique_id=437254381]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.1189709, 4.77763, -16.646425)
+mesh = SubResource("Box9")
+
+[node name="ParkTree13" type="MeshInstance3D" parent="." unique_id=813494845]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.1189709, 3.9977527, -13.834575)
+mesh = SubResource("Box9")
+
+[node name="ParkTree14" type="MeshInstance3D" parent="." unique_id=130275215]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.1189713, 4.5421877, -12.403427)
+mesh = SubResource("Box9")
+
+[node name="ParkTree15" type="MeshInstance3D" parent="." unique_id=155076436]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.1189713, 4.0093865, -10.996399)
+mesh = SubResource("Box9")
+
+[node name="ParkTree16" type="MeshInstance3D" parent="." unique_id=642383509]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.1189713, 3.7105913, -9.535856)
+mesh = SubResource("Box9")
+
+[node name="ParkTree17" type="MeshInstance3D" parent="." unique_id=269399700]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.1189713, 4.102807, -8.130152)
+mesh = SubResource("Box9")
+
+[node name="ParkTree18" type="MeshInstance3D" parent="." unique_id=891806518]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.1189718, 3.761529, -6.622287)
+mesh = SubResource("Box9")
+
+[node name="ParkTree19" type="MeshInstance3D" parent="." unique_id=1894945574]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3.1189718, 4.13235, -4.823183)
+mesh = SubResource("Box9")
+
+[node name="Tree11" parent="." unique_id=2019724985 instance=ExtResource("6_1f1ip")]
+transform = Transform3D(-0.39, 0, -3.409488e-08, 0, 0.39, 0, 3.409488e-08, 0, -0.39, 2.8257618, 0, -4.182276)
+
+[node name="Tree12" parent="." unique_id=1584083331 instance=ExtResource("6_1f1ip")]
+transform = Transform3D(-0.1775607, 0, -0.34723508, 0, 0.39, 0, 0.34723508, 0, -0.1775607, 2.9935308, 0, -10.891731)
+
+[node name="Tree13" parent="." unique_id=852888255 instance=ExtResource("6_1f1ip")]
+transform = Transform3D(-0.17196117, 0, 0.35004193, 0, 0.39, 0, -0.35004193, 0, -0.17196117, 2.8257608, 0, -15.134981)
+
+[node name="Tree14" parent="." unique_id=697403770 instance=ExtResource("6_1f1ip")]
+transform = Transform3D(-0.21457681, 0, -0.32566363, 0, 0.39000005, 0, 0.32566363, 0, -0.21457681, 2.8257613, 0, -7.589876)
+
+[node name="Tree15" parent="." unique_id=481343209 instance=ExtResource("6_1f1ip")]
+transform = Transform3D(-0.21457681, 0, -0.32566363, 0, 0.39000005, 0, 0.32566363, 0, -0.21457681, 2.8257613, 0, -9.288512)
+
+[node name="Tree16" parent="." unique_id=2013435979 instance=ExtResource("7_n7w4m")]
+transform = Transform3D(-0.39, 0, -3.409488e-08, 0, 0.39, 0, 3.409488e-08, 0, -0.39, 6.591173, -0.101513505, -4.915041)
+
+[node name="Tree17" parent="." unique_id=912713531 instance=ExtResource("7_n7w4m")]
+transform = Transform3D(-0.39, 0, -3.409488e-08, 0, 0.39, 0, 3.409488e-08, 0, -0.39, 6.591172, -0.101513505, -16.780127)
+
+[node name="Tree18" parent="." unique_id=1923204955 instance=ExtResource("7_n7w4m")]
+transform = Transform3D(0.39, 0, 3.5527137e-15, 0, 0.39, 0, -3.5527137e-15, 0, 0.39, -0.6038399, -0.101513505, -12.239927)
+
+[node name="Tree19" parent="." unique_id=568234571 instance=ExtResource("8_ukn2q")]
+transform = Transform3D(-0.39, 0, -3.409488e-08, 0, 0.39, 0, 3.409488e-08, 0, -0.39, 9.915452, -0.06952345, -6.081797)
+
+[node name="Tree20" parent="." unique_id=1187341878 instance=ExtResource("8_ukn2q")]
+transform = Transform3D(-0.39, 0, -3.409488e-08, 0, 0.39, 0, 3.409488e-08, 0, -0.39, 9.915451, -0.06952345, -13.470432)
+
+[node name="ParkTree20" type="MeshInstance3D" parent="." unique_id=2062718338]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.707132, 4.102807, -5.8338842)
+mesh = SubResource("Box9")
+
+[node name="Tree21" parent="." unique_id=1606186138 instance=ExtResource("6_1f1ip")]
+transform = Transform3D(0.21457686, 0, 0.3256636, 0, 0.39, 0, -0.3256636, 0, 0.21457686, 9.353388, 0, -6.37416)
+
+[node name="ParkTree21" type="MeshInstance3D" parent="." unique_id=555805876]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 15.128627, 3.9977527, -6.8771305)
+mesh = SubResource("Box9")
+
+[node name="Tree22" parent="." unique_id=73358567 instance=ExtResource("8_ukn2q")]
+transform = Transform3D(-0.39, 0, -3.409488e-08, 0, 0.39, 0, 3.409488e-08, 0, -0.39, 21.925106, -0.06952345, -6.512988)
