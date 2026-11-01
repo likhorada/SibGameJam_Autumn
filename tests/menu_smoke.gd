@@ -51,17 +51,44 @@ func _run() -> void:
 	expect(menu.credits.visible and not menu.settings.visible, "Credits panel")
 	menu._close_panel()
 	expect(music.playing, "Menu music continues through settings and credits")
+	# Exercise recovery without relying on a deliberately broken game resource.
+	menu._music_volume = music.volume_linear
+	menu.play_transition = load("res://scripts/ui/menu_transition.gd").new()
+	root.add_child(menu.play_transition)
+	menu.play_transition.cover(music, 0.1)
+	await create_timer(0.15).timeout
+	menu._load_failed()
+	await create_timer(menu.play_fade_in_seconds + 0.2).timeout
+	expect(not menu.loading and not menu.play.disabled, "Loading failure unlocks the menu")
+	expect(is_equal_approx(music.volume_linear, menu._music_volume), "Loading failure restores the music volume")
+	expect(not is_instance_valid(menu.play_transition), "Loading failure removes the curtain")
 	if DisplayServer.get_name() != "headless":
 		await create_timer(0.5).timeout
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png(OS.get_environment("LOCALAPPDATA") + "/Temp/opencode/menu.png")
+	var starting_volume := music.volume_linear
 	menu._play()
-	for frame: int in 300:
+	var transition: CanvasLayer = menu.play_transition
+	var transition_ref: WeakRef = weakref(transition)
+	expect(menu.loading and menu.play.disabled, "Play locks repeat requests during the transition")
+	menu._play()
+	expect(menu.play_transition == transition, "Repeated Play keeps the same transition")
+	await create_timer(menu.play_fade_out_seconds * 0.4).timeout
+	expect(current_scene == menu, "The menu stays alive while fading out")
+	expect(transition.curtain.modulate.a > 0.0 and transition.curtain.modulate.a < 1.0, "Menu darkens gradually")
+	expect(music.volume_linear > 0.0 and music.volume_linear < starting_volume, "Menu music fades gradually with the picture")
+	var deadline := Time.get_ticks_msec() + 10000
+	while Time.get_ticks_msec() < deadline:
 		await process_frame
-		if current_scene != menu:
+		if current_scene != null and current_scene != menu:
 			break
-	expect(current_scene != menu, "Play transitions to game")
-	if current_scene != menu:
+	expect(current_scene != null and current_scene != menu, "Play transitions to game")
+	if current_scene != null and current_scene != menu:
+		expect(transition.curtain.modulate.a > 0.95, "Scene changes behind a black curtain")
+		await create_timer(0.4).timeout
+		expect(transition.curtain.modulate.a > 0.0 and transition.curtain.modulate.a < 1.0, "Gameplay reveals gradually")
+		await create_timer(0.8).timeout
+		expect(transition_ref.get_ref() == null, "Transition curtain is freed after revealing gameplay")
 		expect(current_scene.get_node_or_null("Apartment/RoomDoor") != null, "Play loads the interactive apartment door")
 		expect(current_scene.power._screen != null, "Power system resolves the laptop screen mesh")
 		expect(is_equal_approx(current_scene.player.mouse_sensitivity, 0.003), "Sensitivity applied to player")

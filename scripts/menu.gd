@@ -1,7 +1,10 @@
 extends Control
 
 const GAME_PATH := "res://scenes/main.tscn"
+const MENU_TRANSITION := preload("res://scripts/ui/menu_transition.gd")
 @export var intro_seconds: float = 3.0
+@export_range(0.1, 3.0) var play_fade_out_seconds: float = 1.2
+@export_range(0.1, 3.0) var play_fade_in_seconds: float = 1.0
 var intro: ColorRect
 var intro_label: Label
 var intro_time: float = 0.0
@@ -20,9 +23,14 @@ var timecode: Label
 var loading: bool = false
 var _return_focus: Control
 var title: Label
+var play_transition: CanvasLayer
+var _transition_handed_over: bool = false
+var _music_volume: float = 1.0
 
 func _exit_tree() -> void:
 	$MenuMusic.stop()
+	if is_instance_valid(play_transition) and not _transition_handed_over:
+		play_transition.queue_free()
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -61,7 +69,7 @@ func _ready() -> void:
 	intro.color = Color.BLACK
 	add_child(intro)
 	intro.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	intro_label = _label(intro, "sample intro", 30)
+	intro_label = _label(intro, "Basement Productions", 30)
 	intro_label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	intro_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	intro_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -172,8 +180,15 @@ func _build_panel() -> void:
 	credits = VBoxContainer.new()
 	column.add_child(credits)
 	_label(credits, "CREDITS", 28)
-	var placeholder := _label(credits, "to be filled")
-	placeholder.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	var credit_line_1 := _label(credits, "") # Текст первой строки
+	credit_line_1.custom_minimum_size = Vector2(0, 24)
+	credit_line_1.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	var credit_line_2 := _label(credits, "") # Текст второй строки
+	credit_line_2.custom_minimum_size = Vector2(0, 24)
+	credit_line_2.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	var credit_line_3 := _label(credits, "") # Текст третьей строки
+	credit_line_3.custom_minimum_size = Vector2(0, 24)
+	credit_line_3.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	_button(column, "BACK", _close_panel)
 	panel.hide()
 
@@ -215,6 +230,8 @@ func _finish_intro() -> void:
 	play.grab_focus()
 
 func _input(event: InputEvent) -> void:
+	if loading:
+		return
 	if intro.visible and ((event is InputEventMouseButton and event.pressed) or event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_cancel")):
 		_finish_intro()
 		get_viewport().set_input_as_handled()
@@ -233,11 +250,15 @@ func _process(delta: float) -> void:
 	fullscreen.set_pressed_no_signal(DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN)
 	if loading:
 		var status := ResourceLoader.load_threaded_get_status(GAME_PATH)
-		if status == ResourceLoader.THREAD_LOAD_LOADED:
+		if status == ResourceLoader.THREAD_LOAD_LOADED and play_transition.covered:
 			loading = false
 			var scene := ResourceLoader.load_threaded_get(GAME_PATH) as PackedScene
+			_transition_handed_over = true
 			if get_tree().change_scene_to_packed(scene) != OK:
+				_transition_handed_over = false
 				_load_failed()
+			else:
+				play_transition.reveal(play_fade_in_seconds)
 		elif status == ResourceLoader.THREAD_LOAD_FAILED or status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 			_load_failed()
 
@@ -250,8 +271,18 @@ func _play() -> void:
 	loading = ResourceLoader.load_threaded_request(GAME_PATH) == OK
 	if not loading:
 		_load_failed()
+		return
+	_music_volume = $MenuMusic.volume_linear
+	play_transition = MENU_TRANSITION.new()
+	play_transition.name = "MenuTransition"
+	get_tree().root.add_child(play_transition)
+	play_transition.cover($MenuMusic, play_fade_out_seconds)
 
 func _load_failed() -> void:
 	loading = false
 	play.disabled = false
 	play.text = "LOAD_FAILED"
+	if is_instance_valid(play_transition):
+		play_transition.reveal(play_fade_in_seconds)
+		var recovery := create_tween()
+		recovery.tween_property($MenuMusic, "volume_linear", _music_volume, play_fade_in_seconds)
