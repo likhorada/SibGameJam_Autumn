@@ -103,7 +103,7 @@ CHAT_RECEIVING,handler is typing...,заказчик печатает...
 CHAT_TYPE_HELP,Type using any letter keys…,Печатайте любыми буквенными клавишами…
 CHAT_DRAFT,Reply draft,Черновик ответа
 CHAT_CHANGE_REPLY,Change,Изменить
-CHAT_SEND_REPLY,Send ↵,Отправить ↵
+CHAT_SEND_REPLY,Send >,Отправить >
 CHAT_CHOOSE,Select a reply below.,Выбери ответ ниже.
 CHAT_IDLE,Awaiting messages.,Ожидание сообщений.
 DOOR_OPEN,E — open door,E — открыть дверь
