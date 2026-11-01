@@ -336,6 +336,8 @@ func _run() -> void:
 	game.disable_threats()
 	game.queue_free()
 	await get_tree().process_frame
+	# AudioServer releases stopped playbacks on its mixing thread, not this frame.
+	await get_tree().create_timer(0.2).timeout
 	print("OUTAGE SMOKE: %s (%d failures)" % ["PASS" if failures == 0 else "FAIL", failures])
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("window.threatTestResult = " + JSON.stringify({"failures": failures}))

@@ -45,6 +45,8 @@ func _run() -> void:
 	_release_actions()
 	game.queue_free()
 	await process_frame
+	# AudioServer releases stopped playbacks on its mixing thread, not this frame.
+	await create_timer(0.2).timeout
 	print("STAMINA SMOKE: %s (%d failures)" % ["PASS" if failures == 0 else "FAIL", failures])
 	quit(0 if failures == 0 else 1)
 

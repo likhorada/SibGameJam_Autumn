@@ -58,6 +58,12 @@ func _run() -> void:
 		"Neighbor discovery uses the same detected cue",
 	)
 
+	var previous_run: WeakRef = weakref(game)
+	game.queue_free()
+	# Let scene teardown and the audio server release their playback references.
+	await process_frame
+	await create_timer(0.2).timeout
+	expect(previous_run.get_ref() == null, "Run is freed before shutting down the audio server")
 	if failures == 0:
 		print("THREAT AUDIO SMOKE: PASS (0 failures)")
 	else:
