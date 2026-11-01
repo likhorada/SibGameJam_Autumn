@@ -37,3 +37,7 @@ func exit_point(index: int) -> Vector3:
 
 func event(_id: String) -> void:
 	pass
+
+
+func start_route() -> void:
+	working = false

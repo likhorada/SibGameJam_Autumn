@@ -76,7 +76,7 @@ func _load_stage() -> void:
 
 func _begin_route(points: Array) -> void:
 	route = points.duplicate(true)
-	location.working = false
+	location.start_route()
 	if route.is_empty():
 		push_error("Observation route is empty: %s" % location.scene_file_path)
 		return

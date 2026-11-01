@@ -146,37 +146,43 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -5)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, -4)
 
 [node name="Guy" parent="Pedestrians/AlleyWalker0" instance=ExtResource("guy")]
-shirt_color = Color(0.32549, 0.407843, 0.478431, 1)
+appearance = 1
+phase_offset = 0.13
 
 [node name="AlleyWalker1" type="Node3D" parent="Pedestrians" unique_id=55395585]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0, -4)
 
 [node name="Guy" parent="Pedestrians/AlleyWalker1" instance=ExtResource("guy")]
-shirt_color = Color(0.470588, 0.403922, 0.486275, 1)
+appearance = 2
+phase_offset = 0.57
 
 [node name="AvenueWalker0" type="Node3D" parent="Pedestrians" unique_id=1546012713]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -15)
 
 [node name="Guy" parent="Pedestrians/AvenueWalker0" instance=ExtResource("guy")]
-shirt_color = Color(0.32549, 0.407843, 0.478431, 1)
+appearance = 3
+phase_offset = 0.36
 
 [node name="AvenueWalker1" type="Node3D" parent="Pedestrians" unique_id=1124268832]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -15)
 
 [node name="Guy" parent="Pedestrians/AvenueWalker1" instance=ExtResource("guy")]
-shirt_color = Color(0.470588, 0.403922, 0.486275, 1)
+appearance = 1
+phase_offset = 0.81
 
 [node name="ParkWalker0" type="Node3D" parent="Pedestrians" unique_id=1068915499]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -4)
 
 [node name="Guy" parent="Pedestrians/ParkWalker0" instance=ExtResource("guy")]
-shirt_color = Color(0.32549, 0.407843, 0.478431, 1)
+appearance = 2
+phase_offset = 0.24
 
 [node name="ParkWalker1" type="Node3D" parent="Pedestrians" unique_id=1165197231]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -4)
 
 [node name="Guy" parent="Pedestrians/ParkWalker1" instance=ExtResource("guy")]
-shirt_color = Color(0.470588, 0.403922, 0.486275, 1)
+appearance = 3
+phase_offset = 0.69
 
 [node name="AlleyPath" type="MeshInstance3D" parent="." unique_id=1087666921]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.2, -0.01, -3)

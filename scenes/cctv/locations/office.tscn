@@ -1,7 +1,5 @@
 [gd_scene format=3 uid="uid://c53gehbbjoxfp"]
 
-[ext_resource type="PackedScene" path="res://scenes/cctv/guy_actor.tscn" id="guy"]
-
 [ext_resource type="Texture2D" uid="uid://brm4lab5imly0" path="res://assets/textures/OfficeFloorTex.png" id="2_02brl"]
 [ext_resource type="Texture2D" uid="uid://dnxpx0nxt4g6w" path="res://assets/textures/WallHomeNormalTex.png" id="3_exvyr"]
 [ext_resource type="PackedScene" uid="uid://g6t6to7fxj31" path="res://assets/models/Cubicle.glb" id="6_px62x"]
@@ -9,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://dwpx08medmoac" path="res://assets/models/Door.glb" id="8_exvyr"]
 [ext_resource type="PackedScene" uid="uid://bmcce1bg846bn" path="res://assets/models/Laptop.glb" id="9_px62x"]
 [ext_resource type="PackedScene" path="res://scenes/cctv/cctv_camera.tscn" id="camera"]
+[ext_resource type="PackedScene" path="res://scenes/cctv/guy_actor.tscn" id="guy"]
 [ext_resource type="Script" uid="uid://mkb8damkfxii" path="res://scripts/cctv/office_location.gd" id="script"]
 [ext_resource type="Script" uid="uid://uvxn40cqfjdj" path="res://scripts/cctv/observation_waypoint.gd" id="waypoint"]
 
@@ -20,31 +19,6 @@ texture_filter = 4
 [sub_resource type="BoxMesh" id="Box0"]
 material = SubResource("StandardMaterial3D_b4ltm")
 size = Vector3(36, 0.3, 38)
-
-[sub_resource type="StandardMaterial3D" id="Mat1"]
-albedo_color = Color(0.7411765, 0.5294118, 0.2509804, 1)
-
-[sub_resource type="BoxMesh" id="Box1"]
-material = SubResource("Mat1")
-size = Vector3(0.6, 0.8, 0.4)
-
-[sub_resource type="StandardMaterial3D" id="Mat2"]
-albedo_color = Color(0.7137255, 0.61960787, 0.52156866, 1)
-
-[sub_resource type="BoxMesh" id="Box2"]
-material = SubResource("Mat2")
-size = Vector3(0.35, 0.4, 0.35)
-
-[sub_resource type="StandardMaterial3D" id="Mat3"]
-albedo_color = Color(0.13333334, 0.17254902, 0.2, 1)
-
-[sub_resource type="BoxMesh" id="Box3"]
-material = SubResource("Mat3")
-size = Vector3(0.2, 0.6, 0.25)
-
-[sub_resource type="BoxMesh" id="Box4"]
-material = SubResource("Mat1")
-size = Vector3(0.16, 0.15, 0.7)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_20vfm"]
 albedo_texture = ExtResource("3_exvyr")
@@ -63,9 +37,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
 mesh = SubResource("Box0")
 
 [node name="Target" type="Node3D" parent="." unique_id=1889645716]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.65, -0.35, 1.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.05, -0.05, 0.6)
 
-[node name="Guy" parent="Target" instance=ExtResource("guy")]
+[node name="Guy" parent="Target" unique_id=1236187884 instance=ExtResource("guy")]
+rotation = Vector3(0, 3.1415927, 0)
+initial_activity = "work"
 
 [node name="Screen" type="Node3D" parent="." unique_id=731392212]
 
@@ -74,12 +50,6 @@ transform = Transform3D(1, 0, 0, 0, 0.9765355, 0.21535659, 0, -0.21535659, 0.976
 pixel_size = 0.003
 text = "0000"
 font_size = 64
-
-[node name="ExitSign" type="Label3D" parent="." unique_id=528316559]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, -6)
-pixel_size = 0.01
-text = "OFFICE / EXIT"
-font_size = 48
 
 [node name="Divider" type="MeshInstance3D" parent="." unique_id=1816771563]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 3.0509558, -2.5507813)
@@ -106,117 +76,118 @@ list_order = 1
 [node name="Route" type="Node3D" parent="." unique_id=1173603782]
 
 [node name="Point1" type="Marker3D" parent="Route" unique_id=1220480620]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.05, -0.05, 0.6)
 script = ExtResource("waypoint")
-seconds = 2.0
+seconds = 1.5
 
 [node name="Point2" type="Marker3D" parent="Route" unique_id=972629660]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 1)
 script = ExtResource("waypoint")
-
-[node name="Point3" type="Marker3D" parent="Route" unique_id=509925874]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, -6)
-script = ExtResource("waypoint")
 seconds = 7.0
 
-[node name="Cubicle" parent="." unique_id=1164718411 instance=ExtResource("6_px62x")]
+[node name="Point3" type="Marker3D" parent="Route" unique_id=509925874]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.77, 0, -10.3)
+script = ExtResource("waypoint")
+seconds = 10.0
+
+[node name="Cubicle" parent="." unique_id=1830433148 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0.049114585, 0.8405807, -0.8939743)
 
-[node name="Office-Chair" parent="Cubicle" unique_id=336899005 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle" unique_id=2046172860 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle2" parent="." unique_id=1655190744 instance=ExtResource("6_px62x")]
+[node name="Cubicle2" parent="." unique_id=1578424024 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 2.4054892, 0.8405807, -0.8939743)
 
-[node name="Office-Chair" parent="Cubicle2" unique_id=1709563728 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle2" unique_id=1029949996 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle3" parent="." unique_id=1652971545 instance=ExtResource("6_px62x")]
+[node name="Cubicle3" parent="." unique_id=705940835 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.405489, 0.8405807, -0.72927594)
 
-[node name="Office-Chair" parent="Cubicle3" unique_id=76250867 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle3" unique_id=1531481511 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle4" parent="." unique_id=2083522276 instance=ExtResource("6_px62x")]
+[node name="Cubicle4" parent="." unique_id=1488292555 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0.049114466, 0.8405807, -0.7292757)
 
-[node name="Office-Chair" parent="Cubicle4" unique_id=407990138 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle4" unique_id=1884274436 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle5" parent="." unique_id=207571505 instance=ExtResource("6_px62x")]
+[node name="Cubicle5" parent="." unique_id=680705739 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.049114, 0.8405807, -0.8939743)
 
-[node name="Office-Chair" parent="Cubicle5" unique_id=255786435 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle5" unique_id=763989507 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle6" parent="." unique_id=1403143675 instance=ExtResource("6_px62x")]
+[node name="Cubicle6" parent="." unique_id=883585465 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 9.405489, 0.8405807, -0.8939743)
 
-[node name="Office-Chair" parent="Cubicle6" unique_id=686760704 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle6" unique_id=891768538 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle7" parent="." unique_id=175411829 instance=ExtResource("6_px62x")]
+[node name="Cubicle7" parent="." unique_id=349445967 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 9.405489, 0.8405807, -0.72927594)
 
-[node name="Office-Chair" parent="Cubicle7" unique_id=72065595 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle7" unique_id=2037001389 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle8" parent="." unique_id=1235555757 instance=ExtResource("6_px62x")]
+[node name="Cubicle8" parent="." unique_id=1390206538 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 7.049114, 0.8405807, -0.7292757)
 
-[node name="Office-Chair" parent="Cubicle8" unique_id=1715107818 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle8" unique_id=2090390031 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle9" parent="." unique_id=1009055133 instance=ExtResource("6_px62x")]
+[node name="Cubicle9" parent="." unique_id=1289428027 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0.049114585, 0.8405807, -5.8939743)
 
-[node name="Office-Chair" parent="Cubicle9" unique_id=766535102 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle9" unique_id=604973926 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle10" parent="." unique_id=1974715850 instance=ExtResource("6_px62x")]
+[node name="Cubicle10" parent="." unique_id=419582517 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 2.4054892, 0.8405807, -5.8939743)
 
-[node name="Office-Chair" parent="Cubicle10" unique_id=1996285422 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle10" unique_id=194247080 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle11" parent="." unique_id=917367637 instance=ExtResource("6_px62x")]
+[node name="Cubicle11" parent="." unique_id=1276153823 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.405489, 0.8405807, -5.7292757)
 
-[node name="Office-Chair" parent="Cubicle11" unique_id=1240921370 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle11" unique_id=2104560077 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle12" parent="." unique_id=2064683300 instance=ExtResource("6_px62x")]
+[node name="Cubicle12" parent="." unique_id=532980547 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0.049114466, 0.8405807, -5.7292757)
 
-[node name="Office-Chair" parent="Cubicle12" unique_id=2124840883 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle12" unique_id=2092564479 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle13" parent="." unique_id=1829677362 instance=ExtResource("6_px62x")]
+[node name="Cubicle13" parent="." unique_id=1767840966 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 7.049114, 0.8405807, -5.8939743)
 
-[node name="Office-Chair" parent="Cubicle13" unique_id=1647905688 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle13" unique_id=1313309785 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle14" parent="." unique_id=944567605 instance=ExtResource("6_px62x")]
+[node name="Cubicle14" parent="." unique_id=1897563877 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 9.405489, 0.8405807, -5.8939743)
 
-[node name="Office-Chair" parent="Cubicle14" unique_id=793434482 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle14" unique_id=358112494 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle15" parent="." unique_id=1065709161 instance=ExtResource("6_px62x")]
+[node name="Cubicle15" parent="." unique_id=1424644949 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 9.405489, 0.8405807, -5.7292757)
 
-[node name="Office-Chair" parent="Cubicle15" unique_id=1898016508 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle15" unique_id=1171149738 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Cubicle16" parent="." unique_id=369843116 instance=ExtResource("6_px62x")]
+[node name="Cubicle16" parent="." unique_id=122698171 instance=ExtResource("6_px62x")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 7.049114, 0.8405807, -5.7292757)
 
-[node name="Office-Chair" parent="Cubicle16" unique_id=922877781 instance=ExtResource("7_kq2j6")]
+[node name="Office-Chair" parent="Cubicle16" unique_id=1063538177 instance=ExtResource("7_kq2j6")]
 transform = Transform3D(-1.2894859e-08, 0, -0.295, 0, 0.295, 0, 0.295, 0, -1.2894859e-08, 1.4033728, -0.29501677, 0.03720838)
 
-[node name="Door" parent="." unique_id=1884931741 instance=ExtResource("8_exvyr")]
+[node name="Door" parent="." unique_id=1627975427 instance=ExtResource("8_exvyr")]
 transform = Transform3D(0.71500003, 0, -5.3290705e-15, 0, 0.52, 0, -3.5527137e-15, 0, 0.52, 4.771389, 1.1036489, -10.32027)
 
-[node name="Laptop" parent="." unique_id=614518301 instance=ExtResource("9_px62x")]
+[node name="Laptop" parent="." unique_id=1838549437 instance=ExtResource("9_px62x")]
 transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -0.06313181, 0.93177223, -0.20096982)
