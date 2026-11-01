@@ -1,16 +1,19 @@
 class_name RunRandom
 extends RefCounted
 ## A fresh seed per run, independent named streams for gameplay and presentation.
-static var _last_seed: int = -1
 
 
 static func fresh_seed() -> int:
+	# Keep cross-scene state on the main loop, whose lifetime is explicit.
+	# A static variable retains this GDScript resource at engine shutdown.
+	var loop := Engine.get_main_loop()
+	var last_seed: int = loop.get_meta(&"_last_run_seed", -1)
 	var source := RandomNumberGenerator.new()
 	source.randomize()
 	var value := source.randi()
-	while value == _last_seed:
+	while value == last_seed:
 		value = source.randi()
-	_last_seed = value
+	loop.set_meta(&"_last_run_seed", value)
 	return value
 
 

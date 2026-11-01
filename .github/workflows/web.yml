@@ -76,12 +76,13 @@ jobs:
           # The regular startup above only opens the menu. Exercise its Play
           # transition so scene-tree contract errors are caught before export.
           godot --headless --path . --script res://tests/menu_smoke.gd 2>&1 | tee "$RUNNER_TEMP/menu-smoke.log"
-          # Ignore only the known shutdown leak, not runtime/script errors.
-          if grep -E 'SCRIPT ERROR:|ERROR:' "$RUNNER_TEMP/menu-smoke.log" | grep -Fv 'ERROR: 2 resources still in use at exit'; then exit 1; fi
+          # Teardown must release the game, audio playbacks and run seed state.
+          if grep -E 'SCRIPT ERROR:|ERROR:' "$RUNNER_TEMP/menu-smoke.log"; then exit 1; fi
           if grep -F 'MENU SMOKE: FAIL' "$RUNNER_TEMP/menu-smoke.log"; then exit 1; fi
           grep -F 'MENU SMOKE: PASS' "$RUNNER_TEMP/menu-smoke.log"
           # Keep audio/stamina cue wiring covered in the build that gets deployed.
           godot --headless --path . --script res://tests/stamina_smoke.gd 2>&1 | tee "$RUNNER_TEMP/stamina-smoke.log"
+          if grep -E 'SCRIPT ERROR:|ERROR:' "$RUNNER_TEMP/stamina-smoke.log"; then exit 1; fi
           if grep -F 'STAMINA SMOKE: FAIL' "$RUNNER_TEMP/stamina-smoke.log"; then exit 1; fi
           grep -F 'STAMINA SMOKE: PASS' "$RUNNER_TEMP/stamina-smoke.log"
           mkdir -p build/web

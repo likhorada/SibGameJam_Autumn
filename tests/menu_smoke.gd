@@ -65,5 +65,14 @@ func _run() -> void:
 	prefs.language = old_language
 	prefs.apply()
 	prefs.save()
+	# Stop mixing before freeing the loaded game's audio resources. The menu
+	# transition starts the ambient loops even in a headless smoke test.
+	if current_scene != menu:
+		current_scene.ambient.set_process(false)
+		current_scene.ambient.stop_all()
+		await create_timer(0.2).timeout
+	current_scene.queue_free()
+	await process_frame
+	await create_timer(0.2).timeout
 	print("MENU SMOKE: %s (%d failures)" % ["PASS" if failures == 0 else "FAIL", failures])
 	quit(0 if failures == 0 else 1)
