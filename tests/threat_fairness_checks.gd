@@ -130,7 +130,7 @@ func _run() -> void:
 	expect(game.police.visual.visible and game.threats.capture_in_progress, "Watchdog cannot delete confirmed attacker")
 	game._process(0.7)
 	await capture("capture")
-	game._process(0.6)
+	game._process(game.capture_cutscene.duration_seconds)
 	expect(game.run_ended and game.failure_reason == "POLICE_DEATH", "Capture ends once with the right reason")
 	# Forced door opening safely displaces a blocking player.
 	await setup()
@@ -149,7 +149,7 @@ func _run() -> void:
 	game.threats.advance(5.0)
 	game.threats.advance(3.0)
 	expect(game.neighbor.visit == PsychNeighbor.Visit.SEARCHING and not game.run_ended, "Neighbor entry starts search")
-	game.threats.advance(game.neighbor.settings.search_seconds)
+	game.threats.advance(game.neighbor.settings.search_seconds + game.neighbor.settings.pressure_seconds)
 	game.threats.advance(game.neighbor.settings.departure_seconds)
 	expect(not game.run_ended and game.neighbor.visit == PsychNeighbor.Visit.DORMANT, "Hidden player survives neighbor search")
 	# Entity at fusebox: eject, retain lever progress, fixed warning bonus.

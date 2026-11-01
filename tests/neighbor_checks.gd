@@ -191,7 +191,7 @@ func _run() -> void:
 	for sample: int in 11:
 		manager.advance(0.1)
 	expect(game.capture_reason == "NEIGHBOR_DEATH" and not game.run_ended, "Neighbor requires confirmed sight and visible capture")
-	game._process(1.3)
+	game._process(game.capture_cutscene.duration_seconds + 0.1)
 	expect(game.run_ended and game.failure_reason == "NEIGHBOR_DEATH", "Neighbor capture completes")
 	expect(not neighbor.visual.visible and not neighbor.footsteps_audio.playing and not manager.is_busy(), "Death cleans neighbor and audio")
 	var death_text := ""

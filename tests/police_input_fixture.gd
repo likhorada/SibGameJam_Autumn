@@ -44,7 +44,7 @@ func _publish_police() -> void:
 		"bed": _aim_spot(true)
 		"trigger": trigger_police()
 		"active": threats.advance(12.0)
-		"search_done": threats.advance(police.settings.search_seconds)
+		"search_done": threats.advance(police.settings.search_seconds + police.settings.pressure_seconds)
 		"gone":
 			threats.advance(police.settings.departure_seconds)
 			threats.advance(1.0)

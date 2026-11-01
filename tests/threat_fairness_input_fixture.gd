@@ -2,6 +2,7 @@ extends Node
 ## Test-only JS bridge. Commands arrange encounters; E, mouse and F use real input.
 var game: Node3D
 var clicks: int = 0
+var _resetting: bool = false
 
 
 func _input(event: InputEvent) -> void:
@@ -13,12 +14,15 @@ func _ready() -> void:
 	if OS.has_feature("web"):
 		var locale := str(JavaScriptBridge.eval("new URL(location.href).searchParams.get('lang') || 'en'"))
 		TranslationServer.set_locale(locale)
-	_setup()
+	await _setup()
 
 
 func _setup() -> void:
+	_resetting = true
 	if is_instance_valid(game):
 		game.queue_free()
+		# Let old cameras, pointer cleanup and viewport overrides finish first.
+		await get_tree().process_frame
 	game = load("res://scenes/main.tscn").instantiate()
 	add_child(game)
 	game.threats.set_process(false)
@@ -26,10 +30,11 @@ func _setup() -> void:
 	game.ambient.random_chance = 0.0
 	game.transition_seconds = 0.05
 	game.terminal_ui.notepad.editor.text = "web evidence"
+	_resetting = false
 
 
 func _process(_delta: float) -> void:
-	if not OS.has_feature("web"):
+	if not OS.has_feature("web") or _resetting:
 		return
 	var command = JavaScriptBridge.eval("window.fairnessCommand || null")
 	if command != null:
@@ -43,7 +48,7 @@ func _process(_delta: float) -> void:
 				game.player.head.rotation = Vector3(-0.25, 0, 0)
 				game.player.stop_motion(true)
 			"search": game.threats.advance(12.0)
-			"departure": game.threats.advance(6.0)
+			"departure": game.threats.advance(game.police.settings.search_seconds + game.police.settings.pressure_seconds)
 			"gone":
 				game.threats.advance(3.01)
 				game.threats.advance(1.01)
@@ -53,13 +58,13 @@ func _process(_delta: float) -> void:
 				game.police.visual.look_at(Vector3(0, 0, 1.1), Vector3.UP)
 				game.threats.set_process(true)
 			"blackout":
-				_setup()
+				await _setup()
 				game.trigger_power_outage()
 				game.player.position = Vector3(4.2, 0.03, -5.0)
 			"fusebox": game.enter_fusebox()
 			"encounter": game.outage.entity._try_encounter()
 			"active": game.threats.advance(game.outage.entity.warning_duration)
-			"reset": _setup()
+			"reset": await _setup()
 	var entity: CorridorEntity = game.outage.entity
 	var telemetry := {
 		"clicks": clicks,
@@ -74,6 +79,8 @@ func _process(_delta: float) -> void:
 		"held_door": game.room_door.held_by_police,
 		"ended": game.run_ended,
 		"capture": game.capture_reason,
+		"capture_elapsed": game.capture_cutscene.elapsed if is_instance_valid(game.capture_cutscene) else 0.0,
+		"capture_duration": game.capture_cutscene.duration_seconds if is_instance_valid(game.capture_cutscene) else 0.0,
 		"reason": game.failure_reason,
 		"notes": game.terminal_ui.notepad.editor.text,
 		"entity_phase": entity.phase,

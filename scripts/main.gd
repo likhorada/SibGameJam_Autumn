@@ -1,6 +1,11 @@
 extends Node3D
 
 signal hiding_changed(hidden: bool)
+const DEFEAT_SCENES := {
+	"POLICE_DEATH": preload("res://scenes/threats/police_defeat.tscn"),
+	"NEIGHBOR_DEATH": preload("res://scenes/threats/neighbor_defeat.tscn"),
+	"ENTITY_DEATH": preload("res://scenes/threats/entity_defeat.tscn"),
+}
 enum Mode { WALKING, ENTERING, COMPUTER, LEAVING, FUSEBOX_ENTERING, FUSEBOX, FUSEBOX_LEAVING, HIDING, CAPTURED }
 
 @export_range(0.02, 2.0) var transition_seconds: float = 0.7
@@ -15,9 +20,7 @@ var _focus_active: bool = true
 var run_ended: bool = false
 var failure_reason: String = ""
 var capture_reason: String = ""
-var _capture_elapsed: float = 0.0
-var _capture_overlay: ColorRect
-var _capture_close_view: Transform3D
+var capture_cutscene: DefeatCutscene
 @onready var visual_effects: VisualEffects = $VisualEffects
 
 @onready var player: ApartmentPlayer = $Player
@@ -137,6 +140,11 @@ func _physics_process(_delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if mode == Mode.CAPTURED:
+		if event.is_action_pressed("back"):
+			_release_pointer()
+		get_viewport().set_input_as_handled()
+		return
 	if dev_menu.is_open:
 		return
 	if mode == Mode.FUSEBOX or mode == Mode.FUSEBOX_ENTERING:
@@ -480,8 +488,8 @@ func _finish_report(won: bool, score: int, reason: String = "") -> void:
 	if run_ended:
 		return
 	run_ended = true
-	if is_instance_valid(_capture_overlay):
-		_capture_overlay.queue_free()
+	if is_instance_valid(capture_cutscene):
+		capture_cutscene.queue_free()
 	failure_reason = reason
 	threats.disable_threats()
 	if is_instance_valid(shift):
@@ -597,10 +605,11 @@ func prepare_for_threat() -> bool:
 
 
 func begin_threat_capture(reason: String, enemy: Node3D) -> bool:
-	if run_ended or not capture_reason.is_empty() or is_hidden():
+	if run_ended or not capture_reason.is_empty() or is_hidden() or not DEFEAT_SCENES.has(reason) or not is_instance_valid(enemy):
 		return false
+	if dev_menu.is_open:
+		dev_menu.close_menu()
 	capture_reason = reason
-	_capture_elapsed = 0.0
 	threats.capture_in_progress = true
 	if is_instance_valid(shift):
 		shift.set_process(false)
@@ -613,30 +622,36 @@ func begin_threat_capture(reason: String, enemy: Node3D) -> bool:
 	transition_camera.fov = player.camera_motion.base_fov
 	transition_camera.make_current()
 	player.set_controls_enabled(false)
+	player.process_mode = Node.PROCESS_MODE_DISABLED
 	_drop_stale_key_state(false)
 	mode = Mode.CAPTURED
-	# Observe the actual attacker first, then cut to a close shot while black.
+	# Observe the actual attacker, then switch to a controlled stage while black.
 	var face := enemy.global_position + Vector3.UP * 1.6
 	if transition_camera.global_position.distance_squared_to(face) > 0.001:
 		transition_camera.look_at(face, Vector3.UP)
-	_capture_close_view = Transform3D(Basis.IDENTITY, face + enemy.global_basis.z * -0.9)
-	_capture_close_view = _capture_close_view.looking_at(face, Vector3.UP)
-	_capture_overlay = ColorRect.new()
-	_capture_overlay.color = Color(0, 0, 0, 0)
-	_capture_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	$UI.add_child(_capture_overlay)
-	_capture_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	terminal_ui.process_mode = Node.PROCESS_MODE_DISABLED
+	cctv_system.set_watching(false)
+	cctv_system.process_mode = Node.PROCESS_MODE_DISABLED
+	$Apartment.process_mode = Node.PROCESS_MODE_DISABLED
+	power.set_flashlight_enabled(false)
+	power.process_mode = Node.PROCESS_MODE_DISABLED
+	ambient.stop_all()
+	ambient.process_mode = Node.PROCESS_MODE_DISABLED
+	dev_menu.visible = false
+	dev_menu.process_mode = Node.PROCESS_MODE_DISABLED
+	for audio: AudioStreamPlayer3D in threats.find_children("*", "AudioStreamPlayer3D", true, false):
+		audio.stop()
+	hud.clear_smear()
+	capture_cutscene = DEFEAT_SCENES[reason].instantiate()
+	capture_cutscene.autoplay = false
+	capture_cutscene.position = Vector3(0, -40, 0)
+	add_child(capture_cutscene)
+	capture_cutscene.finished.connect(_finish_report.bind(false, 0, reason))
 	return true
 
 
 func _process(delta: float) -> void:
 	if capture_reason.is_empty() or run_ended:
 		return
-	_capture_elapsed += delta
-	if _capture_elapsed < 0.6:
-		_capture_overlay.color.a = clampf((_capture_elapsed - 0.3) / 0.3, 0.0, 1.0)
-	elif _capture_elapsed < 1.2:
-		transition_camera.global_transform = _capture_close_view
-		_capture_overlay.color.a = 1.0 - clampf((_capture_elapsed - 0.6) / 0.2, 0.0, 1.0)
-	else:
-		fail_from_threat(capture_reason)
+	if is_instance_valid(capture_cutscene):
+		capture_cutscene.advance(delta)

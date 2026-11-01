@@ -6,8 +6,10 @@ extends Node3D
 @export_range(0.0, 40.0) var max_yaw_degrees: float = 18.0
 @export_range(0.0, 20.0) var max_pitch_degrees: float = 6.0
 @export_range(35.0, 80.0) var view_fov: float = 60.0
+@export var pressure_checkpoint: int = 1
 
 @onready var view: Marker3D = $View
+@onready var pressure_point: Marker3D = get_node_or_null("PressurePoint")
 
 
 func find_safe_exit(player: ApartmentPlayer, entry_pose: Transform3D, game: Node3D = null) -> Variant:

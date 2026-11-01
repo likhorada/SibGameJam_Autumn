@@ -68,7 +68,10 @@ try {
     let state;
     for (let i = 0; i < seconds * 20; i++) {
       state = await evaluate('window.fairnessTelemetry');
-      if (state && predicate(state)) return state;
+      if (state && predicate(state)) {
+        const browserLocked = await evaluate('!!document.pointerLockElement');
+        if (state.captured === browserLocked) return state;
+      }
       await sleep(50);
     }
     throw new Error(message + ': ' + JSON.stringify(state) + ' browser=' + JSON.stringify(await evaluate('({focus:document.hasFocus(), lock:!!document.pointerLockElement})')) + ' errors=' + JSON.stringify(errors));
@@ -108,8 +111,17 @@ try {
     await tap('KeyE', 'e', 69); await wait(s => !s.hidden && !s.ended, 'Real E exit after departure failed');
     await command('police'); await sleep(100); await command('search'); await sleep(100); await command('detect');
     await wait(s => s.capture === 'POLICE_DEATH' && !s.ended, 'Confirmed sight did not start staging');
+    const captureStart = Date.now();
     await capture(locale + '_capture');
+    await tap('Escape', 'Escape', 27);
+    await tap('KeyE', 'e', 69);
+    await tap('KeyW', 'w', 87);
+    await call('Emulation.setDeviceMetricsOverride', {width:960, height:540, deviceScaleFactor:1, mobile:false});
+    await wait(s => s.capture_elapsed >= 3 && !s.ended && s.mode === 8 && s.capture_duration >= 5, 'Long defeat scene was skipped or ended early');
+    await capture(locale + '_police_pin');
     await wait(s => s.ended && s.reason === 'POLICE_DEATH' && s.notes === 'web evidence', 'Staged capture result or notes failed');
+    if (Date.now() - captureStart < 4500) throw new Error('Defeat did not play for its full real-time duration');
+    await call('Emulation.setDeviceMetricsOverride', {width:1280, height:720, deviceScaleFactor:1, mobile:false});
     await command('blackout'); await wait(s => s.flashlight && !s.ended, 'Blackout reset failed');
     await command('fusebox'); await wait(s => s.mode === 5, 'Fusebox did not open');
     await command('encounter'); await wait(s => s.mode === 0 && s.entity_phase === 2 && s.warning_duration === 4 && s.warning === (locale === 'ru' ? 'ЗАМРИ' : 'FREEZE'), 'Entity forced exit and technical allowance failed');
@@ -120,6 +132,10 @@ try {
     await capture(locale + '_freeze_resized');
     await tap('Escape', 'Escape', 27); await wait(s => !s.captured, 'Esc did not release pointer');
     await sleep(2200); await click(); await wait(s => s.captured, 'Pointer not recoverable after Esc');
+    // Do not navigate away with an unresolved pointer-lock request from this page.
+    await tap('Escape', 'Escape', 27);
+    await wait(s => !s.captured, 'Pointer did not unlock before locale reload');
+    await sleep(2200);
     console.log('FAIRNESS INPUT ' + locale.toUpperCase() + ': PASS');
   }
   if (errors.length) throw new Error(errors.join('\n'));

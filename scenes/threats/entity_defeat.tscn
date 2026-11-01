@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/threats/defeat_stage.tscn" id="1"]
+
+[node name="EntityDefeat" instance=ExtResource("1")]
+kind = 2
+duration_seconds = 6.4
+
+[node name="KeyLight" parent="." index="6"]
+light_color = Color(0.62, 0.91, 0.73, 1)

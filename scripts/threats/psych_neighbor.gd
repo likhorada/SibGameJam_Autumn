@@ -18,6 +18,7 @@ var _handle_left: float = 0.0
 var _entry_from: Vector3
 var _rng := RandomNumberGenerator.new()
 var awareness := ThreatAwareness.new()
+var pressure := VisitorPressure.new()
 var _search_route: Array[Vector3] = []
 var _depart_route: Array[Vector3] = []
 var _inside: bool = false
@@ -56,10 +57,19 @@ func _ready() -> void:
 	awareness.recovery_seconds = settings.suspicion_recovery_seconds
 	awareness.sight_range = settings.sight_range
 	awareness.half_angle = settings.sight_half_angle
+	awareness.close_distance = settings.close_distance
+	awareness.close_confirm_seconds = settings.close_capture_seconds
 
 
 func can_start() -> bool:
 	return is_instance_valid(game) and is_instance_valid(door) and game.power.powered and not game.run_ended
+
+
+func can_schedule() -> bool:
+	if not can_start():
+		return false
+	var offset: Vector3 = door.get_node("Approach").global_position - game.player.global_position
+	return Vector2(offset.x, offset.z).length() >= maxf(1.5, settings.close_distance + 0.5)
 
 
 func warning_started() -> void:
@@ -67,7 +77,8 @@ func warning_started() -> void:
 	_elapsed = 0.0
 	entry_seconds = 0.0
 	_inside = false
-	awareness.suspicion = 0.0
+	awareness.reset()
+	pressure.reset()
 	visual.global_position = door.get_node("Approach").global_position
 	visual.show()
 	_face(door.get_node("Waiting").global_position)
@@ -83,7 +94,14 @@ func active_started() -> void:
 
 
 func advance(delta: float) -> void:
-	if not game.capture_reason.is_empty():
+	if visit == Visit.DORMANT or not game.capture_reason.is_empty():
+		return
+	if awareness.advance_close(game, visual, delta):
+		game.begin_threat_capture("NEIGHBOR_DEATH", visual)
+		return
+	if awareness.close_now:
+		footsteps_audio.stop()
+		handle_audio.stop()
 		return
 	if visit in [Visit.SEARCHING, Visit.DEPARTING] and _inside:
 		if awareness.advance(game, visual, delta):
@@ -114,14 +132,19 @@ func advance(delta: float) -> void:
 				_inside = true
 				visit = Visit.SEARCHING
 				_elapsed = 0.0
+				pressure.reset(_search_route, settings.search_seconds, settings.pressure_seconds, true)
 		Visit.RETREATING:
 			visual.global_position = _entry_from.lerp(door.get_node("Waiting").global_position, clampf(_elapsed / 0.6, 0.0, 1.0))
 			if _elapsed >= 0.6:
 				_begin_rattle()
 		Visit.SEARCHING:
-			_move_route(_search_route, _elapsed / settings.search_seconds)
-			_steps()
-			if _elapsed >= settings.search_seconds:
+			pressure.advance(game, visual, delta)
+			_elapsed = pressure.movement_elapsed
+			if pressure.holding:
+				footsteps_audio.stop()
+			else:
+				_steps()
+			if pressure.finished:
 				_begin_departure()
 		Visit.DEPARTING:
 			_move_route(_depart_route, _elapsed / maxf(0.5, settings.departure_seconds))
@@ -220,7 +243,8 @@ func resolved_started(_outcome: StringName) -> void:
 func ended(_outcome: StringName) -> void:
 	visit = Visit.DORMANT
 	entry_seconds = 0.0
-	awareness.suspicion = 0.0
+	awareness.reset()
+	pressure.reset()
 	_inside = false
 	if is_instance_valid(visual):
 		visual.hide()

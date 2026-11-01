@@ -177,7 +177,7 @@ func _pursue_player(delta: float) -> void:
 	var to_player := player_position - global_position
 	to_player.y = 0.0
 	if _touching_player():
-		game.fail_from_threat("ENTITY_DEATH")
+		game.begin_threat_capture("ENTITY_DEATH", visual)
 		return
 	if to_player.length_squared() < 0.0001:
 		return
@@ -186,10 +186,10 @@ func _pursue_player(delta: float) -> void:
 	var collision := move_and_collide(velocity * delta)
 	velocity = Vector3.ZERO
 	if collision != null and collision.get_collider() == game.player:
-		game.fail_from_threat("ENTITY_DEATH")
+		game.begin_threat_capture("ENTITY_DEATH", visual)
 		return
 	if _touching_player():
-		game.fail_from_threat("ENTITY_DEATH")
+		game.begin_threat_capture("ENTITY_DEATH", visual)
 
 
 func _touching_player() -> bool:

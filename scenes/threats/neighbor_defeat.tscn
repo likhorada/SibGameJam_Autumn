@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/threats/defeat_stage.tscn" id="1"]
+
+[node name="NeighborDefeat" instance=ExtResource("1")]
+kind = 1
+duration_seconds = 6.2
+
+[node name="KeyLight" parent="." index="6"]
+light_color = Color(1, 0.72, 0.49, 1)

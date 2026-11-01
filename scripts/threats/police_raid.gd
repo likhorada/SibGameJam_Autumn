@@ -1,6 +1,6 @@
 class_name PoliceRaid
 extends ThreatEvent
-## Visible visit; warning is safe, capture requires body-based confirmed sight.
+## Warning protects distant players; close contact is dangerous during approach too.
 
 enum Visit { DORMANT, WARNING, SEARCHING, DEPARTING }
 const VISUAL := preload("res://scenes/threats/police_officer.tscn")
@@ -13,6 +13,7 @@ var voice_audio: AudioStreamPlayer3D
 var footsteps_audio: AudioStreamPlayer3D
 var arrival_audio: AudioStreamPlayer3D
 var awareness := ThreatAwareness.new()
+var pressure := VisitorPressure.new()
 var _approach: Vector3
 var _entry_pending: bool = false
 var _elapsed: float = 0.0
@@ -43,6 +44,8 @@ func _ready() -> void:
 	awareness.recovery_seconds = settings.suspicion_recovery_seconds
 	awareness.sight_range = settings.sight_range
 	awareness.half_angle = settings.sight_half_angle
+	awareness.close_distance = settings.close_distance
+	awareness.close_confirm_seconds = settings.close_capture_seconds
 
 
 func _audio(stream: AudioStream, volume: float) -> AudioStreamPlayer3D:
@@ -61,10 +64,19 @@ func can_start() -> bool:
 	return is_instance_valid(game) and game.power.powered and not game.run_ended
 
 
+func can_schedule() -> bool:
+	if not can_start():
+		return false
+	var spawn: Vector3 = game.room_door.get_node("Approach").global_position
+	var offset: Vector3 = spawn - game.player.global_position
+	return Vector2(offset.x, offset.z).length() >= maxf(1.5, settings.close_distance + 0.5)
+
+
 func warning_started() -> void:
 	visit = Visit.WARNING
 	_elapsed = 0.0
-	awareness.suspicion = 0.0
+	awareness.reset()
+	pressure.reset()
 	_approach = game.room_door.get_node("Approach").global_position
 	visual.global_position = _approach
 	visual.look_at(_route[0], Vector3.UP)
@@ -90,10 +102,18 @@ func active_started() -> void:
 	visual.global_position = _route[0]
 	footsteps_audio.pitch_scale = 1.0
 	footsteps_audio.play()
+	pressure.reset(_route, settings.search_seconds, settings.pressure_seconds)
 
 
 func advance(delta: float) -> void:
-	if not game.capture_reason.is_empty():
+	if visit == Visit.DORMANT or not game.capture_reason.is_empty():
+		return
+	if awareness.advance_close(game, visual, delta):
+		game.begin_threat_capture("POLICE_DEATH", visual)
+		return
+	if awareness.close_now:
+		# Face the player and stop briefly; do not keep walking through them.
+		footsteps_audio.stop()
 		return
 	_elapsed += delta
 	if visit == Visit.WARNING:
@@ -124,17 +144,22 @@ func advance(delta: float) -> void:
 			_elapsed = maxf(0.0, _elapsed - delta)
 			footsteps_audio.stop()
 			return
-		if not footsteps_audio.playing:
-			footsteps_audio.play()
 		if visit == Visit.SEARCHING:
-			_move(_route, _elapsed / maxf(0.5, settings.search_seconds))
-			if _elapsed >= settings.search_seconds:
+			pressure.advance(game, visual, delta)
+			_elapsed = pressure.movement_elapsed
+			if pressure.holding:
+				footsteps_audio.stop()
+			elif not footsteps_audio.playing:
+				footsteps_audio.play()
+			if pressure.finished:
 				visit = Visit.DEPARTING
 				_elapsed = 0.0
 				voice_audio.stream = settings.departure_sound if settings.departure_sound != null else settings.knock_sound
 				voice_audio.play()
 				footsteps_audio.pitch_scale = 1.15
 		else:
+			if not footsteps_audio.playing:
+				footsteps_audio.play()
 			_move(_departure, _elapsed / maxf(0.5, settings.departure_seconds))
 			if _elapsed >= settings.departure_seconds:
 				resolved.emit(&"survived")
@@ -158,7 +183,8 @@ func ended(_outcome: StringName) -> void:
 	_voice_pending = false
 	_elapsed = 0.0
 	_entry_pending = false
-	awareness.suspicion = 0.0
+	awareness.reset()
+	pressure.reset()
 	game.room_door.held_by_police = false
 	if is_instance_valid(visual):
 		visual.hide()

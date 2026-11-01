@@ -174,8 +174,8 @@ func _run() -> void:
 		expect(not game.run_ended and game.police.visit == PoliceRaid.Visit.SEARCHING and game.room_door.is_open, "Hidden player survives entry; police opens closed door")
 		game.shift._finish_stage()
 		expect(game.shift.state == ShiftDirector.State.WAITING_SCARE, "Scare queues behind inspection")
-		game.threats.advance(6.0)
-		expect(game.police.visit == PoliceRaid.Visit.DEPARTING and game.is_hidden(), "Search lasts six seconds then departure begins")
+		game.threats.advance(game.police.settings.search_seconds + game.police.settings.pressure_seconds)
+		expect(game.police.visit == PoliceRaid.Visit.DEPARTING and game.is_hidden(), "Search includes one listening pause then departure begins")
 		expect(game.police.voice_audio.stream.resource_path == "res://assets/audio/steps.wav", "Departure uses steps.wav")
 		await capture("inspection_" + String(id))
 		game.threats.advance(2.99)
@@ -215,7 +215,7 @@ func _run() -> void:
 		for sample: int in 11:
 			game.threats.advance(0.1)
 		expect(game.capture_reason == "POLICE_DEATH" and not game.run_ended, "Confirmed sight starts visible capture before result")
-		game._process(1.3)
+		game._process(game.capture_cutscene.duration_seconds + 0.1)
 		expect(game.run_ended and game.failure_reason == "POLICE_DEATH", "Capture finishes with police result")
 		expect(game.police.visit == PoliceRaid.Visit.DORMANT and not game.police.knock_audio.playing and not game.police.voice_audio.playing and not game.police.footsteps_audio.playing, "Police death cleans all event state and audio")
 		await capture("death")
@@ -226,7 +226,7 @@ func _run() -> void:
 		game.trigger_police()
 		game.threats.advance(12.0)
 		if during_departure:
-			game.threats.advance(6.0)
+			game.threats.advance(game.police.settings.search_seconds + game.police.settings.pressure_seconds)
 		game.leave_hiding(false)
 		expect(not game.run_ended and game.capture_reason.is_empty(), "Leaving during search/departure requires real sight")
 	game.fail_from_threat("POLICE_DEATH")

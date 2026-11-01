@@ -80,14 +80,14 @@ func _process(delta: float) -> void:
 	_sync_camera()
 	_scare = maxf(0.0, _scare - delta / recovery_seconds)
 	var target := maxf(_proximity(), _scare) * anxiety_strength
-	if game.run_ended:
+	if game.run_ended or not game.capture_reason.is_empty():
 		target = 0.0
 		_scare = 0.0
 	if target > anxiety:
 		anxiety = move_toward(anxiety, target, delta * 4.0)
 	else:
 		anxiety = move_toward(anxiety, target, delta / recovery_seconds)
-	var presenting: bool = not game.dev_menu.is_open and not game.run_ended
+	var presenting: bool = not game.dev_menu.is_open and not game.run_ended and game.capture_reason.is_empty()
 	game.hud.anxiety_amount = anxiety if presenting else 0.0
 	game.hud.world_effects_active = presenting and game.mode != game.Mode.COMPUTER
 	game.terminal_ui.cctv.set_anxiety(anxiety if presenting else 0.0)

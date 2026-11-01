@@ -2,6 +2,7 @@ class_name PoliceRaidConfig
 extends Resource
 
 @export_range(0.5, 30.0) var search_seconds: float = 6.0
+@export_range(0.0, 8.0) var pressure_seconds: float = 4.0
 @export_range(0.5, 15.0) var departure_seconds: float = 3.0
 @export_range(1.0, 12.0) var knock_interval: float = 4.0
 @export_range(0.0, 3.0) var voice_delay: float = 0.9
@@ -13,6 +14,8 @@ extends Resource
 @export_range(0.1, 8.0) var suspicion_recovery_seconds: float = 2.0
 @export_range(1.0, 20.0) var sight_range: float = 9.0
 @export_range(15.0, 90.0) var sight_half_angle: float = 65.0
+@export_range(0.2, 2.0) var close_distance: float = 1.0
+@export_range(0.05, 1.0) var close_capture_seconds: float = 0.25
 @export var departure_sound: AudioStream = preload("res://assets/audio/steps.wav")
 @export var footsteps: AudioStream = preload("res://assets/audio/steps.wav")
 @export_range(-30.0, 6.0) var warning_volume_db: float = -1.0

@@ -193,9 +193,12 @@ func _run() -> void:
 	var distance_during_chase := Vector2(game.player.global_position.x - active.global_position.x, game.player.global_position.z - active.global_position.z).length()
 	expect(distance_during_chase < distance_before_chase and not game.run_ended, "Pursuing entity closes distance before contact")
 	for index: int in 120:
-		if game.run_ended:
+		if not game.capture_reason.is_empty():
 			break
 		await get_tree().physics_frame
+	expect(game.capture_reason == "ENTITY_DEATH" and not game.run_ended, "Contact starts a long monster defeat scene before result")
+	if is_instance_valid(game.capture_cutscene):
+		game._process(game.capture_cutscene.duration_seconds + 0.1)
 	expect(game.run_ended and game.failure_reason == "ENTITY_DEATH" and game.process_mode == Node.PROCESS_MODE_DISABLED, "Contact during pursuit causes entity death")
 	expect(not active.visual.visible and not active.footsteps_audio.playing, "Death cleans the encounter")
 	var death_text := ""
