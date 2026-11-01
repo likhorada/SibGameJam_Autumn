@@ -63,11 +63,21 @@ func start_alarm() -> void:
 
 
 func _load_stage() -> void:
+	var carried_item: Node3D
+	if stage == 2 and is_instance_valid(location) and location.scene_file_path.ends_with("/shop.tscn") and is_instance_valid(location.target):
+		var actor := location.target.get_node_or_null("Guy")
+		if actor != null and is_instance_valid(actor.carrying):
+			carried_item = actor.carrying
 	location = stages[stage].instantiate() as ObservationLocation
 	if location == null:
 		push_error("Shift stage %d must use ObservationLocation" % stage)
 		return
 	game.cctv_system.replace_location(location)
+	# The old location is queued for deletion; rescue the paid-for bottle before
+	# that frame ends so Viktor still carries the same purchase on the street.
+	if is_instance_valid(carried_item):
+		location.bottle = carried_item
+		location.target.get_node("Guy").hold_item(carried_item, Vector3(0, -0.24, 0))
 	if location.has_method("set_code"):
 		location.set_code(code)
 	if location.has_method("set_drink"):

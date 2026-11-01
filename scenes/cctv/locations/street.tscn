@@ -1,7 +1,5 @@
 [gd_scene format=3 uid="uid://c7u2yx85ktp5"]
 
-[ext_resource type="PackedScene" path="res://scenes/cctv/guy_actor.tscn" id="guy"]
-
 [ext_resource type="Texture2D" uid="uid://bm6kqf5aouskd" path="res://assets/textures/AsphaltTex.png" id="2_8i4tb"]
 [ext_resource type="Texture2D" uid="uid://bi5ctvgiy1m6r" path="res://assets/textures/MetalTex.png" id="4_1f1ip"]
 [ext_resource type="Texture2D" uid="uid://brpharcoeh8pe" path="res://assets/textures/LowResWood.png" id="4_k0y0i"]
@@ -9,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://ft2krvlu3bbl" path="res://assets/models/Tree2.glb" id="7_n7w4m"]
 [ext_resource type="PackedScene" uid="uid://ncuny0hgpaqo" path="res://assets/models/Tree3.glb" id="8_ukn2q"]
 [ext_resource type="PackedScene" path="res://scenes/cctv/cctv_camera.tscn" id="camera"]
+[ext_resource type="PackedScene" path="res://scenes/cctv/guy_actor.tscn" id="guy"]
 [ext_resource type="Script" uid="uid://cwoau2otl6qek" path="res://scripts/cctv/street_location.gd" id="script"]
 [ext_resource type="Script" uid="uid://uvxn40cqfjdj" path="res://scripts/cctv/observation_waypoint.gd" id="waypoint"]
 
@@ -18,41 +17,6 @@ albedo_color = Color(0.25882354, 0.27450982, 0.26666668, 1)
 [sub_resource type="BoxMesh" id="Box0"]
 material = SubResource("Mat0")
 size = Vector3(36, 0.3, 38)
-
-[sub_resource type="StandardMaterial3D" id="Mat1"]
-albedo_color = Color(0.7411765, 0.5294118, 0.2509804, 1)
-
-[sub_resource type="BoxMesh" id="Box1"]
-material = SubResource("Mat1")
-size = Vector3(0.6, 0.8, 0.4)
-
-[sub_resource type="StandardMaterial3D" id="Mat2"]
-albedo_color = Color(0.7137255, 0.61960787, 0.52156866, 1)
-
-[sub_resource type="BoxMesh" id="Box2"]
-material = SubResource("Mat2")
-size = Vector3(0.35, 0.4, 0.35)
-
-[sub_resource type="StandardMaterial3D" id="Mat3"]
-albedo_color = Color(0.13333334, 0.17254902, 0.2, 1)
-
-[sub_resource type="BoxMesh" id="Box3"]
-material = SubResource("Mat3")
-size = Vector3(0.2, 0.6, 0.25)
-
-[sub_resource type="StandardMaterial3D" id="Mat6"]
-albedo_color = Color(0.3254902, 0.40784314, 0.47843137, 1)
-
-[sub_resource type="BoxMesh" id="Box6"]
-material = SubResource("Mat6")
-size = Vector3(0.6, 0.8, 0.4)
-
-[sub_resource type="StandardMaterial3D" id="Mat7"]
-albedo_color = Color(0.47058824, 0.40392157, 0.4862745, 1)
-
-[sub_resource type="BoxMesh" id="Box7"]
-material = SubResource("Mat7")
-size = Vector3(0.6, 0.8, 0.4)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fvpn7"]
 albedo_texture = ExtResource("2_8i4tb")
@@ -127,7 +91,7 @@ mesh = SubResource("Box0")
 [node name="Target" type="Node3D" parent="." unique_id=662775761]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
 
-[node name="Guy" parent="Target" instance=ExtResource("guy")]
+[node name="Guy" parent="Target" unique_id=862148267 instance=ExtResource("guy")]
 
 [node name="Exits" type="Node3D" parent="." unique_id=1363148753]
 
@@ -145,42 +109,42 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -5)
 [node name="AlleyWalker0" type="Node3D" parent="Pedestrians" unique_id=795151967]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, -4)
 
-[node name="Guy" parent="Pedestrians/AlleyWalker0" instance=ExtResource("guy")]
+[node name="Guy" parent="Pedestrians/AlleyWalker0" unique_id=1747947370 instance=ExtResource("guy")]
 appearance = 1
 phase_offset = 0.13
 
 [node name="AlleyWalker1" type="Node3D" parent="Pedestrians" unique_id=55395585]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0, -4)
 
-[node name="Guy" parent="Pedestrians/AlleyWalker1" instance=ExtResource("guy")]
+[node name="Guy" parent="Pedestrians/AlleyWalker1" unique_id=1535433334 instance=ExtResource("guy")]
 appearance = 2
 phase_offset = 0.57
 
 [node name="AvenueWalker0" type="Node3D" parent="Pedestrians" unique_id=1546012713]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -15)
 
-[node name="Guy" parent="Pedestrians/AvenueWalker0" instance=ExtResource("guy")]
+[node name="Guy" parent="Pedestrians/AvenueWalker0" unique_id=323409251 instance=ExtResource("guy")]
 appearance = 3
 phase_offset = 0.36
 
 [node name="AvenueWalker1" type="Node3D" parent="Pedestrians" unique_id=1124268832]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -15)
 
-[node name="Guy" parent="Pedestrians/AvenueWalker1" instance=ExtResource("guy")]
+[node name="Guy" parent="Pedestrians/AvenueWalker1" unique_id=951654693 instance=ExtResource("guy")]
 appearance = 1
 phase_offset = 0.81
 
 [node name="ParkWalker0" type="Node3D" parent="Pedestrians" unique_id=1068915499]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -4)
 
-[node name="Guy" parent="Pedestrians/ParkWalker0" instance=ExtResource("guy")]
+[node name="Guy" parent="Pedestrians/ParkWalker0" unique_id=1285409649 instance=ExtResource("guy")]
 appearance = 2
 phase_offset = 0.24
 
 [node name="ParkWalker1" type="Node3D" parent="Pedestrians" unique_id=1165197231]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -4)
 
-[node name="Guy" parent="Pedestrians/ParkWalker1" instance=ExtResource("guy")]
+[node name="Guy" parent="Pedestrians/ParkWalker1" unique_id=1464660009 instance=ExtResource("guy")]
 appearance = 3
 phase_offset = 0.69
 
@@ -195,11 +159,6 @@ mesh = SubResource("Box5")
 [node name="AlleyWall1" type="MeshInstance3D" parent="." unique_id=84456835]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.2, 1, -5)
 mesh = SubResource("Box5")
-
-[node name="AlleySign" type="Label3D" parent="." unique_id=279140059]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -14.62205, 1.3905327, -5.79478)
-pixel_size = 0.01
-text = "ALLEY"
 
 [node name="ALLEY" parent="." unique_id=238316807 instance=ExtResource("camera")]
 transform = Transform3D(1, 0, 0, 0, 0.79863554, 0.601815, 0, -0.601815, 0.79863554, -12, 4, -1)
@@ -248,11 +207,6 @@ mesh = SubResource("Box8")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 2.2, -17)
 visible = false
 mesh = SubResource("Box9")
-
-[node name="AvenueSign" type="Label3D" parent="." unique_id=901775084]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.238236, 1.3904598, -16.908775)
-pixel_size = 0.01
-text = "AVENUE"
 
 [node name="AVENUE" parent="." unique_id=740269956 instance=ExtResource("camera")]
 transform = Transform3D(1, 0, 0, 0, 0.79863554, 0.601815, 0, -0.601815, 0.79863554, 0, 4, -12)
@@ -334,11 +288,6 @@ mesh = SubResource("BoxMesh_8fjlh")
 [node name="BenchLeg2" type="MeshInstance3D" parent="ParkBench" unique_id=708714124]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5798979, -0.3101654, 0.0006415844)
 mesh = SubResource("BoxMesh_8fjlh")
-
-[node name="ParkSign" type="Label3D" parent="." unique_id=1453755397]
-transform = Transform3D(0.96640784, -0.25701353, 0, 0.25701353, 0.96640784, 0, 0, 0, 1, 13.06859, 1.5437611, -4.7306614)
-pixel_size = 0.01
-text = "PARK"
 
 [node name="PARK" parent="." unique_id=1464670930 instance=ExtResource("camera")]
 transform = Transform3D(1, 0, 0, 0, 0.79863554, 0.601815, 0, -0.601815, 0.79863554, 12, 4, -1)

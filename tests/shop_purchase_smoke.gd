@@ -41,11 +41,15 @@ func _run() -> void:
 		var saw_pickup := false
 		var saw_carry := false
 		var saw_checkout := false
+		var saw_collection := false
+		var saw_exit := false
+		var reached_street := false
 		var wrist_error := INF
-		for frame: int in 1860:
+		for frame: int in 1900:
 			var before := actor.global_position
 			shift.advance(1.0 / 30.0)
 			if shift.stage != 1:
+				reached_street = true
 				break
 			actor.advance_motion(1.0 / 30.0, actor.global_position - before)
 			actor.player.advance(1.0 / 30.0)
@@ -55,23 +59,31 @@ func _run() -> void:
 				await _capture(game, choice, "held", 1)
 			elif frame == 1180:
 				await _capture(game, choice, "carry", 2)
+			elif frame == 1770:
+				saw_exit = actor.carrying == item
+				await _capture(game, choice, "leave_with_purchase", 0)
 			if is_instance_valid(actor.carrying):
 				saw_pickup = true
 				_expect(actor.carrying == item, "Actor holds the selected real bottle")
 				_expect(item.global_basis.y.dot(Vector3.UP) > 0.99, "Bottle stays upright after animation updates")
 				if actor.activity == "carry_walk":
 					saw_carry = true
+				if saw_checkout:
+					saw_collection = true
 			if frame in range(908, 916):
 				var wrist: Vector3 = actor.skeleton.global_transform * actor.skeleton.get_bone_global_pose(actor.skeleton.find_bone("DEF-hand.R")).origin
 				wrist_error = minf(wrist_error, wrist.distance_to(original_position + Vector3(0, 0.24, 0)))
-			if saw_pickup and actor.carrying == null and item.get_parent() == shop:
+			if saw_pickup and not saw_checkout and actor.carrying == null and item.get_parent() == shop:
 				saw_checkout = true
+				_expect(item.position.is_equal_approx(shop.get_node("CheckoutItem").position), "Bottle rests at the authored checkout marker")
 				await _capture(game, choice, "checkout", 2)
-				break
 		_expect(saw_pickup and saw_carry and saw_checkout, "Shelf → hand → carry → checkout completed")
+		_expect(saw_collection and saw_exit and reached_street, "Paid purchase is collected and carried out of the shop")
+		var street_actor: Node3D = shift.location.get_node("Target/Guy")
+		_expect(street_actor.carrying == item and shift.location.bottle == item, "Same paid-for bottle survives the scene transition")
+		_expect(item.get_parent() == street_actor.grip, "Purchase belongs to Viktor's new street instance")
 		_expect(wrist_error < 0.18, "Wrist reaches actual shelf bottle, not old placeholder coordinates")
 		_expect(model.scale.is_equal_approx(model_scale), "Reparenting preserves real bottle scale")
-		_expect(item.position.is_equal_approx(shop.get_node("CheckoutItem").position), "Bottle rests at the authored checkout marker")
 		_expect(item.get_meta(&"evidence_id") == DATA.DRINKS[choice], "Visible item and evidence ID agree")
 		var question: Dictionary = shift.report_questions()[1]
 		_expect(question.correct == item.get_meta(&"evidence_id") and question.answers == DATA.DRINKS, "Final quiz derives the answer from the same run's purchase")
@@ -91,6 +103,8 @@ func _run() -> void:
 			TranslationServer.set_locale(language)
 			for option: String in question.answers:
 				_expect(tr(option) != option, "Alcohol answer has a " + language + " translation")
+		shift.advance(40.0)
+		await _capture(game, choice, "street_with_purchase", shift.branch)
 		game.queue_free()
 		await process_frame
 		await process_frame

@@ -34,3 +34,6 @@ func event(id: String) -> void:
 	elif id == "checkout" and is_instance_valid(bottle):
 		$Target/Guy.put_down(self, get_node(checkout_path).position)
 		$Target/Guy.face_direction(-global_basis.z)
+	elif id == "collect" and is_instance_valid(bottle):
+		$Target/Guy.pick_up(bottle, Vector3(0, -0.24, 0))
+		$Target/Guy.face_direction(-global_basis.z)

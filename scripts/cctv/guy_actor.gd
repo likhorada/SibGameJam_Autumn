@@ -9,7 +9,6 @@ const MODELS := [preload("res://assets/models/GuyRig.glb"), preload("res://asset
 @export_enum("Target", "Decoy Green", "Decoy Red", "Decoy Yellow") var appearance: int = 0
 @export_enum("idle", "work") var initial_activity: String = "idle"
 @export var phase_offset: float = 0.0
-@export var shirt_color := Color(0.74, 0.53, 0.25)
 
 var model: Node3D
 var player: AnimationPlayer
@@ -34,13 +33,6 @@ func _ready() -> void:
 	player = model.get_node("AnimationPlayer")
 	skeleton = model.get_node("rig/Skeleton3D")
 	player.add_animation_library(&"cctv", CLIPS)
-	if appearance == 0:
-		for part: String in ["Torso", "ArmUp", "ArmDown"]:
-			var mesh: MeshInstance3D = skeleton.get_node(part)
-			for surface: int in mesh.mesh.get_surface_count():
-				var material := mesh.mesh.surface_get_material(surface).duplicate() as StandardMaterial3D
-				material.albedo_color = shirt_color
-				mesh.set_surface_override_material(surface, material)
 	grip = BoneAttachment3D.new()
 	grip.name = "DrinkGrip"
 	grip.bone_name = "DEF-hand.R"
@@ -74,6 +66,20 @@ func put_down(destination: Node3D, point: Vector3) -> void:
 	_start_reach()
 
 
+func hold_item(item: Node3D, grip_offset: Vector3 = Vector3.ZERO) -> void:
+	carrying = item
+	_grip_offset = grip_offset
+	carrying.owner = null
+	# During a location switch the old scene has already left the tree. No global
+	# transform needs preserving: the wrist pose below supplies the new position.
+	carrying.reparent(grip, false)
+	# Follow position without inheriting the animated wrist rotation.
+	carrying.top_level = true
+	_update_carried_item()
+	if _busy == 0.0:
+		_play("carry_idle", 0.0)
+
+
 func _start_reach() -> void:
 	_busy = CLIPS.get_animation(&"reach").length
 	_handoff = 0.45
@@ -96,11 +102,7 @@ func advance_motion(delta: float, displacement: Vector3) -> void:
 		_handoff -= delta
 		if _handoff < 0.0:
 			if is_instance_valid(_pending_item):
-				carrying = _pending_item
-				carrying.reparent(grip)
-				# Follow the wrist's position, not its rotation: bottles stay upright even
-				# when AnimationPlayer updates the BoneAttachment later in the frame.
-				carrying.top_level = true
+				hold_item(_pending_item, _grip_offset)
 				_pending_item = null
 			elif is_instance_valid(carrying) and is_instance_valid(_release_parent):
 				carrying.reparent(_release_parent)
@@ -116,9 +118,13 @@ func advance_motion(delta: float, displacement: Vector3) -> void:
 		_play(clip)
 		player.speed_scale = clampf(speed / 1.12, 0.18, 2.2) if speed > 0.025 else 1.0
 	if is_instance_valid(carrying):
-		carrying.global_basis = Basis.IDENTITY
-		var wrist := skeleton.get_bone_global_pose(skeleton.find_bone("DEF-hand.R"))
-		carrying.global_position = skeleton.global_transform * wrist.origin + _grip_offset
+		_update_carried_item()
+
+
+func _update_carried_item() -> void:
+	carrying.global_basis = Basis.IDENTITY
+	var wrist := skeleton.get_bone_global_pose(skeleton.find_bone("DEF-hand.R"))
+	carrying.global_position = skeleton.global_transform * wrist.origin + _grip_offset
 
 
 func _play(clip: String, blend: float = 0.18) -> void:

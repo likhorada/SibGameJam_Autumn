@@ -58,6 +58,8 @@ func _publish() -> void:
 		"foot": [foot.x, foot.y, foot.z], "head_y": head.y, "holding": is_instance_valid(actor.carrying),
 		"variants": variants, "position": [actor.global_position.x, actor.global_position.y, actor.global_position.z]}
 	data["scene"] = shift.location.scene_file_path
+	data["branch"] = shift.branch
+	data["brief"] = tr("OBS_BRIEF")
 	data["correct"] = shift.report_questions()[1].correct
 	data["options"] = shift.report_questions()[1].answers
 	data["evidence"] = shift.location.bottle.get_meta(&"evidence_id", "") if is_instance_valid(shift.location.bottle) else ""

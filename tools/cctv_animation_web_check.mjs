@@ -74,6 +74,7 @@ try {
   await call('Emulation.setDeviceMetricsOverride', {width:1280,height:720,deviceScaleFactor:1,mobile:false});
   await call('Page.navigate', {url:`http://127.0.0.1:${server.address().port}/`});
   const seated = await wait(s => s.activity === 'work');
+  expect(/blue tie|синий галстук/.test(seated.brief), 'Briefing does not identify Viktor by the blue tie');
   if (process.argv.includes('--shop')) {
     const drinks = ['OBS_WINE', 'OBS_GIN', 'OBS_VODKA'];
     for (let choice=0; choice<drinks.length; choice++) {
@@ -98,6 +99,16 @@ try {
       expect(!receipt.holding && receipt.correct === receipt.evidence, 'Report disagrees with the bottle on checkout');
       expect(JSON.stringify(receipt.options) === JSON.stringify(drinks), 'Wrong alcohol answer options');
       await sleep(700); await capture('shop_' + choice + '_checkout');
+      await command('advance', {seconds:9.5});
+      await wait(s => s.holding && !s.on_counter);
+      expect((await state()).evidence === drinks[choice], 'Paid purchase was not collected');
+      await capture('shop_' + choice + '_collected');
+      await command('advance', {seconds:7});
+      const streetPurchase = await wait(s => s.stage === 2);
+      expect(streetPurchase.holding && streetPurchase.evidence === drinks[choice], 'Paid bottle was lost on leaving the shop');
+      await command('advance', {seconds:40});
+      await command('camera', {index:(await state()).branch});
+      await sleep(700); await capture('shop_' + choice + '_street');
     }
     expect(errors.length === 0, 'Browser errors: ' + errors.join('\n'));
     console.log('SHOP PURCHASE WEB: PASS (wine, gin, vodka)');

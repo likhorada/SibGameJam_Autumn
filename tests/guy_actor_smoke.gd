@@ -8,6 +8,9 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	for language: String in ["ru", "en"]:
+		TranslationServer.set_locale(language)
+		_expect(tr("OBS_BRIEF").contains("синий галстук" if language == "ru" else "blue tie"), "Briefing identifies Viktor by his blue tie")
 	for scene: String in ["office", "street", "shop", "yard"]:
 		var location: Node3D = load("res://scenes/cctv/locations/%s.tscn" % scene).instantiate()
 		root.add_child(location)
@@ -21,6 +24,9 @@ func _run() -> void:
 			variants[actor.appearance] = true
 			var expected: String = ["GuyRig", "DecoyGreen", "DecoyRed", "DecoyYellow"][actor.appearance]
 			_expect(actor.model.scene_file_path.ends_with(expected + ".glb"), "Actor uses its actual model, not a tinted substitute")
+			if actor.appearance == 0:
+				var torso: MeshInstance3D = actor.skeleton.get_node("Torso")
+				_expect(torso.get_surface_override_material(0) == null, "Viktor retains the original white shirt and blue tie material")
 			for clip: String in ["idle", "walk", "work", "stand", "reach", "carry_walk"]:
 				_expect(actor.player.has_animation("cctv/" + clip), "Shared clip available: " + clip)
 			actor._play("idle", 0.0)

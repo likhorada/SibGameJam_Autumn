@@ -61,7 +61,7 @@ func _run() -> void:
 	shift.advance(20)
 	expect(shift.state == ShiftDirector.State.ROUTE and game.mode == game.Mode.COMPUTER, "Empty atmosphere pool never ejects player or inserts a pause")
 	expect(shift.stage == 1, "Shop starts immediately with no content")
-	expect(shift.location.scene_file_path.ends_with("/shop.tscn") and shift.location.route().size() == 7, "Authored shop scene supplies its route")
+	expect(shift.location.scene_file_path.ends_with("/shop.tscn") and shift.location.route().size() == 8, "Authored shop includes collection before exit")
 	expect(game.cctv_system.cameras.size() == 3, "Only new camera set is registered")
 	expect(game.terminal_ui.cctv.directory.item_count == 3, "PC directory follows scene replacement")
 	game.power.trigger_outage()

@@ -7,4 +7,4 @@
 script = ExtResource("1")
 
 [node name="Guy" parent="." instance=ExtResource("guy")]
-shirt_color = Color(0.65, 0.12, 0.07, 1)
+appearance = 2

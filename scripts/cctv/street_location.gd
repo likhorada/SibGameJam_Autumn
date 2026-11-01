@@ -6,8 +6,9 @@ var elapsed: float = 0.0
 func _ready() -> void:
 	super._ready()
 	for exit: Node in $Exits.get_children():
-		var sign: Label3D = get_node("%sSign" % exit.name)
-		sign.text = tr(sign.text)
+		var sign := get_node_or_null("%sSign" % exit.name) as Label3D
+		if sign != null:
+			sign.text = tr(sign.text)
 
 
 func _process(delta: float) -> void:

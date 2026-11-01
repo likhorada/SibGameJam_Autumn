@@ -143,7 +143,7 @@ CHAT_LOSE,PLAN B,ПЛАН Б
 CHAT_RESULT,Correct answers: %d / %d,Правильных ответов: %d / %d
 CHAT_RESTART,New run,Новый забег
 CHAT_MENU,Main menu,Главное меню
-OBS_BRIEF,"Target wears an ochre jacket. Read the four digits on his office screen BEFORE triggering the alarm in ALARM.sh. After your reply you have 60 seconds. Miss the deadline and we use plan B. Remember his drink and street exit too.","Цель в охристой куртке. Подсмотри четыре цифры на его офисном экране ДО запуска сигнализации через ALARM.sh. После твоего ответа у тебя 60 секунд. Просрочишь — план Б. Запомни также напиток и направление на улице."
+OBS_BRIEF,"Viktor wears a blue tie. Read the four digits on his office screen BEFORE triggering the alarm in ALARM.sh. After your reply you have 60 seconds. Miss the deadline and we use plan B. Remember his drink and street exit too.","Виктор носит синий галстук. Подсмотри четыре цифры на его офисном экране ДО запуска сигнализации через ALARM.sh. После твоего ответа у тебя 60 секунд. Просрочишь — план Б. Запомни также напиток и направление на улице."
 OBS_GO,Clock is ticking. Read the code then run ALARM.sh.,Время пошло. Подсмотри код и запусти ALARM.sh.
 OBS_WAIT_INTRO,Finish the RELAY briefing before running the alarm.,Заверши инструктаж в RELAY перед запуском сигнализации.
 OBS_HACK_START,TRIGGER OFFICE ALARM,ЗАПУСТИТЬ СИГНАЛИЗАЦИЮ ОФИСА

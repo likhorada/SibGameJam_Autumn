@@ -5,9 +5,9 @@
 - `scenes/cctv/guy_actor.tscn` / `scripts/cctv/guy_actor.gd`: one actor controller,
   with Inspector-selectable **GuyRig / DecoyGreen / DecoyRed / DecoyYellow** models.
   Street pedestrians use the actual three decoy GLBs with their original materials.
-  Only the target shirt is tinted ochre, preserving the existing briefing clue.
+  Viktor uses the original GuyRig materials: white shirt and blue tie, matching the briefing.
 - `assets/animations/cctv_humanoid.res`: seven shared skeletal clips: `idle`, `walk`,
-  `work`, `stand`, `carry_idle`, `carry_walk`, `reach` (~603 KiB total).
+  `work`, `stand`, `carry_idle`, `carry_walk`, `reach` (shared library).
   Walking tempo follows measured horizontal speed; turns and clip changes blend.
   Pedestrians have different animation phase offsets.
 - Office: seated at the authored chair/laptop, small typing movements. Starting
@@ -17,6 +17,8 @@
 - Shop (`locations/shop.tscn`, also used by the menu): turn toward wine/gin/vodka,
   reach the actual shelf, attach the item to `DEF-hand.R`, carry with
   a separate upper-body pose, then reach/release onto the checkout counter.
+  After payment he collects the bottle again, leaves carrying it, and keeps that
+  same item when the shift changes to the street (no duplicate or lost purchase).
   Handoffs occur 0.45 seconds into the reach, not at the start of the gesture.
   The wrapper follows wrist position but stays upright (top-level transform), so
   late AnimationPlayer/BoneAttachment updates cannot rotate the bottle sideways.
