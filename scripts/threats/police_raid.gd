@@ -2,7 +2,7 @@ class_name PoliceRaid
 extends ThreatEvent
 ## Warning protects distant players; close contact is dangerous during approach too.
 
-enum Visit { DORMANT, WARNING, SEARCHING, DEPARTING }
+enum Visit { DORMANT, WARNING, SEARCHING, DEPARTING, CHASING }
 const VISUAL := preload("res://scenes/threats/police_officer.tscn")
 @export var settings: PoliceRaidConfig = preload("res://data/threats/police_raid.tres")
 var visit: Visit = Visit.DORMANT
@@ -14,6 +14,7 @@ var footsteps_audio: AudioStreamPlayer3D
 var arrival_audio: AudioStreamPlayer3D
 var awareness := ThreatAwareness.new()
 var pressure := VisitorPressure.new()
+var pursuit := VisitorPursuit.new()
 var _approach: Vector3
 var _entry_pending: bool = false
 var _elapsed: float = 0.0
@@ -22,12 +23,15 @@ var _voice_left: float = 0.0
 var _voice_pending: bool = false
 var _route: Array[Vector3] = []
 var _departure: Array[Vector3] = []
+var _pursuit_route: Array[Vector3] = []
 
 
 func bind(value: Node3D) -> void:
 	game = value
 	for marker: Node3D in game.get_node("Apartment/PoliceRoute").get_children():
 		_route.append(marker.global_position)
+	_pursuit_route.append(game.room_door.get_node("Approach").global_position)
+	_pursuit_route.append_array(_route)
 	_departure.assign(_route)
 	_departure.reverse()
 	_departure.append(game.room_door.get_node("Approach").global_position)
@@ -92,6 +96,8 @@ func warning_started() -> void:
 
 
 func active_started() -> void:
+	if visit == Visit.CHASING:
+		return
 	visit = Visit.SEARCHING
 	_elapsed = 0.0
 	_voice_pending = false
@@ -115,6 +121,15 @@ func advance(delta: float) -> void:
 		# Face the player and stop briefly; do not keep walking through them.
 		footsteps_audio.stop()
 		return
+	if visit != Visit.CHASING and game.room_door.is_open:
+		awareness.advance(game, visual, delta)
+		if awareness.visible_now:
+			_begin_chase()
+	if visit == Visit.CHASING:
+		pursuit.advance(game, visual, _pursuit_route, delta)
+		if not footsteps_audio.playing:
+			footsteps_audio.play()
+		return
 	_elapsed += delta
 	if visit == Visit.WARNING:
 		var approach_progress := clampf(_elapsed / 3.0, 0.0, 1.0)
@@ -136,9 +151,6 @@ func advance(delta: float) -> void:
 		if _entry_pending:
 			_entry_pending = not game.room_door.force_open(game)
 			_elapsed = 0.0
-			return
-		if awareness.advance(game, visual, delta):
-			game.begin_threat_capture("POLICE_DEATH", visual)
 			return
 		if awareness.suspicion > 0.0:
 			_elapsed = maxf(0.0, _elapsed - delta)
@@ -165,6 +177,17 @@ func advance(delta: float) -> void:
 				resolved.emit(&"survived")
 
 
+func _begin_chase() -> void:
+	visit = Visit.CHASING
+	_entry_pending = false
+	_elapsed = 0.0
+	knock_audio.stop()
+	voice_audio.stop()
+	footsteps_audio.pitch_scale = 1.2
+	if not footsteps_audio.playing:
+		footsteps_audio.play()
+
+
 func _move(points: Array[Vector3], progress: float) -> void:
 	var cursor := clampf(progress, 0.0, 1.0) * (points.size() - 1)
 	var index := mini(int(cursor), points.size() - 2)
@@ -183,6 +206,7 @@ func ended(_outcome: StringName) -> void:
 	_voice_pending = false
 	_elapsed = 0.0
 	_entry_pending = false
+	footsteps_audio.pitch_scale = 1.0
 	awareness.reset()
 	pressure.reset()
 	game.room_door.held_by_police = false

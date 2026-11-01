@@ -2,7 +2,7 @@ class_name PsychNeighbor
 extends ThreatEvent
 ## Door race followed by a visible search. An unseen hiding player is safe.
 
-enum Visit { DORMANT, APPROACHING, RATTLING, ENTERING, DEPARTING, RETREATING, SEARCHING }
+enum Visit { DORMANT, APPROACHING, RATTLING, ENTERING, DEPARTING, RETREATING, SEARCHING, CHASING }
 const VISUAL := preload("res://scenes/threats/psych_neighbor.tscn")
 
 @export var settings: PsychNeighborConfig = preload("res://data/threats/psych_neighbor.tres")
@@ -19,8 +19,10 @@ var _entry_from: Vector3
 var _rng := RandomNumberGenerator.new()
 var awareness := ThreatAwareness.new()
 var pressure := VisitorPressure.new()
+var pursuit := VisitorPursuit.new()
 var _search_route: Array[Vector3] = []
 var _depart_route: Array[Vector3] = []
+var _pursuit_route: Array[Vector3] = []
 var _inside: bool = false
 
 
@@ -32,6 +34,8 @@ func bind(value: Node3D) -> void:
 	for marker: Node3D in game.get_node("Apartment/PoliceRoute").get_children():
 		if marker.name != "Entry":
 			_search_route.append(marker.global_position)
+	_pursuit_route.append(door.get_node("Approach").global_position)
+	_pursuit_route.append_array(_search_route)
 
 
 func _ready() -> void:
@@ -86,6 +90,8 @@ func warning_started() -> void:
 
 
 func active_started() -> void:
+	if visit == Visit.CHASING:
+		return
 	visual.global_position = door.get_node("Waiting").global_position
 	footsteps_audio.stop()
 	_begin_rattle()
@@ -103,10 +109,17 @@ func advance(delta: float) -> void:
 		footsteps_audio.stop()
 		handle_audio.stop()
 		return
+	if visit != Visit.CHASING and door.is_open:
+		awareness.advance(game, visual, delta)
+		if awareness.visible_now:
+			_begin_chase()
+	if visit == Visit.CHASING:
+		handle_audio.stop()
+		pursuit.advance(game, visual, _pursuit_route, delta)
+		if not footsteps_audio.playing:
+			footsteps_audio.play()
+		return
 	if visit in [Visit.SEARCHING, Visit.DEPARTING] and _inside:
-		if awareness.advance(game, visual, delta):
-			game.begin_threat_capture("NEIGHBOR_DEATH", visual)
-			return
 		if awareness.suspicion > 0.0:
 			footsteps_audio.stop()
 			return
@@ -199,6 +212,16 @@ func _begin_entry() -> void:
 	handle_audio.stop()
 
 
+func _begin_chase() -> void:
+	visit = Visit.CHASING
+	entry_seconds = 0.0
+	_elapsed = 0.0
+	_inside = true
+	footsteps_audio.pitch_scale = 1.2
+	footsteps_audio.play()
+	handle_audio.stop()
+
+
 func _begin_departure() -> void:
 	visit = Visit.DEPARTING
 	_elapsed = 0.0
@@ -243,6 +266,7 @@ func resolved_started(_outcome: StringName) -> void:
 func ended(_outcome: StringName) -> void:
 	visit = Visit.DORMANT
 	entry_seconds = 0.0
+	footsteps_audio.pitch_scale = 1.0
 	awareness.reset()
 	pressure.reset()
 	_inside = false

@@ -23,6 +23,12 @@ func _run() -> void:
 	player = game.player
 	hud = game.hud
 	await _frames(4)
+	_expect(player.footsteps_audio.stream.resource_path == "res://assets/audio/player_steps.wav", "Player loads the authored footstep sound")
+	_expect(
+		is_equal_approx(player.sprint_footstep_interval, 0.20)
+		and player.sprint_footstep_interval < player.walk_footstep_interval,
+		"Sprinting uses a slightly faster footstep cadence",
+	)
 	_expect(is_equal_approx(hud.visual_ratio(0.5), 0.75), "Half real stamina displays as 75 percent")
 	_expect(hud.visual_ratio(0.0) == 0.0 and hud.visual_ratio(1.0) == 1.0, "Visual curve endpoints")
 	_expect(hud.visual_ratio(0.9) - hud.visual_ratio(0.8) < hud.visual_ratio(0.2) - hud.visual_ratio(0.1), "Visual depletion accelerates near empty")
@@ -120,9 +126,12 @@ func _test_movement() -> void:
 	_expect(Vector2(player.velocity.x, player.velocity.z).length() <= player.sprint_speed + 0.02, "Sprint diagonal normalized")
 	_spawn()
 	await _frames(5)
+	var footstep_samples_finished := [0]
+	player.footsteps_audio.finished.connect(func(): footstep_samples_finished[0] += 1)
 	Input.action_press("sprint")
 	Input.action_press("move_forward")
 	await _frames(90)
+	_expect(footstep_samples_finished[0] > 0, "Walking and sprinting play the authored footstep sound")
 	_expect(absf(player.stamina.value - 0.5) < 0.04, "Actual movement consumes about half in 1.5 seconds")
 	_expect(hud.displayed_ratio > player.stamina.value + 0.15 and hud.bar_alpha > 0.9, "Visible bar is smoothed and deceptive")
 	await _capture("half")
@@ -156,6 +165,7 @@ func _test_movement() -> void:
 	await _frames(50)
 	_expect(player.stamina.value == 1.0 and not player.is_sprinting, "No drain pushing a wall")
 	_expect(player.camera.fov < 75.1, "No sprint FOV pushing a wall")
+	_expect(not player.footsteps_audio.playing, "No footsteps while blocked against a wall")
 	_release_actions()
 	wall.queue_free()
 	await _frames(2)

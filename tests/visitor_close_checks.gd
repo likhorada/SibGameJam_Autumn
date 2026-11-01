@@ -92,6 +92,20 @@ func _run() -> void:
 			var reason := "POLICE_DEATH" if id == &"police_raid" else "NEIGHBOR_DEATH"
 			expect(game.capture_reason == reason and not game.run_ended, "Circling/overlap captures at 0.25s during " + String(id) + "/" + phase)
 			expect(game.capture_cutscene != null and game.capture_cutscene.duration_seconds >= 5.0, "Close capture keeps full unskippable scene")
+		# An open entrance and a clear view should turn the visitor into a pursuer
+		# immediately, even during the warning/approach phase.
+		var chase_visitor: ThreatEvent = await setup(id)
+		expect(game.room_door.set_open(true), "Door opens for the chase test")
+		chase_visitor.visual.global_position = Vector3(1.2, 0, 1.1)
+		game.player.global_position = Vector3(0, 0.03, 1.1)
+		chase_visitor.visual.look_at(game.player.global_position, Vector3.UP)
+		await get_tree().physics_frame
+		await get_tree().physics_frame
+		var previous_distance: float = chase_visitor.visual.global_position.distance_to(game.player.global_position)
+		game.threats.advance(0.1)
+		var chasing: bool = game.police.visit == PoliceRaid.Visit.CHASING if id == &"police_raid" else game.neighbor.visit == PsychNeighbor.Visit.CHASING
+		expect(chasing, "Visible visitor starts chasing through an open door: " + String(id))
+		expect(chase_visitor.visual.global_position.distance_to(game.player.global_position) < previous_distance, "Chaser immediately moves toward the player: " + String(id))
 		# Unit boundaries and recovery use the same actual visitor awareness object.
 		var visitor: ThreatEvent = await setup(id)
 		var spawn: Vector3 = game.room_door.get_node("Approach").global_position
