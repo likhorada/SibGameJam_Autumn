@@ -5,7 +5,10 @@
 [ext_resource type="PackedScene" uid="uid://4ehcj2q4sibd" path="res://assets/models/Stool.glb" id="3_171q7"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_cn8qd"]
-size = Vector3(1.6298523, 1.4606323, 1.1655273)
+size = Vector3(1.6298523, 1.0402069, 1.1655273)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_klnqh"]
+size = Vector3(0.6394043, 0.4204712, 0.55908203)
 
 [sub_resource type="StandardMaterial3D" id="Plastic"]
 albedo_color = Color(0.25, 0.27, 0.22, 1)
@@ -26,7 +29,7 @@ metadata/interaction = &"computer"
 transform = Transform3D(0.34, 0, 0, 0, 0.34, 0, 0, 0, 0.34, -0.05624777, 0.83369976, -0.07799637)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Desk" unique_id=648913281]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.059127808, 0.7107849, -0.08276367)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.059127808, 0.5005722, -0.08276367)
 shape = SubResource("BoxShape3D_cn8qd")
 
 [node name="Monitor" type="StaticBody3D" parent="." unique_id=752757112]
@@ -40,6 +43,10 @@ modulate = Color(0.55, 0.85, 0.65, 1)
 
 [node name="Laptop" parent="Monitor" unique_id=1950824150 instance=ExtResource("2_m4hbx")]
 transform = Transform3D(0.125, 0, 0, 0, 0.125, 0, 0, 0, 0.125, -0.06313181, -0.21815467, -0.025436044)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Monitor" unique_id=1619519469]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.064575195, -0.02456665, -0.07348633)
+shape = SubResource("BoxShape3D_klnqh")
 
 [node name="Stand" type="MeshInstance3D" parent="." unique_id=2076111737]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)

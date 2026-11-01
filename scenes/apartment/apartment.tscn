@@ -824,18 +824,17 @@ omni_range = 3.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 2.3999999, -6)
 mesh = SubResource("BoxMesh_u5q2j")
 
+[node name="BedStatic" type="StaticBody3D" parent="." unique_id=349023502]
+
+[node name="Bed" parent="BedStatic" unique_id=1726691196 instance=ExtResource("8_uf1nb")]
+transform = Transform3D(-0.21500002, 0, 1.8795898e-08, 0, 0.21500002, 0, -1.8795898e-08, 0, -0.21500003, -1.7614565, 0.25264317, 5.066722)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BedStatic" unique_id=691580770]
+transform = Transform3D(-0.21500002, 0, 1.8795895e-08, 0, 0.21500002, 0, -1.8795895e-08, 0, -0.21500003, -1.7692904, 0.47992593, 5.0696816)
+shape = SubResource("BoxShape3D_8fjlh")
+
 [node name="Closet2" parent="." unique_id=1414542955 instance=ExtResource("7_bjaff")]
 transform = Transform3D(-0.245, 0, -2.141858e-08, 0, 0.245, 0, 2.141858e-08, 0, -0.245, -1.8011328, 1.0543185, 2.5897398)
-
-[node name="Bed" type="MeshInstance3D" parent="." unique_id=1101456464]
-transform = Transform3D(-0.215, 0, 1.8795896e-08, 0, 0.215, 0, -1.8795896e-08, 0, -0.215, -1.761456, 0.25264323, 5.066722)
-
-[node name="Bed" parent="Bed" unique_id=1726691196 instance=ExtResource("8_uf1nb")]
-transform = Transform3D(1, 0, 7.1054274e-15, 0, 1, 0, -7.1054274e-15, 0, 1, 0, 0, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Bed" unique_id=691580770]
-transform = Transform3D(1, 0, 2.842171e-14, 0, 1, 0, -2.842171e-14, 0, 1, 0.03643608, 1.057129, -0.013767242)
-shape = SubResource("BoxShape3D_8fjlh")
 
 [node name="Door" parent="." unique_id=1515334798 instance=ExtResource("9_n5k1t")]
 transform = Transform3D(-3.1253638e-08, 0, -0.5199999, 0, 0.5199999, 0, 0.715, 0, -2.2729921e-08, 5.2598114, 1.1250103, -4.804799)
