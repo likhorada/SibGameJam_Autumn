@@ -1,8 +1,7 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/menu.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/menu/backgrounds/shop.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/menu/backgrounds/yard.tscn" id="3"]
 [ext_resource type="Script" path="res://scripts/menu_background.gd" id="4"]
 [ext_resource type="AudioStream" path="res://assets/audio/main_menu.wav" id="5"]
 
@@ -32,4 +31,4 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 6
 script = ExtResource("4")
-backgrounds = Array[PackedScene]([ExtResource("2"), ExtResource("3")])
+backgrounds = Array[PackedScene]([ExtResource("2")])
