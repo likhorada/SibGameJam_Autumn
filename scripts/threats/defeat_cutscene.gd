@@ -1,6 +1,6 @@
 class_name DefeatCutscene
 extends Node3D
-## One staged world, no additional viewport. All motion is deterministic/seekable.
+## Seekable choreography anchored to the actual capture; standalone preview retained.
 signal finished
 signal cue_reached(cue: StringName)
 enum Kind { POLICE, NEIGHBOR, ENTITY }
@@ -18,6 +18,11 @@ var _cues: Dictionary = {}
 var _emitted: Dictionary = {}
 var _fade: ColorRect
 var _audio: AudioStreamPlayer
+var on_location: bool = false
+var _capture_eye: Vector3
+var _capture_floor: Vector3
+var _excluded: Array[RID] = []
+var _source: Node3D
 @onready var view: Camera3D = $View
 @onready var actor: DefeatActor = $Actor
 
@@ -56,6 +61,33 @@ func _ready() -> void:
 	seek(0.0)
 
 
+func place_at_capture(camera: Camera3D, enemy: Node3D, player: CharacterBody3D) -> void:
+	on_location = true
+	_source = enemy
+	_capture_eye = camera.global_position
+	_capture_floor = Vector3(_capture_eye.x, player.global_position.y, _capture_eye.z)
+	_excluded = [player.get_rid()]
+	var forward := enemy.global_position - _capture_floor
+	forward.y = 0.0
+	if forward.length_squared() < 0.0001:
+		forward = -camera.global_basis.z
+		forward.y = 0.0
+	if forward.length_squared() < 0.0001:
+		forward = Vector3.FORWARD
+	global_basis = Basis.looking_at(forward.normalized(), Vector3.UP)
+	# Authored camera starts at z=1.15; map that point to the capture eye.
+	global_position = _capture_floor - global_basis * Vector3(0, 0, 1.15)
+	for node_name: String in ["Floor", "BackWall", "Door", "Ceiling"]:
+		get_node(node_name).hide()
+	view.environment = null
+	view.far = camera.far
+	# Small local fill keeps the attack readable even during a power outage.
+	$KeyLight.light_energy = 0.55
+	$KeyLight.omni_range = 2.5
+	$FillLight.hide()
+	seek(elapsed)
+
+
 func _process(delta: float) -> void:
 	if autoplay:
 		advance(delta)
@@ -84,6 +116,12 @@ func advance(delta: float) -> void:
 func seek(seconds: float) -> void:
 	elapsed = clampf(seconds, 0.0, duration_seconds)
 	_timeline.seek(elapsed, true)
+	if on_location:
+		_constrain_to_room()
+		actor.visible = elapsed >= 0.4
+		$KeyLight.visible = elapsed >= 0.4
+		if is_instance_valid(_source):
+			_source.visible = elapsed < 0.4
 	actor.apply_pose()
 	# First show the real attacker. Switch cameras only while fully black.
 	if elapsed >= 0.4:
@@ -101,6 +139,36 @@ func seek(seconds: float) -> void:
 		for impact: float in [1.7, 2.65, 3.65]:
 			alpha = maxf(alpha, maxf(0, 1.0 - absf(elapsed - impact) / 0.065) * 0.7)
 	_fade.color.a = alpha
+
+
+func _constrain_to_room() -> void:
+	var initial_height := 1.67 if kind == Kind.ENTITY else 1.58
+	view.position.y += _capture_eye.y - _capture_floor.y - initial_height
+	var camera_shape := SphereShape3D.new()
+	camera_shape.radius = 0.08
+	view.global_position = _safe_motion(_capture_eye, view.global_position, camera_shape)
+	var body_shape := CapsuleShape3D.new()
+	body_shape.radius = 0.24
+	body_shape.height = 1.7
+	var body_center := Vector3.UP * 0.92
+	var target := Vector3(actor.global_position.x, _capture_floor.y, actor.global_position.z)
+	var safe := _safe_motion(_capture_floor + body_center, target + body_center, body_shape)
+	actor.global_position = Vector3(safe.x, actor.global_position.y, safe.z)
+
+
+func _safe_motion(from: Vector3, target: Vector3, shape: Shape3D) -> Vector3:
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	query.transform.origin = from
+	query.motion = target - from
+	query.collision_mask = 1
+	query.exclude = _excluded
+	var space := get_world_3d().direct_space_state
+	# If the initial pose already touches furniture, hold rather than cross it.
+	if not space.intersect_shape(query).is_empty():
+		return from
+	var fraction := space.cast_motion(query)[0]
+	return from.lerp(target, maxf(0.0, fraction - 0.01)) if fraction < 1.0 else target
 
 
 func _track(animation: Animation, path: String, times: Array, values: Array) -> void:

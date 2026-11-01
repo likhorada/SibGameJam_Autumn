@@ -625,7 +625,7 @@ func begin_threat_capture(reason: String, enemy: Node3D) -> bool:
 	player.process_mode = Node.PROCESS_MODE_DISABLED
 	_drop_stale_key_state(false)
 	mode = Mode.CAPTURED
-	# Observe the actual attacker, then switch to a controlled stage while black.
+	# Keep the choreography in the room where the attack happened.
 	var face := enemy.global_position + Vector3.UP * 1.6
 	if transition_camera.global_position.distance_squared_to(face) > 0.001:
 		transition_camera.look_at(face, Vector3.UP)
@@ -644,8 +644,8 @@ func begin_threat_capture(reason: String, enemy: Node3D) -> bool:
 	hud.clear_smear()
 	capture_cutscene = DEFEAT_SCENES[reason].instantiate()
 	capture_cutscene.autoplay = false
-	capture_cutscene.position = Vector3(0, -40, 0)
 	add_child(capture_cutscene)
+	capture_cutscene.place_at_capture(transition_camera, enemy, player)
 	capture_cutscene.finished.connect(_finish_report.bind(false, 0, reason))
 	return true
 

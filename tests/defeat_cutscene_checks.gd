@@ -48,6 +48,12 @@ func _run() -> void:
 		source.global_position = Vector3(1.2, 0, 1.1)
 		expect(game.begin_threat_capture(reason, source), "Capture begins: " + reason)
 		var scene: DefeatCutscene = game.capture_cutscene
+		expect(scene.on_location and scene.global_position.y > -1.0, "Scene stays in the apartment")
+		expect(not scene.get_node("Floor").visible and not scene.get_node("BackWall").visible and scene.view.environment == null, "Real room replaces preview geometry and environment")
+		scene.seek(0.4)
+		expect(scene.view.global_position.distance_to(game.transition_camera.global_position) < 0.02, "Camera switch preserves capture eye position")
+		expect(not source.visible, "Original visitor is replaced, not duplicated")
+		scene.seek(0.0)
 		expect(scene.duration_seconds >= 5.0 and scene.duration_seconds <= 7.0, "Long full scene duration")
 		expect(scene.actor.skeleton != null and scene.actor.skeleton.find_bone("DEF-hand.L") >= 0, "Actual GuyRig skeleton is bound")
 		expect(scene.actor.model.scene_file_path == "res://assets/models/GuyRig.glb", "Uses replaceable GuyRig, not placeholder")
@@ -93,7 +99,39 @@ func _run() -> void:
 		game.shift.set_process(false)
 		expect(game.capture_reason.is_empty() and game.mode == game.Mode.WALKING, "Restart restores normal gameplay")
 		expect(game.player.process_mode != Node.PROCESS_MODE_DISABLED and game.capture_cutscene == null, "No frozen body or stage after restart")
-	# Monster contact uses the same staging pipeline rather than a direct result.
+	# Different rooms, attack bearings and tight spaces keep the real environment.
+	for location: Dictionary in [
+		{"name": "room_wall", "position": Vector3(-2.65, 0.03, 0.2), "direction": Vector3.RIGHT},
+		{"name": "bedroom", "position": Vector3(0.7, 0.03, 4.4), "direction": Vector3.FORWARD},
+		{"name": "corridor", "position": Vector3(4.2, 0.03, -2.0), "direction": Vector3.BACK},
+	]:
+		for reason: String in ["POLICE_DEATH", "NEIGHBOR_DEATH", "ENTITY_DEATH"]:
+			await setup()
+			game.player.set_physics_process(false)
+			game.player.global_position = location.position
+			await get_tree().physics_frame
+			await get_tree().physics_frame
+			var source: Node3D = game.police.visual
+			source.global_position = location.position + location.direction * 0.7
+			source.show()
+			expect(game.begin_threat_capture(reason, source), "Location capture begins")
+			var scene: DefeatCutscene = game.capture_cutscene
+			var eye: Vector3 = game.transition_camera.global_position
+			for time: float in [0.4, 0.85, 1.85, 2.75, 3.85, 5.4]:
+				scene.seek(time)
+				expect(scene.view.global_position.distance_to(eye) < 1.8, "Camera remains at the actual attack site")
+				var shape := SphereShape3D.new()
+				shape.radius = 0.075
+				var query := PhysicsShapeQueryParameters3D.new()
+				query.shape = shape
+				query.transform.origin = scene.view.global_position
+				query.collision_mask = 1
+				query.exclude = [game.player.get_rid()]
+				expect(game.get_world_3d().direct_space_state.intersect_shape(query).is_empty(), "Camera does not enter room geometry: " + location.name)
+				await frames()
+				if is_equal_approx(time, 2.75):
+					await capture(location.name + "_" + reason.to_lower())
+	# Monster contact uses the same pipeline rather than a direct result.
 	await setup()
 	game.trigger_power_outage()
 	game.player.position = Vector3(4.2, 0.03, -2.0)
