@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://c53gehbbjoxfp"]
 
+[ext_resource type="PackedScene" path="res://scenes/cctv/guy_actor.tscn" id="guy"]
+
 [ext_resource type="Texture2D" uid="uid://brm4lab5imly0" path="res://assets/textures/OfficeFloorTex.png" id="2_02brl"]
 [ext_resource type="Texture2D" uid="uid://dnxpx0nxt4g6w" path="res://assets/textures/WallHomeNormalTex.png" id="3_exvyr"]
 [ext_resource type="PackedScene" uid="uid://g6t6to7fxj31" path="res://assets/models/Cubicle.glb" id="6_px62x"]
@@ -63,29 +65,7 @@ mesh = SubResource("Box0")
 [node name="Target" type="Node3D" parent="." unique_id=1889645716]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.65, -0.35, 1.2)
 
-[node name="Body" type="MeshInstance3D" parent="Target" unique_id=788843927]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("Box1")
-
-[node name="Head" type="MeshInstance3D" parent="Target" unique_id=521592513]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Target" unique_id=1791293276]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Target" unique_id=1931683476]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="LeftArm" type="MeshInstance3D" parent="Target" unique_id=1963986401]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, 0.9, -0.35)
-mesh = SubResource("Box4")
-
-[node name="RightArm" type="MeshInstance3D" parent="Target" unique_id=449812975]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 0.9, -0.35)
-mesh = SubResource("Box4")
+[node name="Guy" parent="Target" instance=ExtResource("guy")]
 
 [node name="Screen" type="Node3D" parent="." unique_id=731392212]
 

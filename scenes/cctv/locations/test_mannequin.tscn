@@ -1,31 +1,10 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/cctv/test_patrol.gd" id="1"]
-
-[sub_resource type="StandardMaterial3D" id="Jacket"]
-albedo_color = Color(0.65, 0.12, 0.07, 1)
-
-[sub_resource type="StandardMaterial3D" id="Skin"]
-albedo_color = Color(0.65, 0.55, 0.39, 1)
-
-[sub_resource type="BoxMesh" id="Body"]
-size = Vector3(0.45, 1.15, 0.3)
-material = SubResource("Jacket")
-
-[sub_resource type="SphereMesh" id="Head"]
-radius = 0.19
-height = 0.38
-radial_segments = 8
-rings = 4
-material = SubResource("Skin")
+[ext_resource type="PackedScene" path="res://scenes/cctv/guy_actor.tscn" id="guy"]
 
 [node name="TestMannequin" type="Node3D"]
 script = ExtResource("1")
 
-[node name="Body" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0.8, 0)
-mesh = SubResource("Body")
-
-[node name="Head" type="MeshInstance3D" parent="."]
-position = Vector3(0, 1.55, 0)
-mesh = SubResource("Head")
+[node name="Guy" parent="." instance=ExtResource("guy")]
+shirt_color = Color(0.65, 0.12, 0.07, 1)

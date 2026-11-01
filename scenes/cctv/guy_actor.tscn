@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/GuyRig.glb" id="model"]
+[ext_resource type="Script" path="res://scripts/cctv/guy_actor.gd" id="script"]
+
+[node name="Guy" type="Node3D"]
+script = ExtResource("script")
+
+[node name="Model" parent="." instance=ExtResource("model")]

@@ -1,4 +1,6 @@
-[gd_scene load_steps=32 format=3]
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/cctv/guy_actor.tscn" id="guy"]
 
 [ext_resource type="Script" path="res://scripts/cctv/shop_location.gd" id="script"]
 [ext_resource type="Script" path="res://scripts/cctv/observation_waypoint.gd" id="waypoint"]
@@ -114,21 +116,7 @@ mesh = SubResource("Box0")
 [node name="Target" type="Node3D" parent="."]
 position = Vector3(-4, 0, 6)
 
-[node name="Body" type="MeshInstance3D" parent="Target"]
-position = Vector3(0, 1, 0)
-mesh = SubResource("Box1")
-
-[node name="Head" type="MeshInstance3D" parent="Target"]
-position = Vector3(0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Target"]
-position = Vector3(-0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Target"]
-position = Vector3(0.18, 0.3, 0)
-mesh = SubResource("Box3")
+[node name="Guy" parent="Target" instance=ExtResource("guy")]
 
 [node name="ProduceCounter" type="MeshInstance3D" parent="."]
 position = Vector3(-4, 0.6, 0)

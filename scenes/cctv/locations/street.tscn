@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://c7u2yx85ktp5"]
 
+[ext_resource type="PackedScene" path="res://scenes/cctv/guy_actor.tscn" id="guy"]
+
 [ext_resource type="Texture2D" uid="uid://bm6kqf5aouskd" path="res://assets/textures/AsphaltTex.png" id="2_8i4tb"]
 [ext_resource type="Texture2D" uid="uid://bi5ctvgiy1m6r" path="res://assets/textures/MetalTex.png" id="4_1f1ip"]
 [ext_resource type="Texture2D" uid="uid://brpharcoeh8pe" path="res://assets/textures/LowResWood.png" id="4_k0y0i"]
@@ -125,21 +127,7 @@ mesh = SubResource("Box0")
 [node name="Target" type="Node3D" parent="." unique_id=662775761]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
 
-[node name="Body" type="MeshInstance3D" parent="Target" unique_id=1091326522]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("Box1")
-
-[node name="Head" type="MeshInstance3D" parent="Target" unique_id=1280993758]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Target" unique_id=727687183]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Target" unique_id=714431007]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
-mesh = SubResource("Box3")
+[node name="Guy" parent="Target" instance=ExtResource("guy")]
 
 [node name="Exits" type="Node3D" parent="." unique_id=1363148753]
 
@@ -157,116 +145,38 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -5)
 [node name="AlleyWalker0" type="Node3D" parent="Pedestrians" unique_id=795151967]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, -4)
 
-[node name="Body" type="MeshInstance3D" parent="Pedestrians/AlleyWalker0" unique_id=1577336272]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("Box6")
-
-[node name="Head" type="MeshInstance3D" parent="Pedestrians/AlleyWalker0" unique_id=228324128]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/AlleyWalker0" unique_id=1354587507]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/AlleyWalker0" unique_id=828392452]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
-mesh = SubResource("Box3")
+[node name="Guy" parent="Pedestrians/AlleyWalker0" instance=ExtResource("guy")]
+shirt_color = Color(0.32549, 0.407843, 0.478431, 1)
 
 [node name="AlleyWalker1" type="Node3D" parent="Pedestrians" unique_id=55395585]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0, -4)
 
-[node name="Body" type="MeshInstance3D" parent="Pedestrians/AlleyWalker1" unique_id=1738698811]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("Box7")
-
-[node name="Head" type="MeshInstance3D" parent="Pedestrians/AlleyWalker1" unique_id=544938871]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/AlleyWalker1" unique_id=1861642663]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/AlleyWalker1" unique_id=1902073693]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
-mesh = SubResource("Box3")
+[node name="Guy" parent="Pedestrians/AlleyWalker1" instance=ExtResource("guy")]
+shirt_color = Color(0.470588, 0.403922, 0.486275, 1)
 
 [node name="AvenueWalker0" type="Node3D" parent="Pedestrians" unique_id=1546012713]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -15)
 
-[node name="Body" type="MeshInstance3D" parent="Pedestrians/AvenueWalker0" unique_id=1768706202]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("Box6")
-
-[node name="Head" type="MeshInstance3D" parent="Pedestrians/AvenueWalker0" unique_id=1159188725]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/AvenueWalker0" unique_id=1401408859]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/AvenueWalker0" unique_id=1914952958]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
-mesh = SubResource("Box3")
+[node name="Guy" parent="Pedestrians/AvenueWalker0" instance=ExtResource("guy")]
+shirt_color = Color(0.32549, 0.407843, 0.478431, 1)
 
 [node name="AvenueWalker1" type="Node3D" parent="Pedestrians" unique_id=1124268832]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -15)
 
-[node name="Body" type="MeshInstance3D" parent="Pedestrians/AvenueWalker1" unique_id=961599313]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("Box7")
-
-[node name="Head" type="MeshInstance3D" parent="Pedestrians/AvenueWalker1" unique_id=368564637]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/AvenueWalker1" unique_id=778306244]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/AvenueWalker1" unique_id=1966675480]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
-mesh = SubResource("Box3")
+[node name="Guy" parent="Pedestrians/AvenueWalker1" instance=ExtResource("guy")]
+shirt_color = Color(0.470588, 0.403922, 0.486275, 1)
 
 [node name="ParkWalker0" type="Node3D" parent="Pedestrians" unique_id=1068915499]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -4)
 
-[node name="Body" type="MeshInstance3D" parent="Pedestrians/ParkWalker0" unique_id=28214684]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("Box6")
-
-[node name="Head" type="MeshInstance3D" parent="Pedestrians/ParkWalker0" unique_id=94881081]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/ParkWalker0" unique_id=1418461074]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/ParkWalker0" unique_id=196811677]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
-mesh = SubResource("Box3")
+[node name="Guy" parent="Pedestrians/ParkWalker0" instance=ExtResource("guy")]
+shirt_color = Color(0.32549, 0.407843, 0.478431, 1)
 
 [node name="ParkWalker1" type="Node3D" parent="Pedestrians" unique_id=1165197231]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -4)
 
-[node name="Body" type="MeshInstance3D" parent="Pedestrians/ParkWalker1" unique_id=1281764537]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-mesh = SubResource("Box7")
-
-[node name="Head" type="MeshInstance3D" parent="Pedestrians/ParkWalker1" unique_id=1451850984]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
-mesh = SubResource("Box2")
-
-[node name="LeftLeg" type="MeshInstance3D" parent="Pedestrians/ParkWalker1" unique_id=1441161177]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
-mesh = SubResource("Box3")
-
-[node name="RightLeg" type="MeshInstance3D" parent="Pedestrians/ParkWalker1" unique_id=681721229]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
-mesh = SubResource("Box3")
+[node name="Guy" parent="Pedestrians/ParkWalker1" instance=ExtResource("guy")]
+shirt_color = Color(0.470588, 0.403922, 0.486275, 1)
 
 [node name="AlleyPath" type="MeshInstance3D" parent="." unique_id=1087666921]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.2, -0.01, -3)
