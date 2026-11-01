@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="AtmosphereConfig" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="AtmosphereConfig" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/atmosphere/atmosphere_config.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/atmosphere/atmosphere_profile.gd" id="2"]
 [ext_resource type="Resource" path="res://data/atmosphere/you_are_an_idiot.tres" id="3"]
+[ext_resource type="Resource" path="res://data/atmosphere/firewall_breach.tres" id="4"]
 
 [resource]
 script = ExtResource("1")
-events = Array[ExtResource("2")]([ExtResource("3")])
+events = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4")])

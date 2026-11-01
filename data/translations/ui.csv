@@ -191,3 +191,12 @@ DEBUG_HUD_ENTITY_BEAM,"Danger beam on figure: %s","Опасный луч на ф
 DEBUG_HUD_YES,YES,ДА
 DEBUG_HUD_NO,NO,НЕТ
 FLASHLIGHT_HINT,F — flashlight,F — фонарик
+FW_INSTRUCTIONS,Close red ports. Clicking a green port opens it again.,Закрой красные порты. Клик по зелёному открывает его снова.
+FW_OPEN,OPEN,ОТКРЫТ
+FW_CLOSED,CLOSED,ЗАКРЫТ
+FW_INTRUSION,INTRUSION DETECTED,ОБНАРУЖЕНО ВТОРЖЕНИЕ
+FW_OPEN_COUNT,OPEN PORTS: %d / 9,ОТКРЫТО ПОРТОВ: %d / 9
+FW_READY,ALL PORTS CLOSED — BLOCK THE CONNECTION,ВСЕ ПОРТЫ ЗАКРЫТЫ — БЛОКИРУЙ СОЕДИНЕНИЕ
+FW_WATCH_PORTS,WATCH FOR REOPENED PORTS,СЛЕДИ ЗА ПОВТОРНО ОТКРЫТЫМИ ПОРТАМИ
+FW_ESCAPE,Esc — leave PC. The timer keeps running.,Esc — встать. Таймер продолжит идти.
+FW_RESTORED,Local access restored.,Локальный доступ восстановлен.

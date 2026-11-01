@@ -17,6 +17,9 @@ func frames(count: int = 3) -> void:
 
 func make_game() -> void:
 	game = load("res://scenes/main.tscn").instantiate()
+	# Isolate this event's single-candidate fallback from new production content.
+	game.atmosphere_config = AtmosphereConfig.new()
+	game.atmosphere_config.events.append(load("res://data/atmosphere/you_are_an_idiot.tres"))
 	get_tree().root.add_child(game)
 	get_tree().current_scene = game
 	game.transition_seconds = 0.02

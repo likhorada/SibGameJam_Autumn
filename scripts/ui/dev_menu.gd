@@ -113,6 +113,10 @@ func bind(value: Node3D) -> void:
 		close_menu()
 		if not game.atmosphere.request_event(&"you_are_an_idiot", true):
 			game.atmosphere.note("YouAreAnIdiot rejected: sit at PC; " + game.atmosphere.blocked_reason()))
+	_button(column, "TriggerFirewallBreach", func():
+		close_menu()
+		if not game.atmosphere.request_event(&"firewall_breach", true):
+			game.atmosphere.note("FirewallBreach rejected: sit at PC; " + game.atmosphere.blocked_reason()))
 	_button(column, "Atmosphere: trigger selected", func():
 		if _atmosphere_list.selected < 0:
 			game.atmosphere.note("Dev start: empty pool")

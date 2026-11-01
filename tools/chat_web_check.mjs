@@ -3,7 +3,7 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
-const root=path.resolve(process.env.IDIOT_WEB_ROOT || process.env.OUTAGE_WEB_ROOT || process.env.POLICE_WEB_ROOT || process.env.NEIGHBOR_WEB_ROOT || process.env.THREAT_WEB_ROOT || process.env.CHAT_WEB_ROOT || 'build/chat-web');
+const root=path.resolve(process.env.FIREWALL_WEB_ROOT || process.env.IDIOT_WEB_ROOT || process.env.OUTAGE_WEB_ROOT || process.env.POLICE_WEB_ROOT || process.env.NEIGHBOR_WEB_ROOT || process.env.THREAT_WEB_ROOT || process.env.CHAT_WEB_ROOT || 'build/chat-web');
 const artifacts=path.join(process.env.LOCALAPPDATA,'Temp/opencode');
 const profile=await fs.mkdtemp(path.join(artifacts,'chat-chrome-'));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -14,6 +14,7 @@ const neighborMode=process.env.NEIGHBOR_WEB==='1';
 const policeMode=process.env.POLICE_WEB==='1';
 const outageMode=process.env.OUTAGE_WEB==='1';
 const idiotMode=process.env.IDIOT_WEB==='1';
+const firewallMode=process.env.FIREWALL_WEB==='1';
 const server=http.createServer(async(req,res)=>{
   try {
     const name=new URL(req.url,'http://localhost').pathname;
@@ -50,7 +51,7 @@ try {
     requests.set(n,{resolve,reject,timer});ws.send(JSON.stringify({id:n,method,params}));
   });
   const evaluate=async expression=>(await call('Runtime.evaluate',{expression,returnByValue:true})).result.value;
-  const state=()=>evaluate(idiotMode?'window.idiotTelemetry':outageMode?'window.outageTelemetry':policeMode?'window.policeTelemetry':neighborMode?'window.neighborTelemetry':'window.chatTelemetry');
+  const state=()=>evaluate(firewallMode?'window.firewallTelemetry':idiotMode?'window.idiotTelemetry':outageMode?'window.outageTelemetry':policeMode?'window.policeTelemetry':neighborMode?'window.neighborTelemetry':'window.chatTelemetry');
   const expect=(value,message)=>{if(!value)throw Error(message);};
   const wait=async(predicate,message,seconds=10)=>{
     for(let i=0;i<seconds*20;i++){const s=await state();if(s&&predicate(s))return s;await sleep(50);}
@@ -90,7 +91,73 @@ try {
   await call('Runtime.enable');await call('Page.enable');
   await call('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
   const url='http://127.0.0.1:'+server.address().port+'/';
-  if(idiotMode){
+  if(firewallMode){
+    let commandID=0;
+    const command=async(name,seconds=0)=>{
+      const id=++commandID;
+      await evaluate('window.firewallCommand='+JSON.stringify({id,name,seconds}));
+      return wait(s=>s.command===id,'Firewall command not acknowledged: '+name);
+    };
+    const solve=async()=>{
+      for(const p of (await state()).ports.filter(p=>p.open))await click(p.point);
+      return wait(s=>s.block_enabled&&s.ports.every(p=>!p.open),'Grid did not become green');
+    };
+    for(const lang of ['ru','en']){
+      await call('Page.navigate',{url:url+'?lang='+lang});
+      await wait(s=>s.mode===2&&s.notes==='Firewall evidence stays','Firewall fixture not ready',30);
+      await call('Page.bringToFront');
+      await call('Input.dispatchKeyEvent',{type:'keyDown',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+      await wait(s=>s.dev,'Dev menu did not open');
+      await call('Input.dispatchKeyEvent',{type:'keyUp',code:'F7',key:'F7',windowsVirtualKeyCode:118});
+      await command('reveal_trigger');await sleep(150);
+      await click((await state()).trigger);
+      let s=await wait(s=>s.active&&s.modal&&!s.dev,'Dedicated firewall trigger failed');
+      expect(s.ports.filter(p=>p.open).length===6&&!s.block_enabled,'Wrong initial grid');
+      await tap('KeyZ','z',90,'z');
+      await click(s.start);
+      s=await state();
+      expect(s.notes==='Firewall evidence stays'&&!s.menu&&s.app==='notepad','Modal leaked input into desktop');
+      await click(s.block);expect((await state()).round_state===0,'Disabled BLOCK accepted click');
+      await capture('firewall_active_'+lang);
+      await call('Emulation.setDeviceMetricsOverride',{width:800,height:600,deviceScaleFactor:1,mobile:false});
+      await sleep(250);s=await state();
+      const [x,y,w,h]=s.panel,[ax,ay,aw,ah]=s.area;
+      expect(x>=ax-1&&y>=ay-1&&x+w<=ax+aw+1&&y+h<=ay+ah+1,'Firewall escaped resized desktop');
+      await capture('firewall_small_'+lang);
+      await call('Emulation.setDeviceMetricsOverride',{width:1280,height:720,deviceScaleFactor:1,mobile:false});
+      await sleep(250);
+      s=await state();await click(s.ports.find(p=>!p.open).point);
+      await wait(s=>s.ports.filter(p=>p.open).length===7,'Green click did not open port');
+      await command('due');await solve();
+      s=await command('advance',0.69);expect(s.block_enabled,'Grace ended too early');
+      s=await command('advance',0.02);expect(!s.block_enabled&&s.ports.filter(p=>p.open).length===1,'Reopening failed after grace');
+      await solve();await click((await state()).block);
+      await wait(s=>s.round_state===1&&s.modal,'BLOCK did not show victory');
+      await capture('firewall_won_'+lang);
+      s=await command('advance',0.99);expect(s.active,'Victory confirmation ended too early');
+      await command('advance',0.02);s=await wait(s=>!s.active&&!s.modal&&s.outcome==='won','Won result/cleanup failed');
+      expect(s.opened.notepad&&s.opened.calculator&&s.opened.cctv,'Victory closed applications');
+      await command('start');await command('minimize_calc');await command('advance',15);
+      s=await wait(s=>!s.active&&s.outcome==='lost','Timeout did not lose');
+      expect(Object.values(s.opened).every(v=>!v),'Loss did not close every application');
+      expect(s.notes==='Firewall evidence stays'&&s.calc==='73'&&s.history,'Loss erased app data');
+      await click(s.note_icon);await click(s.note_icon,2);await wait(s=>s.opened.notepad&&s.app==='notepad','Notepad could not reopen');
+      await command('start');await tap('Escape','Escape',27);
+      await wait(s=>s.mode===0&&!s.visible&&s.active,'Esc failed to leave locked PC');
+      s=await command('advance',1);expect(s.elapsed===1,'Outside clock stopped');
+      await command('return');await wait(s=>s.mode===2&&s.modal&&s.visible,'Return bypassed firewall');
+      await tap('Escape','Escape',27);await wait(s=>s.mode===0,'Could not leave again');
+      await command('advance',14);s=await wait(s=>!s.active&&s.outcome==='lost','Outside deadline did not lose');
+      expect(Object.values(s.opened).every(v=>!v)&&s.notes==='Firewall evidence stays','Outside loss failed preservation/closure');
+      await command('return');await wait(s=>s.mode===2,'Return after loss failed');
+      await click((await state()).note_icon);await click((await state()).note_icon,2);await wait(s=>s.opened.notepad,'Reopen after outside loss failed');
+      await command('start');await command('cancel');s=await state();
+      expect(s.opened.notepad&&!s.modal&&s.outcome==='cancelled','Cancellation applied loss penalty');
+      await command('start');await command('quiz');
+      s=await wait(s=>s.quiz&&!s.active&&!s.modal,'Quiz did not cancel firewall');
+      expect(s.opened.notepad&&s.notes==='Firewall evidence stays','Quiz cancellation closed or erased apps');
+    }
+  }else if(idiotMode){
     let commandID=0;
     const command=async(name,seconds=0)=>{
       const id=++commandID;
@@ -362,5 +429,5 @@ try {
     await capture(perfect?'win':'lose');
   }
   expect(errors.length===0,'Browser errors: '+errors.join('\n'));
-  console.log(idiotMode?'IDIOT WEB: PASS (RU/EN real dev click, drag/crosses, cap, taskbar/Esc, return, resize, fades and cleanup).':outageMode?'OUTAGE INPUT WEB: PASS (RU/EN, F7 trigger, blackout eject, F flashlight, encounter, provoked chase, contact death).':policeMode?'POLICE INPUT WEB: PASS (RU/EN, F7, PC escape, E hiding/exit, clamped mouse look, blocked walking, safe departure, early-exit death).':neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
+  console.log(firewallMode?'FIREWALL WEB: PASS (RU/EN dev click, ports/BLOCK, modal input, grace, win/loss, preservation, Esc/return, resize and cancellation).':idiotMode?'IDIOT WEB: PASS (RU/EN real dev click, drag/crosses, cap, taskbar/Esc, return, resize, fades and cleanup).':outageMode?'OUTAGE INPUT WEB: PASS (RU/EN, F7 trigger, blackout eject, F flashlight, encounter, provoked chase, contact death).':policeMode?'POLICE INPUT WEB: PASS (RU/EN, F7, PC escape, E hiding/exit, clamped mouse look, blocked walking, safe departure, early-exit death).':neighborMode?'NEIGHBOR INPUT WEB: PASS (pointer capture, real E, F7 trigger, rescue, TXT double-click, death).':threatMode?'THREAT WEB: PASS (shared scheduler and integration checks).':shiftMode?'SHIFT WEB: PASS (alarm click, scene transitions, live quiz input, 3/3 win, 2/3 loss).':'CHAT WEB: PASS (real choice clicks, key typing, Enter, audio triggers, F7 report, 3/3 win, 2/3 loss).');
 } finally {ws?.close();browser.kill();server.close();}

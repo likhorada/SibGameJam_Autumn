@@ -43,6 +43,7 @@ var _clock_minute: int = -1
 var _windows_layer: Control
 var _task_list: HBoxContainer
 var transient_overlay: Control
+var modal_overlay: Control
 
 @onready var workspace: Control = $Workspace
 
@@ -218,7 +219,7 @@ func _process(_delta: float) -> void:
 
 
 func launch_app(app: StringName) -> void:
-	if not windows.has(app):
+	if has_modal() or not windows.has(app):
 		return
 	_close_start()
 	_deselect_icons()
@@ -228,6 +229,8 @@ func launch_app(app: StringName) -> void:
 
 
 func activate_window(app: StringName) -> void:
+	if has_modal():
+		return
 	var window: DesktopAppWindow = windows[app]
 	if not window.opened or window.minimized:
 		return
@@ -244,6 +247,8 @@ func activate_window(app: StringName) -> void:
 
 
 func _focus_content(app: StringName) -> void:
+	if has_modal():
+		return
 	if app == &"notepad" and is_visible_in_tree():
 		notepad.focus_editor()
 	elif app == &"chat" and is_visible_in_tree():
@@ -251,6 +256,8 @@ func _focus_content(app: StringName) -> void:
 
 
 func _task_pressed(app: StringName) -> void:
+	if has_modal():
+		return
 	_close_start()
 	var window: DesktopAppWindow = windows[app]
 	if app == active_app and window.visible:
@@ -297,6 +304,11 @@ func _clear_active() -> void:
 func _input(event: InputEvent) -> void:
 	if not is_visible_in_tree():
 		return
+	if has_modal():
+		# Mouse input still reaches modal GUI controls. Escape/F7 belong to Main/dev.
+		if event is InputEventKey and not event.is_action("back") and event.physical_keycode != KEY_F7 and event.keycode != KEY_F7:
+			get_viewport().set_input_as_handled()
+		return
 	if event is InputEventMouseButton and event.pressed:
 		var point: Vector2 = event.position
 		if start_menu.visible and start_menu.get_global_rect().has_point(point):
@@ -321,7 +333,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if not is_visible_in_tree() or start_menu.visible or active_app != &"calculator":
+	if has_modal() or not is_visible_in_tree() or start_menu.visible or active_app != &"calculator":
 		return
 	if event is InputEventKey and calculator.handle_key(event):
 		get_viewport().set_input_as_handled()
@@ -347,6 +359,8 @@ func _icon_input(event: InputEvent, app: StringName) -> void:
 
 
 func _toggle_start() -> void:
+	if has_modal():
+		return
 	if not start_button.button_pressed:
 		_close_start()
 		return
@@ -387,7 +401,7 @@ func _fit_workspace() -> void:
 
 func resume_desktop() -> void:
 	_fit_workspace()
-	input_audio.enabled = true
+	input_audio.enabled = not has_modal()
 	if _first_login:
 		_first_login = false
 		launch_app(&"chat")
@@ -424,6 +438,35 @@ func _notification(what: int) -> void:
 
 func _sync_cctv_controls() -> void:
 	if is_instance_valid(chat):
-		chat.set_input_enabled(active_app == &"chat" and not start_menu.visible and is_visible_in_tree())
+		chat.set_input_enabled(not has_modal() and active_app == &"chat" and not start_menu.visible and is_visible_in_tree())
 	if is_instance_valid(cctv):
-		cctv.set_input_enabled(active_app == &"cctv" and not start_menu.visible and is_visible_in_tree())
+		cctv.set_input_enabled(not has_modal() and active_app == &"cctv" and not start_menu.visible and is_visible_in_tree())
+
+
+func has_modal() -> bool:
+	# Hidden while walking/dev menu is still a locked PC when the player returns.
+	return is_instance_valid(modal_overlay)
+
+
+func set_modal_overlay(overlay: Control) -> void:
+	modal_overlay = overlay
+	suspend_desktop()
+
+
+func clear_modal_overlay(overlay: Control) -> void:
+	if modal_overlay != overlay:
+		return
+	modal_overlay = null
+	if is_inside_tree() and is_visible_in_tree():
+		input_audio.enabled = true
+		_sync_cctv_controls()
+		_focus_content(active_app)
+
+
+func close_all_windows() -> void:
+	# Preserve app instances/session/editor data. This is not a desktop reset.
+	_close_start()
+	for window: DesktopAppWindow in windows.values():
+		window.close_window()
+	_clear_active()
+	_update_task_buttons()
