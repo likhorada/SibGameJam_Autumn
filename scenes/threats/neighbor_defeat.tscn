@@ -1,9 +1,11 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/threats/defeat_stage.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://assets/models/AlkashRig.glb" id="2"]
 
 [node name="NeighborDefeat" instance=ExtResource("1")]
 kind = 1
+model_scene = ExtResource("2")
 duration_seconds = 6.2
 
 [node name="KeyLight" parent="." index="6"]

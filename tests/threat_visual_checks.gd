@@ -37,7 +37,8 @@ func _run() -> void:
 		visual.position.x = (visuals.size() - 1) * 1.25
 		visuals.append(visual)
 		expect(not visual.visible, "Starts hidden: " + file)
-		expect(visual.model.scene_file_path == "res://assets/models/GuyRig.glb", "Actual replaceable GuyRig: " + file)
+		var expected_model: String = {"police_officer": "MusorRig", "psych_neighbor": "AlkashRig", "corridor_entity": "BoogeyManRig"}[file]
+		expect(visual.model.scene_file_path == "res://assets/models/" + expected_model + ".glb", "Correct enemy model: " + file)
 		expect(visual.skeleton != null and visual.skeleton.find_bone("DEF-foot.L") >= 0, "Leg rig bound")
 		expect(visual.model.basis.z.dot(Vector3.FORWARD) > 0.99, "Textured face matches route -Z")
 		visual.show()

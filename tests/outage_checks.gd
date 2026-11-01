@@ -146,7 +146,8 @@ func _run() -> void:
 	var settings: CorridorEntityConfig = outage.settings
 	expect(is_instance_valid(entity) and entity.get_parent() == outage, "Production outage adapter carries its entity")
 	expect(game.get_node("Apartment/CorridorEncounters/Routes").get_child_count() == 1, "Only the far-end corridor route exists")
-	expect(entity.visual is ThreatVisual and entity.visual.skeleton != null, "Entity uses the live GuyRig skeleton")
+	expect(entity.visual is ThreatVisual and entity.visual.skeleton != null, "Entity uses a live skeleton")
+	expect(entity.visual.model.scene_file_path == "res://assets/models/BoogeyManRig.glb", "Darkness monster uses BoogeyManRig")
 	# The scheduled path needs the desktop; the forced path does not.
 	expect(not outage.can_schedule(), "Random outage cannot start while walking")
 	expect(not manager.request_event(&"power_outage"), "Random request outside the PC is rejected")

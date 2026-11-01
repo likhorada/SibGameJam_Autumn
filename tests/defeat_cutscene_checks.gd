@@ -60,8 +60,10 @@ func _run() -> void:
 		expect(not source.visible, "Original visitor is replaced, not duplicated")
 		scene.seek(0.0)
 		expect(scene.duration_seconds >= 5.0 and scene.duration_seconds <= 7.0, "Long full scene duration")
-		expect(scene.actor.skeleton != null and scene.actor.skeleton.find_bone("DEF-hand.L") >= 0, "Actual GuyRig skeleton is bound")
-		expect(scene.actor.model.scene_file_path == "res://assets/models/GuyRig.glb", "Uses replaceable GuyRig, not placeholder")
+		expect(scene.actor.skeleton != null and scene.actor.skeleton.find_bone("DEF-hand.L") >= 0, "Enemy skeleton is bound")
+		var expected_model: String = {"POLICE_DEATH": "MusorRig", "NEIGHBOR_DEATH": "AlkashRig", "ENTITY_DEATH": "BoogeyManRig"}[reason]
+		expect(scene.actor.model.scene_file_path == "res://assets/models/" + expected_model + ".glb", "Correct defeat model: " + reason)
+		expect(scene.actor.model_scene == source.model_scene, "Defeat preserves the gameplay enemy model")
 		expect(scene.cue_sounds.is_empty(), "No created or placeholder audio")
 		expect(not game.begin_threat_capture("POLICE_DEATH", source), "No second attack can replace capture")
 		expect(game.player.process_mode == Node.PROCESS_MODE_DISABLED and game.power.process_mode == Node.PROCESS_MODE_DISABLED, "Body and power clocks frozen")
